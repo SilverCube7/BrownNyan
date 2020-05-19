@@ -1,4 +1,5 @@
 const scriptName = "화냥";
+
 /**
  * (string) room
  * (string) sender
@@ -8,36 +9,184 @@ const scriptName = "화냥";
  * (string) imageDB.getProfileBase64()
  * (string) packageName
  */
-function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
-  qry = [
-    "화냥",
-    "화냥 돌아와",
-    "화냥 체고"
-  ];
 
-  ans = [
-    ["냥?", "냐앙?", "화냥은 지금 바쁘다냥", "왜 불럿냥", "무슨 일이냥", "화냥은 지금 오프라인이다냥", "열심히 일하는 중이다냥", "냐아아아아아아아아아아앙", "우선님은 뵨태다냥"],
-    ["돌아오고 싶다냥 ㅠㅠ", sender+"님 좀 더 기다려주라냥"],
-    [sender+"님 체고"]
-  ];
+/**
+ * 봇주인: 실큡
+ * 봇: 화냥봇
+ */
 
-  mention = ["실버큐브", "실큡", "화이트냥", "화냥"];
+let forbidden = "";
+let db = "";
 
-  if(room == "실큡" || room == "Happy Room") {
-    /*for(let i=0; i<qry.length; i++) {
-      if(msg == qry[i]) {
-        let r = Math.floor(Math.random()*ans[i].length);
-        replier.reply(ans[i][r]);
-        break;
-      }
-    }*/
+function loadForbidden() {
+  forbidden = DataBase.getDataBase("냥습_금지어");
+
+  if(forbidden == null || forbidden == "") {
+    forbidden = [];
+    return;
   }
 
+  forbidden = forbidden.split(';');
+}
+
+function loadDB() {
+  db = DataBase.getDataBase("냥습");
+
+  if(db == null || db == "") {
+    db = [];
+    return;
+  }
+
+  db = db.split(';');
+
+  for(let i=0; i<db.length; i++)
+    db[i] = db[i].split('/');
+}
+
+function saveDB() {
+  let makeDB = "";
+
+  for(let i=0; i<db.length; i++) {
+    makeDB += db[i][0]+'/'+db[i][1]+'/'+db[i][2];
+
+    if(i != db.length-1)
+      makeDB += ';';
+  }
+
+  DataBase.setDataBase("냥습", makeDB);
+}
+
+loadForbidden();
+loadDB();
+
+function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
+  if(room == "실큡" || room == "해피룸_봇전용") {
+    let query = msg.substring(0, 3);
+
+    if(query == "냥습 ") {
+      if(msg.indexOf('/') != -1) {
+        let l = msg.substring(3).split('/');
+        let a = l[0], b = l[1];
+        let inForbidden = false;
+
+        // 금지어 탐색
+        for(let i=0; i<forbidden.length; i++) {
+          if(a == forbidden[i]) {
+            inForbidden = true;
+            break;
+          }
+        }
+
+        // 부분문자열에서 금지어 탐색
+        if(a.length >= 2 && a.substring(0, 2) == "냥습") inForbidden = true;
+        if(a.length >= 2 && a.substring(0, 2) == "삭제") inForbidden = true;
+        if(a.indexOf(';') != -1 || b.indexOf(';') != -1) inForbidden = true;
+        if(a[0] == '\r') inForbidden = true;
+        if(a[0] == '\n') inForbidden = true;
+        if(a[0] == ' ') inForbidden = true;
+        if(a[a.length-1] == '\r') inForbidden = true;
+        if(a[a.length-1] == '\n') inForbidden = true;
+        if(a[a.length-1] == ' ') inForbidden = true;
+
+        if(a.length <= 1 || b.length == 0) {
+          replier.reply("너무 짧다냥!");
+        } else if(inForbidden) {
+          replier.reply("냥습할 수 없다냥!");
+        } else {
+          let learned = false;
+
+          for(let i=0; i<db.length; i++) {
+            // 냥습 했을 경우 덮어쓰기
+            if(a == db[i][0]) {
+              db[i][1] = b;
+              db[i][2] = sender;
+
+              learned = true;
+              break;
+            }
+          }
+
+          // 냥습 안 했을 경우 추가
+          if(!learned)
+            db.push([a, b, sender]);
+
+          saveDB();
+          replier.reply("냥!");
+        }
+      } else {
+        let a = msg.substring(3), b = "", c = "";
+        let learned = false;
+
+        for(let i=0; i<db.length; i++) {
+          // 냥습 했는지 확인
+          if(a == db[i][0]) {
+            b = db[i][1];
+            c = db[i][2];
+
+            learned = true;
+            break;
+          }
+        }
+
+        if(learned)
+          replier.reply(b+", "+c+"님이 냥습시켯다냥!");
+        else
+          replier.reply("냥습한게 없다냥!");
+      }
+    } else if(query == "삭제 ") {
+      let a = msg.substring(3);
+      let learned = false;
+
+      for(let i=0; i<db.length; i++) {
+        // 냥습되어 있으면 삭제
+        if(a == db[i][0]) {
+          db.splice(i, 1);
+
+          saveDB();
+          replier.reply("냥!");
+
+          learned = true;
+          break;
+        }
+      }
+
+      if(!learned)
+        replier.reply("냥습한게 없다냥!");
+    } else if(msg == "냥습목록") {
+      let list = "< 냥습목록 >\n";
+
+      for(let i=0; i<db.length; i++)
+        list += String(i+1)+": "+String(db[i])+'\n';
+
+      replier.reply(list);
+    } else {
+      if(msg == "안녕" || msg == "안녕하세요") replier.reply(sender+"님 환영한다냥!");
+      else if(msg == "화냥봇") replier.reply("냥?");
+      else if(msg == "화냥폰 배터리") replier.reply(Device.getBatteryLevel()+"% 남았다냥!");
+      else if(msg == "화냥폰 버전") replier.reply(Device.getAndroidVersionName()+"이다냥!");
+      else if(msg == "화냥폰 온도") replier.reply(Device.getBatteryTemperature()+"이다냥!");
+      else if(msg == "화냥폰 전압") replier.reply(Device.getBatteryVoltage()+"mV 이다냥!");
+      else {
+        for(let i=0; i<db.length; i++) {
+          // 냥습한거 활용
+          if(msg == db[i][0]) {
+            replier.reply(db[i][1]);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  let mention = ["실버큐브", "실큡", "화이트냥", "화냥"];
+
   // 언급 알림
-  for(let i=0; i<mention.length; i++) {
-    if(msg.indexOf(mention[i]) != -1) {
-      replier.reply("실큡", room+"에서 "+mention[i]+"이(가) 언급되었다.");
-      break;
+  if(room != "화냥봇") {
+    for(let i=0; i<mention.length; i++) {
+      if(msg.indexOf(mention[i]) != -1) {
+        replier.reply("실큡", room+"에서 "+mention[i]+"이(가) 언급되었다냥!");
+        break;
+      }
     }
   }
 }

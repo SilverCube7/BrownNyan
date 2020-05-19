@@ -21,23 +21,23 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     [sender+"님 체고"]
   ];
 
-  mention = ["실버큐브", "실큡", "화이트냥", "화냥", "WhiteNyan"];
+  mention = ["실버큐브", "실큡", "화이트냥", "화냥"];
 
   if(room == "실큡" || room == "Happy Room") {
-    for(let i=0; i<qry.length; i++) {
+    /*for(let i=0; i<qry.length; i++) {
       if(msg == qry[i]) {
         let r = Math.floor(Math.random()*ans[i].length);
         replier.reply(ans[i][r]);
         break;
       }
-    }
+    }*/
+  }
 
-    // 언급 알림
-    for(let i=0; i<mention.length; i++) {
-      if(msg.indexOf(mention[i]) != -1) {
-        replier.reply("실큡", room+"에서 "+mention[i]+"이(가) 언급되었다.");
-        break;
-      }
+  // 언급 알림
+  for(let i=0; i<mention.length; i++) {
+    if(msg.indexOf(mention[i]) != -1) {
+      replier.reply("실큡", room+"에서 "+mention[i]+"이(가) 언급되었다.");
+      break;
     }
   }
 }

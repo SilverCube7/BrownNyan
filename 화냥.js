@@ -19,6 +19,7 @@ let forbiddenWords = "";
 let db = "";
 let msgList = [];
 let msgListLimit = 100;
+let forbiddenSigns = [';', '%', '&'];
 
 function loadForbiddenWords() {
   forbiddenWords = DataBase.getDataBase("냥습_금지어");
@@ -62,6 +63,11 @@ loadForbiddenWords();
 loadDB();
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
+  /**
+   * 화냥봇이 참가하고 있는 room이 다음 조건을 만족해야 반응
+   *   room이 실큡
+   *   room의 접두사가 WN
+   */
   if(room == "실큡" || room.substring(0, 2) == "WN") {
     // 메시지 리스트에 메시지 임시저장
     msgList.push([msg, sender]);
@@ -69,44 +75,52 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     while(msgList.length > msgListLimit)
       msgList.shift();
 
-    let query = msg.substring(0, 3);
+    let query = msg.split('/');
 
-    if(query == "냥습 ") {
-      if(msg.indexOf('/') != -1) {
-        let l = msg.substring(3).split('/');
-        let a = l[0], b = l[1];
-        let inForbiddenWord = false;
+    if(query[0] == "냥습") {
+      if(query.length >= 3) {
+        /**
+         * 명령어: 냥습/A/B
+         * 설명: 메시지 A가 왔을 때 메시지 B를 보내도록 학습시킨다.
+         */
+
+        let A = query[1], B = query[2];
+        let forbad = false;
 
         // 금지어 탐색
         for(let i=0; i<forbiddenWords.length; i++) {
-          if(a == forbiddenWords[i]) {
-            inForbiddenWord = true;
+          if(A == forbiddenWords[i]) {
+            forbad = true;
             break;
           }
         }
 
-        // 부분문자열에서 금지어 탐색
-        if(a.length >= 2 && a.substring(0, 2) == "냥습") inForbiddenWord = true;
-        if(a.length >= 2 && a.substring(0, 2) == "삭제") inForbiddenWord = true;
-        if(a.indexOf(';') != -1 || b.indexOf(';') != -1) inForbiddenWord = true;
-        if(a[0] == '\r') inForbiddenWord = true;
-        if(a[0] == '\n') inForbiddenWord = true;
-        if(a[0] == ' ') inForbiddenWord = true;
-        if(a[a.length-1] == '\r') inForbiddenWord = true;
-        if(a[a.length-1] == '\n') inForbiddenWord = true;
-        if(a[a.length-1] == ' ') inForbiddenWord = true;
+        // A의 부분문자열에서 금지기호 탐색
+        for(let i=0; i<forbiddenSigns.length; i++) {
+          if(A.indexOf(forbiddenSigns[i]) != -1 || B.indexOf(forbiddenSigns[i]) != -1) {
+            forbad = true;
+            break;
+          }
+        }
 
-        if(a.length <= 1 || b.length == 0) {
+        if(A[0] == '\r') forbad = true;
+        if(A[0] == '\n') forbad = true;
+        if(A[0] == ' ') forbad = true;
+        if(A[A.length-1] == '\r') forbad = true;
+        if(A[A.length-1] == '\n') forbad = true;
+        if(A[A.length-1] == ' ') forbad = true;
+
+        if(A.length <= 1 || B.length == 0) {
           replier.reply("너무 짧다냥!");
-        } else if(inForbiddenWord) {
+        } else if(forbad) {
           replier.reply("냥습할 수 없다냥!");
         } else {
           let learned = false;
 
           for(let i=0; i<db.length; i++) {
-            // 냥습 했을 경우 덮어쓰기
-            if(a == db[i][0]) {
-              db[i][1] = b;
+            // 학습을 했을 경우 메시지 덮어쓰기
+            if(A == db[i][0]) {
+              db[i][1] = B;
               db[i][2] = sender;
 
               learned = true;
@@ -114,22 +128,27 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             }
           }
 
-          // 냥습 안 했을 경우 추가
+          // 학습을 안 했을 경우 메시지 추가
           if(!learned)
-            db.push([a, b, sender]);
+            db.push([A, B, sender]);
 
           saveDB();
           replier.reply("냥!");
         }
-      } else {
-        let a = msg.substring(3), b = "", c = "";
+      } else if(query.length == 2) {
+        /**
+         * 명령어: 냥습/A
+         * 설명: 메시지 A를 학습시켰는지 확인한다.
+         */
+
+        let A = query[1], b = "", c = "";
         let learned = false;
 
         for(let i=0; i<db.length; i++) {
-          // 냥습 했는지 확인
-          if(a == db[i][0]) {
-            b = db[i][1];
-            c = db[i][2];
+          // 학습을 했는지 확인
+          if(A == db[i][0]) {
+            B = db[i][1];
+            C = db[i][2];
 
             learned = true;
             break;
@@ -137,70 +156,109 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         }
 
         if(learned)
-          replier.reply(b+", "+c+"님이 냥습시켯다냥!");
+          replier.reply(B+", "+C+"님이 냥습시켯다냥!");
         else
           replier.reply("냥습한게 없다냥!");
       }
-    } else if(query == "삭제 ") {
-      let a = msg.substring(3);
-      let learned = false;
+    } else if(query[0] == "삭제") {
+      if(query.length >= 2) {
+        /**
+         * 명령어: 삭제/A
+         * 설명: 학습되어 있는 메시지 A를 삭제한다.
+         */
 
-      for(let i=0; i<db.length; i++) {
-        // 냥습되어 있으면 삭제
-        if(a == db[i][0]) {
-          db.splice(i, 1);
+        let A = query[1];
+        let learned = false;
 
-          saveDB();
-          replier.reply("냥!");
+        for(let i=0; i<db.length; i++) {
+          // 학습되어 있으면 삭제
+          if(A == db[i][0]) {
+            db.splice(i, 1);
 
-          learned = true;
-          break;
+            saveDB();
+            replier.reply("냥!");
+
+            learned = true;
+            break;
+          }
         }
+
+        if(!learned)
+          replier.reply("냥습한게 없다냥!");
       }
+    } else if(query[0] == "말") {
+      if(query.length >= 2) {
+        /**
+         * 명령어: 말/A
+         * 조건: A는 정수
+         * 설명: 이전에 왔던 메시지를 본다.
+         */
 
-      if(!learned)
-        replier.reply("냥습한게 없다냥!");
-    } else if(query == "대화 ") {
-      let a = Number(msg.substring(3));
+        let A = Number(query[1]);
 
-      if(Number.isInteger(a) && 0 <= a && msgList.length-(a+1) >= 0)
-        replier.reply(msgList[msgList.length-(a+1)][0]+", "+msgList[msgList.length-(a+1)][1]+"님이다냥!");
-      else
-        replier.reply("수가 잘못되엇다냥!");
+        if(!Number.isInteger(A))
+          replier.reply("정수가 아니다냥!");
+        else if(!(0 <= A && msgList.length-(A+1) >= 0))
+          replier.reply("수가 범위를 초과했다냥!");
+        else
+          replier.reply(msgList[msgList.length-(A+1)][0]+", "+msgList[msgList.length-(A+1)][1]+"님이다냥!");
+      }
+    } else if(query[0] == "화냥폰") {
+      if(query.length >= 2) {
+        /**
+         * 명령어: 화냥폰/A
+         * 설명: 화냥폰의 정보를 본다.
+         *   A ∈ { 배터리, 전압 }
+         */
+
+        let A = query[1];
+
+        if(A == "배터리")
+          replier.reply(Device.getBatteryLevel()+"% 남았다냥!");
+        else if(A == "전압")
+          replier.reply(Device.getBatteryVoltage()+"mV 이다냥!");
+      }
     } else if(msg == "냥습목록") {
+      /**
+       * 명령어: 냥습목록
+       * 설명: 학습 목록을 본다.
+       */
+
       let list = "< 냥습목록 >\n";
 
       for(let i=0; i<db.length; i++)
         list += String(i+1)+": "+String(db[i])+'\n';
 
       replier.reply(list);
+    } else if(msg == "오늘은") {
+      /**
+       * 명령어: 오늘은
+       * 설명: 오늘 날짜를 본다.
+       */
+
+      let now = new Date();
+      replier.reply(now.getFullYear()+"년 "+(now.getMonth()+1)+"월 "+now.getDate()+"일이다냥!");
+    } else if(msg == "안녕" || msg == "안녕하세요") {
+      /**
+       * 명령어: 안녕 or 안녕하세요
+       */
+
+      replier.reply(sender+"님 환영한다냥!");
+    } else if(msg == "화냥봇") {
+      /**
+       * 명령어: 화냥봇
+       */
+
+      let ans = ["냥?", "냐앙?", "왜 불럿냥?", "무슨 일이냥?"];
+      let r = Math.floor(Math.random()*ans.length);
+      replier.reply(ans[r]);
     } else {
-      if(msg == "안녕" || msg == "안녕하세요") replier.reply(sender+"님 환영한다냥!");
-      else if(msg == "화냥봇") replier.reply("냥?");
-      else if(msg == "화냥폰 배터리") replier.reply(Device.getBatteryLevel()+"% 남았다냥!");
-      else if(msg == "화냥폰 버전") replier.reply(Device.getAndroidVersionName()+"이다냥!");
-      else if(msg == "화냥폰 온도") replier.reply(Device.getBatteryTemperature()+"이다냥!");
-      else if(msg == "화냥폰 전압") replier.reply(Device.getBatteryVoltage()+"mV 이다냥!");
-      else {
-        for(let i=0; i<db.length; i++) {
-          // 냥습한거 활용
-          if(msg == db[i][0]) {
-            replier.reply(db[i][1]);
-            break;
-          }
+      for(let i=0; i<db.length; i++) {
+        // 학습한거 활용
+        if(msg == db[i][0]) {
+          replier.reply(db[i][1]);
+          break;
         }
-      }
-    }
-  }
-
-  let mention = ["실버큐브", "실큡", "화이트냥", "화냥"];
-
-  // 언급 알림
-  if(room != "화냥봇") {
-    for(let i=0; i<mention.length; i++) {
-      if(msg.indexOf(mention[i]) != -1) {
-        replier.reply("실큡", room+"에서 "+mention[i]+"이(가) 언급되었다냥!");
-        break;
       }
     }
   }

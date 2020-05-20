@@ -15,18 +15,18 @@ const scriptName = "화냥";
  * 봇: 화냥봇
  */
 
-let forbidden = "";
+let forbiddenWords = "";
 let db = "";
 
-function loadForbidden() {
-  forbidden = DataBase.getDataBase("냥습_금지어");
+function loadForbiddenWords() {
+  forbiddenWords = DataBase.getDataBase("냥습_금지어");
 
-  if(forbidden == null || forbidden == "") {
-    forbidden = [];
+  if(forbiddenWords == null || forbiddenWords == "") {
+    forbiddenWords = [];
     return;
   }
 
-  forbidden = forbidden.split(';');
+  forbiddenWords = forbiddenWords.split(';');
 }
 
 function loadDB() {
@@ -56,41 +56,41 @@ function saveDB() {
   DataBase.setDataBase("냥습", makeDB);
 }
 
-loadForbidden();
+loadForbiddenWords();
 loadDB();
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
-  if(room == "실큡" || room == "해피룸_봇전용") {
+  if(room == "실큡" || room.substring(0, 2) == "WN") {
     let query = msg.substring(0, 3);
 
     if(query == "냥습 ") {
       if(msg.indexOf('/') != -1) {
         let l = msg.substring(3).split('/');
         let a = l[0], b = l[1];
-        let inForbidden = false;
+        let inForbiddenWord = false;
 
         // 금지어 탐색
-        for(let i=0; i<forbidden.length; i++) {
-          if(a == forbidden[i]) {
-            inForbidden = true;
+        for(let i=0; i<forbiddenWords.length; i++) {
+          if(a == forbiddenWords[i]) {
+            inForbiddenWord = true;
             break;
           }
         }
 
         // 부분문자열에서 금지어 탐색
-        if(a.length >= 2 && a.substring(0, 2) == "냥습") inForbidden = true;
-        if(a.length >= 2 && a.substring(0, 2) == "삭제") inForbidden = true;
-        if(a.indexOf(';') != -1 || b.indexOf(';') != -1) inForbidden = true;
-        if(a[0] == '\r') inForbidden = true;
-        if(a[0] == '\n') inForbidden = true;
-        if(a[0] == ' ') inForbidden = true;
-        if(a[a.length-1] == '\r') inForbidden = true;
-        if(a[a.length-1] == '\n') inForbidden = true;
-        if(a[a.length-1] == ' ') inForbidden = true;
+        if(a.length >= 2 && a.substring(0, 2) == "냥습") inForbiddenWord = true;
+        if(a.length >= 2 && a.substring(0, 2) == "삭제") inForbiddenWord = true;
+        if(a.indexOf(';') != -1 || b.indexOf(';') != -1) inForbiddenWord = true;
+        if(a[0] == '\r') inForbiddenWord = true;
+        if(a[0] == '\n') inForbiddenWord = true;
+        if(a[0] == ' ') inForbiddenWord = true;
+        if(a[a.length-1] == '\r') inForbiddenWord = true;
+        if(a[a.length-1] == '\n') inForbiddenWord = true;
+        if(a[a.length-1] == ' ') inForbiddenWord = true;
 
         if(a.length <= 1 || b.length == 0) {
           replier.reply("너무 짧다냥!");
-        } else if(inForbidden) {
+        } else if(inForbiddenWord) {
           replier.reply("냥습할 수 없다냥!");
         } else {
           let learned = false;

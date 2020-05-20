@@ -17,6 +17,7 @@ const scriptName = "화냥";
 
 let forbiddenWords = "";
 let db = "";
+let msgList = [];
 
 function loadForbiddenWords() {
   forbiddenWords = DataBase.getDataBase("냥습_금지어");
@@ -61,6 +62,12 @@ loadDB();
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
   if(room == "실큡" || room.substring(0, 2) == "WN") {
+    // 메시지 리스트에 메시지 임시저장
+    msgList.push([msg, sender]);
+
+    while(msgList.length >= 100)
+      msgList.shift();
+
     let query = msg.substring(0, 3);
 
     if(query == "냥습 ") {
@@ -152,6 +159,13 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
 
       if(!learned)
         replier.reply("냥습한게 없다냥!");
+    } else if(query == "대화 ") {
+      let a = Number(msg.substring(3));
+
+      if(Number.isInteger(a) && 1 <= a && a <= 99 && msgList.length-a >= 0)
+        replier.reply(msgList[msgList.length-a][0]+", "+msgList[msgList.length-a][1]+"님이다냥!");
+      else
+        replier.reply("수가 잘못되엇다냥!");
     } else if(msg == "냥습목록") {
       let list = "< 냥습목록 >\n";
 

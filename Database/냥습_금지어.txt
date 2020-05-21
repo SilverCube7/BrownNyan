@@ -1,1 +1,1 @@
-실버큐브;실큡;화냥;화이트냥;화냥봇;냥습;삭제;목록;냥습목록;냥습 목록;안녕하세요;안녕;출석;출첵;출석순위;출첵순위;출석 순위;출첵 순위;오늘은;화냥폰;배터리;버전;브랜드명;모델명;충전중?;온도;전압
+실버큐브{enter}실큡{enter}화냥{enter}화이트냥{enter}화냥봇{enter}냥습{enter}삭제{enter}목록{enter}냥습목록{enter}냥습 목록{enter}안녕하세요{enter}안녕{enter}출석{enter}출첵{enter}출석순위{enter}출첵순위{enter}출석 순위{enter}출첵 순위{enter}오늘은{enter}화냥폰{enter}배터리{enter}버전{enter}브랜드명{enter}모델명{enter}충전중?{enter}온도{enter}전압

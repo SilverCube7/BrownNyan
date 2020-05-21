@@ -29,7 +29,7 @@ function loadForbiddenWords() {
     return;
   }
 
-  forbiddenWords = forbiddenWords.split(';');
+  forbiddenWords = forbiddenWords.split("{enter}");
 }
 
 function loadDB() {
@@ -40,20 +40,20 @@ function loadDB() {
     return;
   }
 
-  db = db.split(';');
+  db = db.split("{enter}");
 
   for(let i=0; i<db.length; i++)
-    db[i] = db[i].split('/');
+    db[i] = db[i].split("{space}");
 }
 
 function saveDB() {
   let makeDB = "";
 
   for(let i=0; i<db.length; i++) {
-    makeDB += db[i][0]+'/'+db[i][1]+'/'+db[i][2];
+    makeDB += db[i][0]+"{space}"+db[i][1]+"{space}"+db[i][2];
 
     if(i != db.length-1)
-      makeDB += ';';
+      makeDB += "{enter}";
   }
 
   DataBase.setDataBase("냥습", makeDB);
@@ -67,20 +67,20 @@ function loadMsgList() {
     return;
   }
 
-  msgList = msgList.split(';ㅇ~ㅇ;');
+  msgList = msgList.split("{enter}");
 
   for(let i=0; i<msgList.length; i++)
-    msgList[i] = msgList[i].split('/ㅇ~ㅇ/');
+    msgList[i] = msgList[i].split("{space}");
 }
 
 function saveMsgList() {
   let makeMsgList = "";
 
   for(let i=0; i<msgList.length; i++) {
-    makeMsgList += msgList[i][0]+'/ㅇ~ㅇ/'+msgList[i][1];
+    makeMsgList += msgList[i][0]+"{space}"+msgList[i][1];
 
     if(i != msgList.length-1)
-      makeMsgList += ';ㅇ~ㅇ;';
+      makeMsgList += "{enter}";
   }
 
   DataBase.setDataBase("메시지_리스트", makeMsgList);

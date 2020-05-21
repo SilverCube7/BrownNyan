@@ -15,8 +15,8 @@ const scriptName = "화냥";
  * 봇: 화냥봇
  */
 
-let forbiddenWords = "";
-let db = "";
+let forbiddenWords = [];
+let db = [];
 let msgList = [];
 let msgListLimit = 100;
 let forbiddenSigns = [';', '%', '&'];
@@ -59,8 +59,36 @@ function saveDB() {
   DataBase.setDataBase("냥습", makeDB);
 }
 
+function loadMsgList() {
+  msgList = DataBase.getDataBase("메시지_리스트");
+
+  if(msgList == null || msgList == "") {
+    msgList = [];
+    return;
+  }
+
+  msgList = msgList.split(';ㅇ~ㅇ;');
+
+  for(let i=0; i<msgList.length; i++)
+    msgList[i] = msgList[i].split('/ㅇ~ㅇ/');
+}
+
+function saveMsgList() {
+  let makeMsgList = "";
+
+  for(let i=0; i<msgList.length; i++) {
+    makeMsgList += msgList[i][0]+'/ㅇ~ㅇ/'+msgList[i][1];
+
+    if(i != msgList.length-1)
+      makeMsgList += ';ㅇ~ㅇ;';
+  }
+
+  DataBase.setDataBase("메시지_리스트", makeMsgList);
+}
+
 loadForbiddenWords();
 loadDB();
+loadMsgList();
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
   /**
@@ -69,11 +97,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
    *   room의 접두사가 WN
    */
   if(room == "실큡" || room.substring(0, 2) == "WN") {
-    // 메시지 리스트에 메시지 임시저장
+    // 메시지 리스트에 msg와 sender 추가
     msgList.push([msg, sender]);
-
-    while(msgList.length > msgListLimit)
-      msgList.shift();
+    while(msgList.length > msgListLimit) msgList.shift();
+    saveMsgList();
 
     let query = msg.split('/');
 

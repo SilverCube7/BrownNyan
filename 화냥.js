@@ -128,18 +128,18 @@ function learn(query, sender) {
   if(A[A.length-1] == '\n') forbad = true;
   if(A[A.length-1] == ' ') forbad = true;
 
-  // 너무 짧은 경우
+  // A or B가 너무 짧으면 안 됨
   if(A.length <= 1 || B.length == 0)
     return "너무 짧다냥!";
-  
-  // A가 금지어 or A 안에 금지기호가 있는 경우
+
+  // A가 금지어이거나 A 안에 금지기호가 있으면 안 됨
   if(forbad)
     return "냥습할 수 없다냥!";
 
   let learned = false;
 
   for(let i=0; i<learnDB.length; i++) {
-    // 학습한게 있으면 learnDB에 학습데이터 덮어쓰기
+    // 학습한게 있으면 learnDB 안에 있는 학습데이터 덮어쓰기
     if(A == learnDB[i][0]) {
       learnDB[i][1] = B;
       learnDB[i][2] = sender;
@@ -201,11 +201,11 @@ function del(query) {
 function prevMsg(query) {
   let A = Number(query[1]);
 
-  // 정수가 아닌 경우
+  // A가 정수여야 함
   if(!Number.isInteger(A))
     return "정수가 아니다냥!";
 
-  // 수가 해당 범위 안에 있지 않은 경우
+  // A가 [0, msgDB.length) 범위 안에 있어야 함
   if(!(0 <= A && msgDB.length-(A+1) >= 0))
     return "수가 범위를 초과했다냥!";
 
@@ -229,7 +229,7 @@ function phone(query) {
   if(A == "전압")
     return Device.getBatteryVoltage()+"mV 이다냥!";
 
-  // 엉뚱한 정보를 출력하라고 했을 경우
+  // 그 외의 정보는 출력할 수 없음
   return "이 정보는 1급기밀이다냥!";
 }
 
@@ -271,7 +271,7 @@ function nyanBot() {
   return ans[r];
 }
 
-// Database에 있는 데이터 불러오기
+// Database에 있는 데이터 모두 불러오기
 loadForbiddenWords();
 loadLearnDB();
 loadMsgDB();
@@ -283,7 +283,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
    *   room의 접두사가 WN
    */
   if(room == "실큡" || room.substring(0, 2) == "WN") {
-    // msgDB에 msg와 sender 추가
+    // msgDB에 msg, sender 추가
     msgDB.push([msg, sender]);
     while(msgDB.length > msgDBLimit) msgDB.shift();
     saveMsgDB();
@@ -311,7 +311,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     } else if(msg == "안녕" || msg == "안녕하세요") {
       replier.reply(hello(sender)); // 인사하기
     } else if(msg == "화냥봇") {
-      replier.reply(nyanBot()); // 화냥봇 반응하기
+      replier.reply(nyanBot()); // 화냥봇을 부르면 반응하기
     } else {
       // 메시지가 오면 학습데이터에 따라 반응하기
       for(let i=0; i<learnDB.length; i++) {

@@ -127,7 +127,9 @@ function isCondStr(s1, s2) {
        * 0.P (x)
        * 0.0.0 (x)
        */
-      for(let j=i; (j<s1.length && (Number.isInteger(Number(s1[j])) || (s1[j] == '.' && !inDot && j+1<s1.length && Number.isInteger(Number(s1[j+1]))))); j++) {
+      let j = i;
+
+      for(; (j<s1.length && (Number.isInteger(Number(s1[j])) || (s1[j] == '.' && !inDot && j+1<s1.length && Number.isInteger(Number(s1[j+1]))))); j++) {
         s += s1[j];
 
         if(s1[j] == '.')
@@ -136,7 +138,9 @@ function isCondStr(s1, s2) {
       
       i = j-1;
     } else {
-      for(let j=i; (j<s1.length && !Number.isInteger(Number(s1[j]))); j++)
+      let j = i;
+
+      for(; (j<s1.length && !Number.isInteger(Number(s1[j]))); j++)
         s += s1[j];
       
       i = j-1;
@@ -150,13 +154,17 @@ function isCondStr(s1, s2) {
     let s = "";
 
     if(s2[i] == '{') {
-      for(let j=i; s2[j]!='}'; j++)
+      let j = i;
+
+      for(; s2[j]!='}'; j++)
         s += s2[j];
       
       s += '}';
       i = j;
     } else {
-      for(let j=i; (j<s2.length && s2[j]!='{'); j++)
+      let j = i;
+
+      for(; (j<s2.length && s2[j]!='{'); j++)
         s += s2[j];
       
       i = j-1;
@@ -410,11 +418,11 @@ function nHr(msg) {
   let splitMsg = msg.split('H');
   let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
 
-  // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
-  if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
-    return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
+  // n, r, n+r-1이 [0, factorialLimit] 범위 안에 있어야 함
+  if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit) || !(0 <= n+r-1 && n+r-1 <= factorialLimit))
+    return "0<=n<="+factorialLimit+", 0<=r<="+factorialLimit+", 0<=n+r-1<="+factorialLimit+" 를 만족해야 한다냥!";
 
-  return nCr(n+r-1, r)+" 이다냥!";
+  return nCr((n+r-1)+'C'+r);
 }
 
 /**
@@ -486,7 +494,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     } else if(msg == "화냥봇") {
       replier.reply(nyanBot()); // 화냥봇을 부르면 반응하기
     } else if(isCondStr(msg, "{int}!")) {
-      let n = Number(msg);
+      let n = Number(msg.substring(0, msg.length-1));
 
       if(0 <= n && n <= factorialLimit)
         replier.reply(factorial(n)+" 이다냥!"); // n! 보여주기

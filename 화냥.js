@@ -98,11 +98,13 @@ function saveMsgDB() {
 }
 
 /**
- * s1이 s2 형태를 만족하는지 확인 (정규표현식과 비슷)
- *   {int}: 정수
- *   {number}: 실수
+ * s1이 s2 표현식을 만족하는지 확인
  * 
- *   (주의!) 여는 중괄호를 해줬으면 닫는 중괄호도 해줘야 오류 안 남
+ * < 표현식 문법 >
+ * {int}: 정수
+ * {number}: 실수
+ * 
+ * (주의!) 여는 중괄호를 해줬으면 닫는 중괄호도 해줘야 오류 안 남
  */
 function isCondStr(s1, s2) {
   let l1 = [], l2 = [];
@@ -117,7 +119,7 @@ function isCondStr(s1, s2) {
       /**
        * 예외 처리 신경쓰면서 수 파싱
        * 
-       * (예시)
+       * < 예시 >
        * 0 (o)
        * 0.9 (o)
        * 000 (o)
@@ -173,9 +175,11 @@ function isCondStr(s1, s2) {
     l2.push(s);
   }
 
+  // 표현식을 만족하는 문자열인지 판별
+  // 실패
   if(l1.length != l2.length)
     return false;
-  
+
   for(let i=0; i<l1.length; i++) {
     if(l2[i] == "{int}") {
       if(!Number.isInteger(Number(l1[i])))
@@ -189,6 +193,7 @@ function isCondStr(s1, s2) {
     }
   }
 
+  // 성공
   return true;
 }
 
@@ -224,6 +229,15 @@ function learn(query, sender) {
   if(A[A.length-1] == '\r') forbad = true;
   if(A[A.length-1] == '\n') forbad = true;
   if(A[A.length-1] == ' ') forbad = true;
+
+  // A가 특정 수식인지 확인
+  if(isCondStr(A, "{int}!")) forbad = true;
+  if(isCondStr(A, "{int}P{int}")) forbad = true;
+  if(isCondStr(A, "{int}C{int}")) forbad = true;
+  if(isCondStr(A, "{int}H{int}")) forbad = true;
+  if(isCondStr(A, "sin{number}")) forbad = true;
+  if(isCondStr(A, "cos{number}")) forbad = true;
+  if(isCondStr(A, "tan{number}")) forbad = true;
 
   // A or B가 너무 짧으면 안 됨
   if(A.length <= 1 || B.length == 0)
@@ -409,7 +423,7 @@ function nCr(msg) {
 
   // n < r
   if(n < r)
-    return 0;
+    return "0 이다냥!";
 
   return (factorial(n)/factorial(n-r)/factorial(r))+" 이다냥!";
 }
@@ -424,7 +438,7 @@ function nHr(msg) {
 
   // n, r, n+r-1이 [0, factorialLimit] 범위 안에 있어야 함
   if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit) || !(0 <= n+r-1 && n+r-1 <= factorialLimit))
-    return "0<=n<="+factorialLimit+", 0<=r<="+factorialLimit+", 0<=n+r-1<="+factorialLimit+" 를 만족해야 한다냥!";
+    return "0 <= n,r,n+r-1 <= "+factorialLimit+" 을 만족해야 한다냥!";
 
   return nCr((n+r-1)+'C'+r);
 }

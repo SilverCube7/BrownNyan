@@ -407,6 +407,10 @@ function nCr(msg) {
   if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
     return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
 
+  // n < r
+  if(n < r)
+    return 0;
+
   return (factorial(n)/factorial(n-r)/factorial(r))+" 이다냥!";
 }
 

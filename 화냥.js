@@ -20,6 +20,7 @@ let learnDB = [];
 let msgDB = [];
 let msgDBLimit = 300;
 let forbiddenSigns = ['{', '}'];
+let factorialLimit = 20;
 
 // 냥습금지어.txt 데이터 불러오기
 function loadForbiddenWords() {
@@ -97,7 +98,95 @@ function saveMsgDB() {
 }
 
 /**
+ * s1이 s2 형태를 만족하는지 확인 (정규표현식과 비슷)
+ *   {int}: 정수
+ *   {number}: 실수
+ * 
+ *   (주의!) 여는 중괄호를 해줬으면 닫는 중괄호도 해줘야 오류 안 남
+ */
+function isCondStr(s1, s2) {
+  let l1 = [], l2 = [];
+
+  // s1 파싱
+  for(let i=0; i<s1.length; i++) {
+    let s = "";
+
+    if(Number.isInteger(Number(s1[i]))) {
+      let inDot = false;
+
+      /**
+       * 예외 처리 신경쓰면서 수 파싱
+       * 
+       * (예시)
+       * 0 (o)
+       * 0.9 (o)
+       * 000 (o)
+       * 00.090 (o)
+       * 0P (x)
+       * 0. (x)
+       * 0.P (x)
+       * 0.0.0 (x)
+       */
+      for(let j=i; (j<s1.length && (Number.isInteger(Number(s1[j])) || (s1[j] == '.' && !inDot && j+1<s1.length && Number.isInteger(Number(s1[j+1]))))); j++) {
+        s += s1[j];
+
+        if(s1[j] == '.')
+          inDot = true;
+      }
+      
+      i = j-1;
+    } else {
+      for(let j=i; (j<s1.length && !Number.isInteger(Number(s1[j]))); j++)
+        s += s1[j];
+      
+      i = j-1;
+    }
+
+    l1.push(s);
+  }
+
+  // s2 파싱
+  for(let i=0; i<s2.length; i++) {
+    let s = "";
+
+    if(s2[i] == '{') {
+      for(let j=i; s2[j]!='}'; j++)
+        s += s2[j];
+      
+      s += '}';
+      i = j;
+    } else {
+      for(let j=i; (j<s2.length && s2[j]!='{'); j++)
+        s += s2[j];
+      
+      i = j-1;
+    }
+
+    l2.push(s);
+  }
+
+  if(l1.length != l2.length)
+    return false;
+  
+  for(let i=0; i<l1.length; i++) {
+    if(l2[i] == "{int}") {
+      if(!Number.isInteger(Number(l1[i])))
+        return false;
+    } else if(l2[i] == "{number}") {
+      if(!Number.isFinite(Number(l1[i])))
+        return false;
+    } else {
+      if(l1[i] != l2[i])
+        return false;
+    }
+  }
+
+  return true;
+}
+
+/**
  * 명령어: 냥습/A/B
+ * 매개변수: A, B
  * 설명: 메시지 A가 왔을 때 메시지 B를 보내도록 학습시킨다.
  */
 function learn(query, sender) {
@@ -158,6 +247,7 @@ function learn(query, sender) {
 
 /**
  * 명령어: 냥습/A
+ * 매개변수: A
  * 설명: 메시지 A를 학습시켰는지 확인한다.
  */
 function confirmLearn(query) {
@@ -175,6 +265,7 @@ function confirmLearn(query) {
 
 /**
  * 명령어: 삭제/A
+ * 매개변수: A
  * 설명: 학습되어 있는 메시지 A를 삭제한다.
  */
 function del(query) {
@@ -195,7 +286,7 @@ function del(query) {
 
 /**
  * 명령어: 말/A
- * 조건: A는 정수
+ * 매개변수: A
  * 설명: 이전에 왔던 메시지를 본다.
  */
 function prevMsg(query) {
@@ -215,6 +306,7 @@ function prevMsg(query) {
 
 /**
  * 명령어: 화냥폰/A
+ * 매개변수: A
  * 설명: 화냥폰의 정보를 본다.
  *   A ∈ { 배터리, 전압 }
  */
@@ -271,6 +363,87 @@ function nyanBot() {
   return ans[r];
 }
 
+/**
+ * 명령어: n!
+ * 매개변수: n
+ */
+function factorial(n) {
+  if(n <= 1) return 1;
+  return n*factorial(n-1);
+}
+
+/**
+ * 명령어: nPr
+ * 매개변수: n, r
+ */
+function nPr(msg) {
+  let splitMsg = msg.split('P');
+  let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
+
+  // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
+  if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
+    return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
+
+  return (factorial(n)/factorial(n-r))+" 이다냥!";
+}
+
+/**
+ * 명령어: nCr
+ * 매개변수: n, r
+ */
+function nCr(msg) {
+  let splitMsg = msg.split('C');
+  let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
+
+  // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
+  if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
+    return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
+
+  return (factorial(n)/factorial(n-r)/factorial(r))+" 이다냥!";
+}
+
+/**
+ * 명령어: nHr
+ * 매개변수: n, r
+ */
+function nHr(msg) {
+  let splitMsg = msg.split('H');
+  let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
+
+  // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
+  if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
+    return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
+
+  return nCr(n+r-1, r)+" 이다냥!";
+}
+
+/**
+ * 명령어: sinA
+ * 매개변수: A
+ */
+function sin(msg) {
+  let A = Number(msg.substring(3));
+  return Math.sin(A)+" 이다냥!";
+}
+
+/**
+ * 명령어: cosA
+ * 매개변수: A
+ */
+function cos(msg) {
+  let A = Number(msg.substring(3));
+  return Math.cos(A)+" 이다냥!";
+}
+
+/**
+ * 명령어: tanA
+ * 매개변수: A
+ */
+function tan(msg) {
+  let A = Number(msg.substring(3));
+  return Math.tan(A)+" 이다냥!";
+}
+
 // Database에 있는 데이터 모두 불러오기
 loadForbiddenWords();
 loadLearnDB();
@@ -312,6 +485,25 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       replier.reply(hello(sender)); // 인사하기
     } else if(msg == "화냥봇") {
       replier.reply(nyanBot()); // 화냥봇을 부르면 반응하기
+    } else if(isCondStr(msg, "{int}!")) {
+      let n = Number(msg);
+
+      if(0 <= n && n <= factorialLimit)
+        replier.reply(factorial(n)+" 이다냥!"); // n! 보여주기
+      else
+        replier.reply("0~"+factorialLimit+" 사이의 수여야 한다냥!");
+    } else if(isCondStr(msg, "{int}P{int}")) {
+      replier.reply(nPr(msg)); // nPr 보여주기
+    } else if(isCondStr(msg, "{int}C{int}")) {
+      replier.reply(nCr(msg)); // nCr 보여주기
+    } else if(isCondStr(msg, "{int}H{int}")) {
+      replier.reply(nHr(msg)); // nHr 보여주기
+    } else if(isCondStr(msg, "sin{number}")) {
+      replier.reply(sin(msg)); // sinA 보여주기
+    } else if(isCondStr(msg, "cos{number}")) {
+      replier.reply(cos(msg)); // cosA 보여주기
+    } else if(isCondStr(msg, "tan{number}")) {
+      replier.reply(tan(msg)); // tanA 보여주기
     } else {
       // 메시지가 오면 학습데이터에 따라 반응하기
       for(let i=0; i<learnDB.length; i++) {

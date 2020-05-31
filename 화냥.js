@@ -199,8 +199,6 @@ function isCondStr(s1, s2) {
 
 /**
  * 명령어: 냥습/A/B
- * 매개변수: A, B
- * 설명: 메시지 A가 왔을 때 메시지 B를 보내도록 학습시킨다.
  */
 function learn(query, sender) {
   let A = query[1], B = query[2];
@@ -269,8 +267,6 @@ function learn(query, sender) {
 
 /**
  * 명령어: 냥습/A
- * 매개변수: A
- * 설명: 메시지 A를 학습시켰는지 확인한다.
  */
 function confirmLearn(query) {
   let A = query[1];
@@ -287,8 +283,6 @@ function confirmLearn(query) {
 
 /**
  * 명령어: 삭제/A
- * 매개변수: A
- * 설명: 학습되어 있는 메시지 A를 삭제한다.
  */
 function del(query) {
   let A = query[1];
@@ -308,8 +302,6 @@ function del(query) {
 
 /**
  * 명령어: 말/A
- * 매개변수: A
- * 설명: 이전에 왔던 메시지를 본다.
  */
 function prevMsg(query) {
   let A = Number(query[1]);
@@ -328,8 +320,6 @@ function prevMsg(query) {
 
 /**
  * 명령어: 화냥폰/A
- * 매개변수: A
- * 설명: 화냥폰의 정보를 본다.
  *   A ∈ { 배터리, 전압 }
  */
 function phone(query) {
@@ -349,7 +339,6 @@ function phone(query) {
 
 /**
  * 명령어: 냥습목록
- * 설명: 학습 목록을 본다.
  */
 function learnList() {
   let list = "< 냥습목록 >\n";
@@ -362,7 +351,6 @@ function learnList() {
 
 /**
  * 명령어: 오늘은
- * 설명: 오늘 날짜를 본다.
  */
 function today() {
   let now = new Date();
@@ -370,7 +358,8 @@ function today() {
 }
 
 /**
- * 명령어: 안녕 or 안녕하세요
+ * 명령어: 안녕
+ * 명령어: 안녕하세요
  */
 function hello(sender) {
   return sender+"님 환영한다냥!";
@@ -387,7 +376,6 @@ function nyanBot() {
 
 /**
  * 명령어: n!
- * 매개변수: n
  */
 function factorial(n) {
   if(n <= 1) return 1;
@@ -396,7 +384,6 @@ function factorial(n) {
 
 /**
  * 명령어: nPr
- * 매개변수: n, r
  */
 function nPr(msg) {
   let splitMsg = msg.split('P');
@@ -411,7 +398,6 @@ function nPr(msg) {
 
 /**
  * 명령어: nCr
- * 매개변수: n, r
  */
 function nCr(msg) {
   let splitMsg = msg.split('C');
@@ -430,7 +416,6 @@ function nCr(msg) {
 
 /**
  * 명령어: nHr
- * 매개변수: n, r
  */
 function nHr(msg) {
   let splitMsg = msg.split('H');
@@ -445,7 +430,6 @@ function nHr(msg) {
 
 /**
  * 명령어: sinA
- * 매개변수: A
  */
 function sin(msg) {
   let A = Number(msg.substring(3));
@@ -454,7 +438,6 @@ function sin(msg) {
 
 /**
  * 명령어: cosA
- * 매개변수: A
  */
 function cos(msg) {
   let A = Number(msg.substring(3));
@@ -463,7 +446,6 @@ function cos(msg) {
 
 /**
  * 명령어: tanA
- * 매개변수: A
  */
 function tan(msg) {
   let A = Number(msg.substring(3));

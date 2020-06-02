@@ -42,7 +42,12 @@ function loadForbiddenWords() {
     return;
   }
 
-  forbiddenWords = forbiddenWords.split("\n");
+  forbiddenWords = forbiddenWords.split("{enter}");
+
+  for(let i=0; i<forbiddenWords.length; i++) {
+    forbiddenWords[i] = forbiddenWords[i].replace('\n', '');
+    forbiddenWords[i] = forbiddenWords[i].replace('\r', '');
+  }
 }
 
 // 냥습.txt 데이터 불러오기
@@ -83,7 +88,7 @@ function loadMsgDB(room) {
 
   msgDB.set(room, []);
 
-  if(data in [null, ""])
+  if(data == null || data == "")
     return;
 
   data = data.split("{enter}");
@@ -110,6 +115,15 @@ function saveMsgDB(room) {
   }
 
   DataBase.setDataBase(name, makeMsgDB);
+}
+
+// in 연산을 해주는 함수
+function In(s, l) {
+  for(let i of l)
+    if(s == i)
+      return true;
+  
+  return false;
 }
 
 /**
@@ -375,7 +389,7 @@ function Death() {
  * 명령어: 냥습목록
  */
 function learnList() {
-  let list = "< 냥습목록 >\n";
+  let list = "< 냥습목록 >\n\n";
 
   for(let i=0; i<learnDB.length; i++)
     list += "("+String(i+1)+") "+String(learnDB[i][0])+'\n';
@@ -436,7 +450,7 @@ function nPr(msg) {
   if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
     return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
 
-  return (factorial(n)/factorial(n-r))+" 이다냥!";
+  return Math.round(factorial(n)/factorial(n-r))+" 이다냥!";
 }
 
 /**
@@ -454,7 +468,7 @@ function nCr(msg) {
   if(n < r)
     return "0 이다냥!";
 
-  return (factorial(n)/factorial(n-r)/factorial(r))+" 이다냥!";
+  return Math.round(factorial(n)/factorial(n-r)/factorial(r))+" 이다냥!";
 }
 
 /**
@@ -466,7 +480,7 @@ function nHr(msg) {
 
   // n, r, n+r-1이 [0, factorialLimit] 범위 안에 있어야 함
   if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit) || !(0 <= n+r-1 && n+r-1 <= factorialLimit))
-    return "0 <= n,r,n+r-1 <= "+factorialLimit+" 을 만족해야 한다냥!";
+    return "0 <= n, r, n+r-1 <= "+factorialLimit+" 을 만족해야 한다냥!";
 
   return nCr((n+r-1)+'C'+r);
 }
@@ -516,7 +530,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
    */
   if(room == "화이트냥" || room.substring(0, 2) == "WN") {
     // 봇끼리 대화하는거 방지
-    if(sender in ["L", "l", "엘", "死神", "사신"])
+    if(In(sender, ["L", "l", "엘", "死神", "사신"]))
       return;
 
     // msgDB[room]에 데이터가 없는 경우 Database에 있는 메시지_room.txt 불러오기
@@ -546,15 +560,15 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         replier.reply(phone(query)); // 화냥폰 정보 보여주기
     } else if(msg == "냥냥어") {
       replier.reply(nyanLang); // 명령어 목록 보여주기
-    } else if(msg in ["L", "l", "엘"]) {
+    } else if(In(msg, ["L", "l", "엘"])) {
       replier.reply(L()); // L을 부르면 반응하기
-    } else if(msg in ["사신", "死神"]) {
+    } else if(In(msg, ["사신", "死神"])) {
       replier.reply(Death()); // 사신을 부르면 반응하기
     } else if(msg == "냥습목록") {
       replier.reply(learnList()); // 학습 목록 보여주기
     } else if(msg == "오늘은") {
       replier.reply(today()); // 오늘 날짜 보여주기
-    } else if(msg in ["안녕", "안녕하세요"]) {
+    } else if(In(msg, ["안녕", "안녕하세요"])) {
       replier.reply(hello(sender)); // 인사하기
     } else if(msg == "화냥봇") {
       replier.reply(nyanBot()); // 화냥봇을 부르면 반응하기
@@ -572,7 +586,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       replier.reply(cos(msg)); // cosA 보여주기
     } else if(isCondStr(msg, "tan{number}")) {
       replier.reply(tan(msg)); // tanA 보여주기
-    } else if(msg in ["pi", "PI"]) {
+    } else if(In(msg, ["pi", "PI"])) {
       replier.reply(pi()); // PI 보여주기
     } else {
       // 메시지가 오면 학습데이터에 따라 반응하기

@@ -42,7 +42,7 @@ function loadForbiddenWords() {
     return;
   }
 
-  forbiddenWords = forbiddenWords.split("{enter}");
+  forbiddenWords = forbiddenWords.split("\n");
 }
 
 // 냥습.txt 데이터 불러오기

@@ -11,20 +11,30 @@ const scriptName = "화냥";
  */
 
 /**
- * 봇주인: 실큡
+ * 봇주인: 화이트냥
  * 봇: 화냥봇
  */
 
+let nyanLang = "";
 let forbiddenWords = [];
 let learnDB = [];
-let msgDB = [];
-let msgDBLimit = 300;
-let forbiddenSigns = ['{', '}'];
-let factorialLimit = 20;
+const msgDB = new Map();
+const msgDBLimit = 300;
+const forbiddenSigns = ['{', '}'];
+const factorialLimit = 100;
+
+// 냥냥어.txt 데이터 불러오기
+function loadNyanLang() {
+  const name = "냥냥어";
+  nyanLang = DataBase.getDataBase(name);
+
+  if(nyanLang == null)
+    nyanLang = "";
+}
 
 // 냥습금지어.txt 데이터 불러오기
 function loadForbiddenWords() {
-  let name = "냥습금지어";
+  const name = "냥습금지어";
   forbiddenWords = DataBase.getDataBase(name);
 
   if(forbiddenWords == null || forbiddenWords == "") {
@@ -37,7 +47,7 @@ function loadForbiddenWords() {
 
 // 냥습.txt 데이터 불러오기
 function loadLearnDB() {
-  let name = "냥습";
+  const name = "냥습";
   learnDB = DataBase.getDataBase(name);
 
   if(learnDB == null || learnDB == "") {
@@ -53,7 +63,7 @@ function loadLearnDB() {
 
 // 냥습.txt에 데이터 저장하기
 function saveLearnDB() {
-  let name = "냥습";
+  const name = "냥습";
   let makeDB = "";
 
   for(let i=0; i<learnDB.length; i++) {
@@ -67,30 +77,35 @@ function saveLearnDB() {
 }
 
 // 메시지.txt 데이터 불러오기
-function loadMsgDB() {
-  let name = "메시지";
-  msgDB = DataBase.getDataBase(name);
+function loadMsgDB(room) {
+  const name = "메시지_"+room;
+  let data = DataBase.getDataBase(name);
 
-  if(msgDB == null || msgDB == "") {
-    msgDB = [];
+  msgDB.set(room, []);
+
+  if(data in [null, ""])
     return;
-  }
 
-  msgDB = msgDB.split("{enter}");
+  data = data.split("{enter}");
 
-  for(let i=0; i<msgDB.length; i++)
-    msgDB[i] = msgDB[i].split("{space}");
+  for(let i=0; i<data.length; i++)
+    msgDB.get(room).push(data[i].split("{space}"));
 }
 
 // 메시지.txt에 데이터 저장하기
-function saveMsgDB() {
-  let name = "메시지";
+function saveMsgDB(room) {
+  const name = "메시지_"+room;
+  let data = msgDB.get(room);
+
+  if(data == undefined)
+    data = [];
+
   let makeMsgDB = "";
 
-  for(let i=0; i<msgDB.length; i++) {
-    makeMsgDB += msgDB[i][0]+"{space}"+msgDB[i][1];
+  for(let i=0; i<data.length; i++) {
+    makeMsgDB += data[i][0]+"{space}"+data[i][1];
 
-    if(i != msgDB.length-1)
+    if(i != data.length-1)
       makeMsgDB += "{enter}";
   }
 
@@ -117,7 +132,7 @@ function isCondStr(s1, s2) {
       let inDot = false;
 
       /**
-       * 예외 처리 신경쓰면서 수 파싱
+       * 예외 처리 해주면서 수 파싱
        * 
        * < 예시 >
        * 0 (o)
@@ -303,19 +318,20 @@ function del(query) {
 /**
  * 명령어: 말/A
  */
-function prevMsg(query) {
+function prevMsg(room, query) {
   let A = Number(query[1]);
+  let data = msgDB.get(room);
 
   // A가 정수여야 함
   if(!Number.isInteger(A))
     return "정수가 아니다냥!";
 
-  // A가 [0, msgDB.length) 범위 안에 있어야 함
-  if(!(0 <= A && msgDB.length-(A+1) >= 0))
+  // A가 [0, data.length) 범위 안에 있어야 함
+  if(!(0 <= A && data.length-(A+1) >= 0))
     return "수가 범위를 초과했다냥!";
 
   // 이전 메시지 출력
-  return msgDB[msgDB.length-(A+1)][0]+", "+msgDB[msgDB.length-(A+1)][1]+"님이다냥!";
+  return data[data.length-(A+1)][0]+", "+data[data.length-(A+1)][1]+"님이다냥!";
 }
 
 /**
@@ -338,13 +354,31 @@ function phone(query) {
 }
 
 /**
+ * 명령어: L, l, 엘
+ */
+function L() {
+  let ans = ["L이다냥!", "엘!", "L!"];
+  let r = Math.floor(Math.random()*ans.length);
+  return ans[r];
+}
+
+/**
+ * 명령어: 사신, 死神
+ */
+function Death() {
+  let ans = ["꺆", "냐아아아앗!", "전방에 사신 출현이다냥!", "사신이다냥! 도망쳐야 한다냥!"];
+  let r = Math.floor(Math.random()*ans.length);
+  return ans[r];
+}
+
+/**
  * 명령어: 냥습목록
  */
 function learnList() {
   let list = "< 냥습목록 >\n";
 
   for(let i=0; i<learnDB.length; i++)
-    list += String(i+1)+": "+String(learnDB[i])+'\n';
+    list += "("+String(i+1)+") "+String(learnDB[i][0])+'\n';
 
   return list;
 }
@@ -358,8 +392,7 @@ function today() {
 }
 
 /**
- * 명령어: 안녕
- * 명령어: 안녕하세요
+ * 명령어: 안녕, 안녕하세요
  */
 function hello(sender) {
   return sender+"님 환영한다냥!";
@@ -377,6 +410,16 @@ function nyanBot() {
 /**
  * 명령어: n!
  */
+function nfact(msg) {
+  let n = Number(msg.substring(0, msg.length-1));
+
+  // n이 [0, factorialLimit] 범위 안에 있어야 함
+  if(!(0 <= n && n <= factorialLimit))
+    return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
+
+  return factorial(n)+" 이다냥!";
+}
+
 function factorial(n) {
   if(n <= 1) return 1;
   return n*factorial(n-1);
@@ -452,22 +495,38 @@ function tan(msg) {
   return Math.tan(A)+" 이다냥!";
 }
 
-// Database에 있는 데이터 모두 불러오기
+/**
+ * 명령어: pi, PI
+ */
+function pi() {
+  const name = "파이";
+  return DataBase.getDataBase(name)+" 이다냥!";
+}
+
+// Database에 있는 txt 불러오기 (메시지_room.txt는 제외)
+loadNyanLang();
 loadForbiddenWords();
 loadLearnDB();
-loadMsgDB();
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
   /**
    * 화냥봇이 참가하고 있는 room이 다음 조건을 만족해야 반응
-   *   room이 실큡
+   *   room이 화이트냥
    *   room의 접두사가 WN
    */
-  if(room == "실큡" || room.substring(0, 2) == "WN") {
-    // msgDB에 msg, sender 추가
-    msgDB.push([msg, sender]);
-    while(msgDB.length > msgDBLimit) msgDB.shift();
-    saveMsgDB();
+  if(room == "화이트냥" || room.substring(0, 2) == "WN") {
+    // 봇끼리 대화하는거 방지
+    if(sender in ["L", "l", "엘", "死神", "사신"])
+      return;
+
+    // msgDB[room]에 데이터가 없는 경우 Database에 있는 메시지_room.txt 불러오기
+    if(!msgDB.has(room))
+      loadMsgDB(room);
+
+    // msgDB[room]에 msg, sender 추가
+    msgDB.get(room).push([msg, sender]);
+    while(msgDB.get(room).length > msgDBLimit) msgDB.get(room).shift();
+    saveMsgDB(room);
 
     let query = msg.split('/');
 
@@ -481,25 +540,26 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         replier.reply(del(query)); // 학습한거 삭제
     } else if(query[0] == "말") {
       if(query.length >= 2)
-        replier.reply(prevMsg(query)); // 이전 메시지 보여주기
+        replier.reply(prevMsg(room, query)); // 이전 메시지 보여주기
     } else if(query[0] == "화냥폰") {
       if(query.length >= 2)
         replier.reply(phone(query)); // 화냥폰 정보 보여주기
+    } else if(msg == "냥냥어") {
+      replier.reply(nyanLang); // 명령어 목록 보여주기
+    } else if(msg in ["L", "l", "엘"]) {
+      replier.reply(L()); // L을 부르면 반응하기
+    } else if(msg in ["사신", "死神"]) {
+      replier.reply(Death()); // 사신을 부르면 반응하기
     } else if(msg == "냥습목록") {
-      replier.reply(learnList()); // 학습목록 보여주기
+      replier.reply(learnList()); // 학습 목록 보여주기
     } else if(msg == "오늘은") {
       replier.reply(today()); // 오늘 날짜 보여주기
-    } else if(msg == "안녕" || msg == "안녕하세요") {
+    } else if(msg in ["안녕", "안녕하세요"]) {
       replier.reply(hello(sender)); // 인사하기
     } else if(msg == "화냥봇") {
       replier.reply(nyanBot()); // 화냥봇을 부르면 반응하기
     } else if(isCondStr(msg, "{int}!")) {
-      let n = Number(msg.substring(0, msg.length-1));
-
-      if(0 <= n && n <= factorialLimit)
-        replier.reply(factorial(n)+" 이다냥!"); // n! 보여주기
-      else
-        replier.reply("0~"+factorialLimit+" 사이의 수여야 한다냥!");
+      replier.reply(nfact(msg)); // n! 보여주기
     } else if(isCondStr(msg, "{int}P{int}")) {
       replier.reply(nPr(msg)); // nPr 보여주기
     } else if(isCondStr(msg, "{int}C{int}")) {
@@ -512,6 +572,8 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       replier.reply(cos(msg)); // cosA 보여주기
     } else if(isCondStr(msg, "tan{number}")) {
       replier.reply(tan(msg)); // tanA 보여주기
+    } else if(msg in ["pi", "PI"]) {
+      replier.reply(pi()); // PI 보여주기
     } else {
       // 메시지가 오면 학습데이터에 따라 반응하기
       for(let i=0; i<learnDB.length; i++) {

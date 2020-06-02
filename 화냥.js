@@ -529,9 +529,13 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
    *   room의 접두사가 WN
    */
   if(room == "화이트냥" || room.substring(0, 2) == "WN") {
-    // 봇끼리 대화하는거 방지
-    if(In(sender, ["L", "l", "엘", "死神", "사신"]))
+    // 일부 상황을 제외하고 L과 대화하는거 방지
+    if(In(sender, ["L", "l", "엘", "死神", "사신"])) {
+      if(msg == "화냥봇님, 죽어주세요 !")
+        replier.reply("꾸에에엑"); // L에게 살해당했을 때
+
       return;
+    }
 
     // msgDB[room]에 데이터가 없는 경우 Database에 있는 메시지_room.txt 불러오기
     if(!msgDB.has(room))

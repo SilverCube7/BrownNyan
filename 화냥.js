@@ -19,9 +19,60 @@ let nyanLang = "";
 let forbiddenWords = [];
 let learnDB = [];
 const msgDB = new Map();
-const msgDBLimit = 300;
-const forbiddenSigns = ['{', '}'];
+const msgDBLimit = 500;
 const factorialLimit = 100;
+const PI_1000 = DataBase.getDataBase("파이");
+
+const LNames = ["L", "l", "엘", "死神", "사신"];
+
+const forbiddenSigns = [
+  '{',
+  '}',
+  String.fromCharCode(8238) // 뒤집기 문자
+];
+
+const spaces = [
+  ' ',
+  '\n',
+  '\r',
+  '\t',
+  String.fromCharCode(11),
+  String.fromCharCode(12),
+  String.fromCharCode(133),
+  String.fromCharCode(160),
+  String.fromCharCode(5760),
+  String.fromCharCode(8192),
+  String.fromCharCode(8193),
+  String.fromCharCode(8194),
+  String.fromCharCode(8195),
+  String.fromCharCode(8196),
+  String.fromCharCode(8197),
+  String.fromCharCode(8198),
+  String.fromCharCode(8199),
+  String.fromCharCode(8200),
+  String.fromCharCode(8201),
+  String.fromCharCode(8202),
+  String.fromCharCode(8232),
+  String.fromCharCode(8233),
+  String.fromCharCode(8239),
+  String.fromCharCode(8287),
+  String.fromCharCode(10240),
+  String.fromCharCode(12288)
+];
+
+const condStrs = [
+  "{int}!",
+  "{int}P{int}",
+  "{int}C{int}",
+  "{int}π{int}",
+  "{int}H{int}",
+  "sin{number}",
+  "cos{number}",
+  "tan{number}",
+  "asin{number}",
+  "acos{number}",
+  "atan{number}"
+];
 
 // 냥냥어.txt 데이터 불러오기
 function loadNyanLang() {
@@ -168,10 +219,15 @@ function isCondStr(s1, s2) {
       }
       
       i = j-1;
+    } else if(s1.substring(i, i+2).toUpperCase() == 'PI') {
+      s = String(Math.PI);
+      i++;
+    } else if(s1[i].toUpperCase() == 'E') {
+      s = String(Math.E);
     } else {
       let j = i;
 
-      for(; (j<s1.length && !Number.isInteger(Number(s1[j]))); j++)
+      for(; (j<s1.length && !Number.isInteger(Number(s1[j])) && s1.substring(j, j+2).toUpperCase()!='PI' && s1[j].toUpperCase()!='E'); j++)
         s += s1[j];
       
       i = j-1;
@@ -234,37 +290,41 @@ function learn(query, sender) {
   let forbad = false;
 
   // A가 금지어인지 확인
-  for(let i=0; i<forbiddenWords.length; i++) {
-    if(A == forbiddenWords[i]) {
+  for(let i of forbiddenWords) {
+    if(A == i) {
       forbad = true;
       break;
     }
   }
 
   // A 안에 금지기호가 있는지 확인
-  for(let i=0; i<forbiddenSigns.length; i++) {
-    if(A.indexOf(forbiddenSigns[i]) != -1 || B.indexOf(forbiddenSigns[i]) != -1) {
+  for(let i of forbiddenSigns) {
+    if(A.indexOf(i) != -1 || B.indexOf(i) != -1) {
       forbad = true;
       break;
     }
   }
 
   // A의 맨 앞 문자 or 맨 뒤 문자가 공백인지 확인
-  if(A[0] == '\r') forbad = true;
-  if(A[0] == '\n') forbad = true;
-  if(A[0] == ' ') forbad = true;
-  if(A[A.length-1] == '\r') forbad = true;
-  if(A[A.length-1] == '\n') forbad = true;
-  if(A[A.length-1] == ' ') forbad = true;
+  for(let i of spaces) {
+    if(A[0] == i) {
+      forbad = true;
+      break;
+    }
+
+    if(A[A.length-1] == i) {
+      forbad = true;
+      break;
+    }
+  }
 
   // A가 특정 수식인지 확인
-  if(isCondStr(A, "{int}!")) forbad = true;
-  if(isCondStr(A, "{int}P{int}")) forbad = true;
-  if(isCondStr(A, "{int}C{int}")) forbad = true;
-  if(isCondStr(A, "{int}H{int}")) forbad = true;
-  if(isCondStr(A, "sin{number}")) forbad = true;
-  if(isCondStr(A, "cos{number}")) forbad = true;
-  if(isCondStr(A, "tan{number}")) forbad = true;
+  for(let i of condStrs) {
+    if(isCondStr(A, i)) {
+      forbad = true;
+      break;
+    }
+  }
 
   // A or B가 너무 짧으면 안 됨
   if(A.length <= 1 || B.length == 0)
@@ -472,6 +532,20 @@ function nCr(msg) {
 }
 
 /**
+ * 명령어: nπr
+ */
+function nπr(msg) {
+  let splitMsg = msg.split('π');
+  let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
+
+  // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
+  if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
+    return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
+
+  return Math.pow(n, r)+" 이다냥!";
+}
+
+/**
  * 명령어: nHr
  */
 function nHr(msg) {
@@ -510,11 +584,41 @@ function tan(msg) {
 }
 
 /**
- * 명령어: pi, PI
+ * 명령어: asinA
  */
-function pi() {
-  const name = "파이";
-  return DataBase.getDataBase(name)+" 이다냥!";
+function asin(msg) {
+  let A = Number(msg.substring(4));
+  return Math.asin(A)+" 이다냥!";
+}
+
+/**
+ * 명령어: acosA
+ */
+function acos(msg) {
+  let A = Number(msg.substring(4));
+  return Math.acos(A)+" 이다냥!";
+}
+
+/**
+ * 명령어: atanA
+ */
+function atan(msg) {
+  let A = Number(msg.substring(4));
+  return Math.atan(A)+" 이다냥!";
+}
+
+/**
+ * 명령어: pi, pI, Pi, PI
+ */
+function PI() {
+  return PI_1000+" 이다냥!";
+}
+
+/**
+ * 명령어: e, E
+ */
+function E() {
+  return Math.E+" 이다냥!";
 }
 
 // Database에 있는 txt 불러오기 (메시지_room.txt는 제외)
@@ -529,14 +633,6 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
    *   room의 접두사가 WN
    */
   if(room == "화이트냥" || room.substring(0, 2) == "WN") {
-    // 일부 상황을 제외하고 L과 대화하는거 방지
-    if(In(sender, ["L", "l", "엘", "死神", "사신"])) {
-      if(msg == "화냥봇님, 죽어주세요 !")
-        replier.reply("꾸에에엑"); // L에게 살해당했을 때
-
-      return;
-    }
-
     // msgDB[room]에 데이터가 없는 경우 Database에 있는 메시지_room.txt 불러오기
     if(!msgDB.has(room))
       loadMsgDB(room);
@@ -546,6 +642,21 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     while(msgDB.get(room).length > msgDBLimit) msgDB.get(room).shift();
     saveMsgDB(room);
 
+    // 일부 상황을 제외하고 L과 대화하는거 방지
+    if(In(sender, LNames)) {
+      let data = msgDB.get(room);
+
+      // L이 같은 말을 2번 이상 해서 무한루프 걸리게 되는거 방지
+      if(!In(data[data.length-2][1], LNames)) {
+        if(msg == "화냥봇님, 죽어주세요 !")
+          replier.reply("꾸에에엑"); // L에게 살해당했을 때
+        else if(msg.indexOf("화냥봇님") != -1)
+          replier.reply("냥!?"); // L이 화냥봇을 언급했을 때
+      }
+
+      return;
+    }
+
     let query = msg.split('/');
 
     if(query[0] == "냥습") {
@@ -553,46 +664,80 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         replier.reply(learn(query, sender)); // 학습시키기
       else if(query.length == 2)
         replier.reply(confirmLearn(query)); // 학습했는지 확인
-    } else if(query[0] == "삭제") {
+    }
+    else if(query[0] == "삭제") {
       if(query.length >= 2)
         replier.reply(del(query)); // 학습한거 삭제
-    } else if(query[0] == "말") {
+    }
+    else if(query[0] == "말") {
       if(query.length >= 2)
         replier.reply(prevMsg(room, query)); // 이전 메시지 보여주기
-    } else if(query[0] == "화냥폰") {
+    }
+    else if(query[0] == "화냥폰") {
       if(query.length >= 2)
         replier.reply(phone(query)); // 화냥폰 정보 보여주기
-    } else if(msg == "냥냥어") {
+    }
+    else if(msg == "냥냥어") {
       replier.reply(nyanLang); // 명령어 목록 보여주기
-    } else if(In(msg, ["L", "l", "엘"])) {
+    }
+    else if(In(msg, ["L", "l", "엘"])) {
       replier.reply(L()); // L을 부르면 반응하기
-    } else if(In(msg, ["사신", "死神"])) {
+    }
+    else if(In(msg, ["사신", "死神"])) {
       replier.reply(Death()); // 사신을 부르면 반응하기
-    } else if(msg == "냥습목록") {
+    }
+    else if(msg == "냥습목록") {
       replier.reply(learnList()); // 학습 목록 보여주기
-    } else if(msg == "오늘은") {
+    }
+    else if(msg == "오늘은") {
       replier.reply(today()); // 오늘 날짜 보여주기
-    } else if(In(msg, ["안녕", "안녕하세요"])) {
+    }
+    else if(In(msg, ["안녕", "안녕하세요"])) {
       replier.reply(hello(sender)); // 인사하기
-    } else if(msg == "화냥봇") {
+    }
+    else if(msg == "화냥봇") {
       replier.reply(nyanBot()); // 화냥봇을 부르면 반응하기
-    } else if(isCondStr(msg, "{int}!")) {
+    }
+    else if(isCondStr(msg, "{int}!")) {
       replier.reply(nfact(msg)); // n! 보여주기
-    } else if(isCondStr(msg, "{int}P{int}")) {
+    }
+    else if(isCondStr(msg, "{int}P{int}")) {
       replier.reply(nPr(msg)); // nPr 보여주기
-    } else if(isCondStr(msg, "{int}C{int}")) {
+    }
+    else if(isCondStr(msg, "{int}C{int}")) {
       replier.reply(nCr(msg)); // nCr 보여주기
-    } else if(isCondStr(msg, "{int}H{int}")) {
+    }
+    else if(isCondStr(msg, "{int}π{int}")) {
+      replier.reply(nπr(msg)); // nπr 보여주기
+    }
+    else if(isCondStr(msg, "{int}H{int}")) {
       replier.reply(nHr(msg)); // nHr 보여주기
-    } else if(isCondStr(msg, "sin{number}")) {
+    }
+    else if(isCondStr(msg, "sin{number}")) {
       replier.reply(sin(msg)); // sinA 보여주기
-    } else if(isCondStr(msg, "cos{number}")) {
+    }
+    else if(isCondStr(msg, "cos{number}")) {
       replier.reply(cos(msg)); // cosA 보여주기
-    } else if(isCondStr(msg, "tan{number}")) {
+    }
+    else if(isCondStr(msg, "tan{number}")) {
       replier.reply(tan(msg)); // tanA 보여주기
-    } else if(In(msg, ["pi", "PI"])) {
-      replier.reply(pi()); // PI 보여주기
-    } else {
+    }
+    else if(isCondStr(msg, "asin{number}")) {
+      replier.reply(asin(msg)); // asinA 보여주기
+    }
+    else if(isCondStr(msg, "acos{number}")) {
+      replier.reply(acos(msg)); // acosA 보여주기
+    }
+    else if(isCondStr(msg, "atan{number}")) {
+      replier.reply(atan(msg)); // atanA 보여주기
+    }
+    else if(msg.toUpperCase() == 'PI') {
+      replier.reply(PI()); // PI 보여주기
+    }
+    else if(msg.toUpperCase() == 'E') {
+      replier.reply(E()); // E 보여주기
+    }
+    else {
       // 메시지가 오면 학습데이터에 따라 반응하기
       for(let i=0; i<learnDB.length; i++) {
         if(msg == learnDB[i][0]) {

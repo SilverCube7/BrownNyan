@@ -66,12 +66,17 @@ const condStrs = [
   "{int}C{int}",
   "{int}π{int}",
   "{int}H{int}",
+  "C{int}",
   "sin{number}",
   "cos{number}",
   "tan{number}",
   "asin{number}",
   "acos{number}",
-  "atan{number}"
+  "atan{number}",
+  "log{number}",
+  "ln{number}",
+  "sqrt{number}",
+  "abs{number}"
 ];
 
 // 냥냥어.txt 데이터 불러오기
@@ -442,18 +447,38 @@ function prevMsg(room, query) {
 
 /**
  * 명령어: 화냥폰/A
- *   A ∈ { 배터리, 전압 }
+ *   A ∈ { 버전, 배터리, 전압, 온도, 충전중? }
  */
 function phone(query) {
   let A = query[1];
 
+  // 안드로이드 버전 이름 출력
+  if(A == "버전")
+    return Device.getAndroidVersionName()+" 이다냥!";
+
   // 배터리 출력
-  if(A == "배터리")
+  if(A == "배터리") {
+    if(Device.getBatteryLevel() == 100)
+      return "풀 차지 상태다냥!!";
+
     return Device.getBatteryLevel()+"% 남았다냥!";
+  }
 
   // 전압 출력
   if(A == "전압")
     return Device.getBatteryVoltage()+"mV 이다냥!";
+
+  // 온도 출력
+  if(A == "온도")
+    return Device.getBatteryTemperature()/10+"℃ 이다냥!";
+
+  // 충전 중인지 출력
+  if(A == "충전중?") {
+    if(Device.isCharging())
+      return "충전 중이다냥!";
+
+    return "충전 중이 아니다냥!";
+  }
 
   // 그 외의 정보는 출력할 수 없음
   return "이 정보는 1급기밀이다냥!";
@@ -592,6 +617,20 @@ function nHr(msg) {
 }
 
 /**
+ * 명령어: Cn
+ */
+function C(msg) {
+  let n = Number(msg.substring(1));
+
+  // 2n이 [0, factorialLimit] 범위 안에 있어야 함
+  if(!(0 <= n*2 && n*2 <= factorialLimit))
+    return "0 <= 2n <= "+factorialLimit+" 을 만족해야 한다냥!";
+
+  let res = nCr(n*2+'C'+n).replace(" 이다냥!", "");
+  return Math.round(Number(res)/(n+1))+" 이다냥!";
+}
+
+/**
  * 명령어: sinA
  */
 function sin(msg) {
@@ -637,6 +676,38 @@ function acos(msg) {
 function atan(msg) {
   let A = ston(msg.substring(4));
   return Math.atan(A)+" 이다냥!";
+}
+
+/**
+ * 명령어: logA
+ */
+function log(msg) {
+  let A = ston(msg.substring(3));
+  return Math.log10(A)+" 이다냥!";
+}
+
+/**
+ * 명령어: lnA
+ */
+function ln(msg) {
+  let A = ston(msg.substring(2));
+  return Math.log(A)+" 이다냥!";
+}
+
+/**
+ * 명령어: sqrtA
+ */
+function sqrt(msg) {
+  let A = ston(msg.substring(4));
+  return Math.sqrt(A)+" 이다냥!";
+}
+
+/**
+ * 명령어: absA
+ */
+function abs(msg) {
+  let A = ston(msg.substring(3));
+  return Math.abs(A)+" 이다냥!";
 }
 
 /**
@@ -745,6 +816,9 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     else if(isCondStr(msg, "{int}H{int}")) {
       replier.reply(nHr(msg)); // nHr 보여주기
     }
+    else if(isCondStr(msg, "C{int}")) {
+      replier.reply(C(msg)); // Cn 보여주기
+    }
     else if(isCondStr(msg, "sin{number}")) {
       replier.reply(sin(msg)); // sinA 보여주기
     }
@@ -762,6 +836,18 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     }
     else if(isCondStr(msg, "atan{number}")) {
       replier.reply(atan(msg)); // atanA 보여주기
+    }
+    else if(isCondStr(msg, "log{number}")) {
+      replier.reply(log(msg)); // logA 보여주기
+    }
+    else if(isCondStr(msg, "ln{number}")) {
+      replier.reply(ln(msg)); // lnA 보여주기
+    }
+    else if(isCondStr(msg, "sqrt{number}")) {
+      replier.reply(sqrt(msg)); // sqrtA 보여주기
+    }
+    else if(isCondStr(msg, "abs{number}")) {
+      replier.reply(abs(msg)); // absA 보여주기
     }
     else if(msg.toUpperCase() == 'PI') {
       replier.reply(PI()); // PI 보여주기

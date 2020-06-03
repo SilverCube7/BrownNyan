@@ -233,6 +233,20 @@ function isCondStr(s1, s2) {
       i = j-1;
     }
 
+    // 음수 판별
+    if(Number.isFinite(Number(s)) && l1.length >= 1) {
+      let last = l1[l1.length-1];
+
+      if(last[last.length-1] == '-') {
+        l1[l1.length-1] = last.substring(0, last.length-1);
+
+        if(l1[l1.length-1] == '')
+          l1.pop();
+
+        s = '-'+s;
+      }
+    }
+
     l1.push(s);
   }
 
@@ -280,6 +294,24 @@ function isCondStr(s1, s2) {
 
   // 성공
   return true;
+}
+
+/**
+ * 문자열을 수로 변환
+ * PI, E는 해당 상수로 자동 변환
+ */
+function ston(s) {
+  s = s.toUpperCase();
+
+  // PI 변환
+  if(s.substring(s.length-2) == 'PI')
+    s = s.substring(0, s.length-2)+Math.PI;
+
+  // E 변환
+  if(s[s.length-1] == 'E')
+    s = s.substring(0, s.length-1)+Math.E;
+
+  return Number(s);
 }
 
 /**
@@ -452,7 +484,7 @@ function learnList() {
   let list = "< 냥습목록 >\n\n";
 
   for(let i=0; i<learnDB.length; i++)
-    list += "("+String(i+1)+") "+String(learnDB[i][0])+'\n';
+    list += "("+String(i+1)+") "+String(learnDB[i][0])+"/"+String(learnDB[i][2])+'\n';
 
   return list;
 }
@@ -563,7 +595,7 @@ function nHr(msg) {
  * 명령어: sinA
  */
 function sin(msg) {
-  let A = Number(msg.substring(3));
+  let A = ston(msg.substring(3));
   return Math.sin(A)+" 이다냥!";
 }
 
@@ -571,7 +603,7 @@ function sin(msg) {
  * 명령어: cosA
  */
 function cos(msg) {
-  let A = Number(msg.substring(3));
+  let A = ston(msg.substring(3));
   return Math.cos(A)+" 이다냥!";
 }
 
@@ -579,7 +611,7 @@ function cos(msg) {
  * 명령어: tanA
  */
 function tan(msg) {
-  let A = Number(msg.substring(3));
+  let A = ston(msg.substring(3));
   return Math.tan(A)+" 이다냥!";
 }
 
@@ -587,7 +619,7 @@ function tan(msg) {
  * 명령어: asinA
  */
 function asin(msg) {
-  let A = Number(msg.substring(4));
+  let A = ston(msg.substring(4));
   return Math.asin(A)+" 이다냥!";
 }
 
@@ -595,7 +627,7 @@ function asin(msg) {
  * 명령어: acosA
  */
 function acos(msg) {
-  let A = Number(msg.substring(4));
+  let A = ston(msg.substring(4));
   return Math.acos(A)+" 이다냥!";
 }
 
@@ -603,7 +635,7 @@ function acos(msg) {
  * 명령어: atanA
  */
 function atan(msg) {
-  let A = Number(msg.substring(4));
+  let A = ston(msg.substring(4));
   return Math.atan(A)+" 이다냥!";
 }
 
@@ -647,7 +679,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       let data = msgDB.get(room);
 
       // L이 같은 말을 2번 이상 해서 무한루프 걸리게 되는거 방지
-      if(!In(data[data.length-2][1], LNames)) {
+      if(!(data.length-2 >= 0 && In(data[data.length-2][1], LNames))) {
         if(msg == "화냥봇님, 죽어주세요 !")
           replier.reply("꾸에에엑"); // L에게 살해당했을 때
         else if(msg.indexOf("화냥봇님") != -1)

@@ -1,31 +1,30 @@
-실버큐브{enter}
-실큡{enter}
 화냥{enter}
 화이트냥{enter}
-화냥봇{enter}
 냥습{enter}
 삭제{enter}
-목록{enter}
-냥습목록{enter}
-냥습 목록{enter}
-안녕하세요{enter}
-안녕{enter}
-출석{enter}
-출첵{enter}
-출석순위{enter}
-출첵순위{enter}
-출석 순위{enter}
-출첵 순위{enter}
-오늘은{enter}
 화냥폰{enter}
-배터리{enter}
-버전{enter}
-브랜드명{enter}
-모델명{enter}
-충전중?{enter}
-온도{enter}
-전압{enter}
+냥냥어{enter}
 사신{enter}
 死神{enter}
+냥습목록{enter}
+오늘은{enter}
+요일은{enter}
+안녕{enter}
+안녕하세요{enter}
+화냥봇{enter}
+가위{enter}
+바위{enter}
+운세지수{enter}
+Who's That Pokemon?{enter}
+포켓몬{enter}
+예약{enter}
+예약목록{enter}
+결투{enter}
+길드{enter}
+길드목록{enter}
+순위{enter}
 pi{enter}
-PI
+pI{enter}
+Pi{enter}
+PI{enter}
+목록

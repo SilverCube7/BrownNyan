@@ -20,6 +20,7 @@ Who's That Pokemon?{enter}
 예약{enter}
 예약목록{enter}
 결투{enter}
+계산{enter}
 길드{enter}
 길드목록{enter}
 순위{enter}

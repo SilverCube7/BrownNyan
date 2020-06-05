@@ -784,10 +784,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       replier.reply(nyanLang); // 명령어 목록 보여주기
     }
     else if(In(msg, ["L", "l", "엘"])) {
-      replier.reply(L()); // L을 부르면 반응하기
+      //replier.reply(L()); // L을 부르면 반응하기
     }
     else if(In(msg, ["사신", "死神"])) {
-      replier.reply(Death()); // 사신을 부르면 반응하기
+      //replier.reply(Death()); // 사신을 부르면 반응하기
     }
     else if(msg == "냥습목록") {
       replier.reply(learnList()); // 학습 목록 보여주기

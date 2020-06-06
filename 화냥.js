@@ -21,6 +21,7 @@ let learnList = [];
 const msgList = new Map();
 const msgListLimit = 500;
 const rankingEatList = new Map();
+const eatFailPer = 3; // 꿀꺽 실패 확률이 1/eatFailPer
 const factorialLimit = 100;
 const C = [];
 const PI_1000 = DataBase.getDataBase("파이");
@@ -532,7 +533,7 @@ function Death() {
 /**
  * 명령어: 냥습목록
  */
-function learnList() {
+function showLearnList() {
   let list = "< 냥습목록 >\n\n";
 
   for(let i=0; i<learnList.length; i++)
@@ -600,15 +601,19 @@ function rsp(me) {
 function eat(room, sender) {
   let data = msgList.get(room);
 
-  // msgList에 데이터가 없어서 꿀꺽할 수 없음
-  if(data.length == 0)
+  // msgList에 데이터가 부족해서 꿀꺽할 수 없음
+  if(data.length < 2)
     return "꿀꺽할 수 없다냥!";
 
-  let target = data[data.length-1][1];
+  let target = data[data.length-2][1];
 
   // 자신을 꿀꺽할 수 없음
   if(target == sender)
     return "자신을 꿀꺽할 수 없다냥!";
+
+  // 꿀꺽 실패
+  if(Math.floor(Math.random()*eatFailPer) == 0)
+    return target+"님을 꿀꺽하려고 했지만, 도망갔다냥!";
 
   // 꿀꺽 순위 불러오기
   if(!rankingEatList.has(room))
@@ -915,7 +920,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       //replier.reply(Death()); // 사신을 부르면 반응하기
     }
     else if(msg == "냥습목록") {
-      replier.reply(learnList()); // 학습 목록 보여주기
+      replier.reply(showLearnList()); // 학습 목록 보여주기
     }
     else if(msg == "오늘은") {
       replier.reply(today()); // 오늘 날짜 보여주기

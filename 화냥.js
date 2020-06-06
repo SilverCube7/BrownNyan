@@ -611,6 +611,10 @@ function eat(room, sender) {
   if(target == sender)
     return "자신을 꿀꺽할 수 없다냥!";
 
+  // L을 꿀꺽할 수 없음
+  if(In(target, LNames))
+    return "L을 꿀꺽할 수 없다냥!";
+
   // 꿀꺽 실패
   if(Math.floor(Math.random()*eatFailPer) == 0)
     return target+"님을 꿀꺽하려고 했지만, 도망갔다냥!";

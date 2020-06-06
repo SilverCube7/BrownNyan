@@ -14,6 +14,8 @@
 화냥봇{enter}
 가위{enter}
 바위{enter}
+너의 이름은{enter}
+내 이름은{enter}
 운세지수{enter}
 Who's That Pokemon?{enter}
 포켓몬{enter}

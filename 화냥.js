@@ -21,9 +21,18 @@ let learnDB = [];
 const msgDB = new Map();
 const msgDBLimit = 500;
 const factorialLimit = 100;
+const C = [];
 const PI_1000 = DataBase.getDataBase("파이");
 
 const LNames = ["L", "l", "엘", "死神", "사신"];
+
+const day = ['일', '월', '화', '수', '목', '금', '토'];
+
+const resRSP = [
+  ['tie', 'bot', 'me'],
+  ['me', 'tie', 'bot'],
+  ['bot', 'me', 'tie']
+]
 
 const forbiddenSigns = [
   '{',
@@ -65,6 +74,7 @@ const condStrs = [
   "{int}P{int}",
   "{int}C{int}",
   "{int}π{int}",
+  "{int}^{int}",
   "{int}H{int}",
   "C{int}",
   "sin{number}",
@@ -180,6 +190,12 @@ function In(s, l) {
       return true;
   
   return false;
+}
+
+// 배열의 요소들 중 하나를 선택해주는 함수
+function choose(l) {
+  let r = Math.floor(Math.random()*l.length);
+  return l[r];
 }
 
 /**
@@ -319,6 +335,23 @@ function ston(s) {
   return Number(s);
 }
 
+// nCr 배열 초기화
+function init_nCr() {
+  for(let i=0; i<=factorialLimit; i++) {
+    C.push([]);
+
+    for(let j=0; j<=factorialLimit; j++)
+      C[i].push(0);
+  }
+
+  for(let i=0; i<=factorialLimit; i++) {
+    C[i][0] = 1;
+
+    for(let j=1; j<=i; j++)
+      C[i][j] = C[i-1][j-1]+C[i-1][j];
+  }
+}
+
 /**
  * 명령어: 냥습/A/B
  */
@@ -400,7 +433,7 @@ function confirmLearn(query) {
   for(let i=0; i<learnDB.length; i++) {
     // 학습한게 있으면 학습데이터 출력
     if(A == learnDB[i][0])
-      return learnDB[i][1]+", "+learnDB[i][2]+"님이 냥습시켯다냥!";
+      return learnDB[i][1]+", "+learnDB[i][2]+"님이 냥습시켰다냥!";
   }
 
   // 학습한게 없으면 없다고 출력
@@ -454,7 +487,7 @@ function phone(query) {
 
   // 안드로이드 버전 이름 출력
   if(A == "버전")
-    return Device.getAndroidVersionName()+" 이다냥!";
+    return Device.getAndroidVersionName()+"버전 이다냥!";
 
   // 배터리 출력
   if(A == "배터리") {
@@ -488,18 +521,14 @@ function phone(query) {
  * 명령어: L, l, 엘
  */
 function L() {
-  let ans = ["L이다냥!", "엘!", "L!"];
-  let r = Math.floor(Math.random()*ans.length);
-  return ans[r];
+  return choose(["L이다냥!", "엘!", "L!"]);
 }
 
 /**
  * 명령어: 사신, 死神
  */
 function Death() {
-  let ans = ["꺆", "냐아아아앗!", "전방에 사신 출현이다냥!", "사신이다냥! 도망쳐야 한다냥!"];
-  let r = Math.floor(Math.random()*ans.length);
-  return ans[r];
+  return choose(["꺆", "냐아아아앗!", "전방에 사신 출현이다냥!", "사신이다냥! 도망쳐야 한다냥!"]);
 }
 
 /**
@@ -523,19 +552,48 @@ function today() {
 }
 
 /**
+ * 명령어: 요일은
+ */
+function today_day() {
+  let now = new Date();
+  return day[now.getDay()]+"요일이다냥!";
+}
+
+/**
  * 명령어: 안녕, 안녕하세요
  */
 function hello(sender) {
-  return sender+"님 환영한다냥!";
+  return sender+"님 "+choose(["환영한다냥!", "반갑다냥!", "어서오라냥!"]);
 }
 
 /**
  * 명령어: 화냥봇
  */
 function nyanBot() {
-  let ans = ["냥?", "냐앙?", "왜 불럿냥?", "무슨 일이냥?"];
-  let r = Math.floor(Math.random()*ans.length);
-  return ans[r];
+  return choose(["냥?", "냐앙?", "왜 불렀냥?", "무슨 일이냥?"]);
+}
+
+/**
+ * 명령어: 가위, 바위, 보
+ */
+function rsp(me) {
+  let bot = Math.floor(Math.random()*3);
+  const res = resRSP[bot][me];
+
+  if(bot == 0) bot = '바위';
+  else if(bot == 1) bot = '가위';
+  else bot = '보';
+
+  // 비김
+  if(res == 'tie')
+    return bot+"! "+choose(["무승부다냥!", "비겼다냥!"]);
+
+  // 봇이 이김
+  if(res == 'bot')
+    return bot+"! 내가 이겼다냥!";
+
+  // 봇이 짐
+  return bot+"! 내가 졌다냥..";
 }
 
 /**
@@ -581,11 +639,7 @@ function nCr(msg) {
   if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
     return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
 
-  // n < r
-  if(n < r)
-    return "0 이다냥!";
-
-  return Math.round(factorial(n)/factorial(n-r)/factorial(r))+" 이다냥!";
+  return C[n][r]+" 이다냥!";
 }
 
 /**
@@ -593,6 +647,20 @@ function nCr(msg) {
  */
 function nπr(msg) {
   let splitMsg = msg.split('π');
+  let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
+
+  // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
+  if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
+    return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
+
+  return Math.pow(n, r)+" 이다냥!";
+}
+
+/**
+ * 명령어: n^r
+ */
+function pow(msg) {
+  let splitMsg = msg.split('^');
   let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
 
   // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
@@ -619,7 +687,7 @@ function nHr(msg) {
 /**
  * 명령어: Cn
  */
-function C(msg) {
+function Cn(msg) {
   let n = Number(msg.substring(1));
 
   // 2n이 [0, factorialLimit] 범위 안에 있어야 함
@@ -729,6 +797,9 @@ loadNyanLang();
 loadForbiddenWords();
 loadLearnDB();
 
+// 배열 초기화
+init_nCr();
+
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
   /**
    * 화냥봇이 참가하고 있는 room이 다음 조건을 만족해야 반응
@@ -795,11 +866,29 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     else if(msg == "오늘은") {
       replier.reply(today()); // 오늘 날짜 보여주기
     }
+    else if(msg == "요일은") {
+      replier.reply(today_day()); // 오늘 요일 보여주기
+    }
     else if(In(msg, ["안녕", "안녕하세요"])) {
       replier.reply(hello(sender)); // 인사하기
     }
     else if(msg == "화냥봇") {
       replier.reply(nyanBot()); // 화냥봇을 부르면 반응하기
+    }
+    else if(msg == "가위") {
+      replier.reply(rsp(1)); // 화냥봇과 가위바위보: 가위 내기
+    }
+    else if(msg == "바위") {
+      replier.reply(rsp(0)); // 화냥봇과 가위바위보: 바위 내기
+    }
+    else if(msg == "보") {
+      replier.reply(rsp(2)); // 화냥봇과 가위바위보: 보 내기
+    }
+    else if(msg == "너의 이름은") {
+      replier.reply("화냥봇이다냥! 화이트냥님이 만들었다냥!"); // 화냥봇의 이름 말하기
+    }
+    else if(msg == "내 이름은") {
+      replier.reply(sender+"님이다냥!"); // 메시지 보낸 사람의 이름 말하기
     }
     else if(isCondStr(msg, "{int}!")) {
       replier.reply(nfact(msg)); // n! 보여주기
@@ -813,11 +902,14 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     else if(isCondStr(msg, "{int}π{int}")) {
       replier.reply(nπr(msg)); // nπr 보여주기
     }
+    else if(isCondStr(msg, "{int}^{int}")) {
+      replier.reply(pow(msg)); // n^r 보여주기
+    }
     else if(isCondStr(msg, "{int}H{int}")) {
       replier.reply(nHr(msg)); // nHr 보여주기
     }
     else if(isCondStr(msg, "C{int}")) {
-      replier.reply(C(msg)); // Cn 보여주기
+      replier.reply(Cn(msg)); // Cn 보여주기
     }
     else if(isCondStr(msg, "sin{number}")) {
       replier.reply(sin(msg)); // sinA 보여주기

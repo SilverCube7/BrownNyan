@@ -3,6 +3,7 @@
 냥습{enter}
 삭제{enter}
 화냥폰{enter}
+순위{enter}
 냥냥어{enter}
 사신{enter}
 死神{enter}
@@ -16,6 +17,7 @@
 바위{enter}
 너의 이름은{enter}
 내 이름은{enter}
+꿀꺽{enter}
 운세지수{enter}
 Who's That Pokemon?{enter}
 포켓몬{enter}
@@ -25,7 +27,6 @@ Who's That Pokemon?{enter}
 계산{enter}
 길드{enter}
 길드목록{enter}
-순위{enter}
 pi{enter}
 pI{enter}
 Pi{enter}

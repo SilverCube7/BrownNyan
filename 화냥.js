@@ -17,9 +17,10 @@ const scriptName = "화냥";
 
 let nyanLang = "";
 let forbiddenWords = [];
-let learnDB = [];
-const msgDB = new Map();
-const msgDBLimit = 500;
+let learnList = [];
+const msgList = new Map();
+const msgListLimit = 500;
+const rankingEatList = new Map();
 const factorialLimit = 100;
 const C = [];
 const PI_1000 = DataBase.getDataBase("파이");
@@ -89,13 +90,48 @@ const condStrs = [
   "abs{number}"
 ];
 
-// 냥냥어.txt 데이터 불러오기
-function loadNyanLang() {
-  const name = "냥냥어";
-  nyanLang = DataBase.getDataBase(name);
+// txt 파일 불러오기
+function loadTxt(name) {
+  let txt = DataBase.getDataBase(name);
 
-  if(nyanLang == null)
-    nyanLang = "";
+  if(txt == null)
+    txt = "";
+
+  return txt;
+}
+
+// txt 파일 불러온 후 {space}, {enter} 토큰을 분리하면서 리스트로 만들기
+function loadList(name) {
+  let list = loadTxt(name);
+
+  if(list == "")
+    return [];
+
+  list = list.split("{enter}");
+
+  for(let i=0; i<list.length; i++)
+    list[i] = list[i].split("{space}");
+
+  return list;
+}
+
+// 리스트를 txt 파일로 저장하기
+function saveList(name, list) {
+  let makeTxt = "";
+
+  for(let i=0; i<list.length; i++) {
+    for(let j=0; j<list[i].length; j++) {
+      makeTxt += list[i][j];
+
+      if(j != list[i].length-1)
+        makeTxt += "{space}";
+    }
+
+    if(i != list.length-1)
+      makeTxt += "{enter}";
+  }
+
+  DataBase.setDataBase(name, makeTxt);
 }
 
 // 냥습금지어.txt 데이터 불러오기
@@ -116,73 +152,6 @@ function loadForbiddenWords() {
   }
 }
 
-// 냥습.txt 데이터 불러오기
-function loadLearnDB() {
-  const name = "냥습";
-  learnDB = DataBase.getDataBase(name);
-
-  if(learnDB == null || learnDB == "") {
-    learnDB = [];
-    return;
-  }
-
-  learnDB = learnDB.split("{enter}");
-
-  for(let i=0; i<learnDB.length; i++)
-    learnDB[i] = learnDB[i].split("{space}");
-}
-
-// 냥습.txt에 데이터 저장하기
-function saveLearnDB() {
-  const name = "냥습";
-  let makeDB = "";
-
-  for(let i=0; i<learnDB.length; i++) {
-    makeDB += learnDB[i][0]+"{space}"+learnDB[i][1]+"{space}"+learnDB[i][2];
-
-    if(i != learnDB.length-1)
-      makeDB += "{enter}";
-  }
-
-  DataBase.setDataBase(name, makeDB);
-}
-
-// 메시지.txt 데이터 불러오기
-function loadMsgDB(room) {
-  const name = "메시지_"+room;
-  let data = DataBase.getDataBase(name);
-
-  msgDB.set(room, []);
-
-  if(data == null || data == "")
-    return;
-
-  data = data.split("{enter}");
-
-  for(let i=0; i<data.length; i++)
-    msgDB.get(room).push(data[i].split("{space}"));
-}
-
-// 메시지.txt에 데이터 저장하기
-function saveMsgDB(room) {
-  const name = "메시지_"+room;
-  let data = msgDB.get(room);
-
-  if(data == undefined)
-    data = [];
-
-  let makeMsgDB = "";
-
-  for(let i=0; i<data.length; i++) {
-    makeMsgDB += data[i][0]+"{space}"+data[i][1];
-
-    if(i != data.length-1)
-      makeMsgDB += "{enter}";
-  }
-
-  DataBase.setDataBase(name, makeMsgDB);
-}
-
 // in 연산을 해주는 함수
 function In(s, l) {
   for(let i of l)
@@ -192,10 +161,10 @@ function In(s, l) {
   return false;
 }
 
-// 배열의 요소들 중 하나를 선택해주는 함수
-function choose(l) {
-  let r = Math.floor(Math.random()*l.length);
-  return l[r];
+// 리스트의 요소들 중 하나를 선택해주는 함수
+function choose(list) {
+  let r = Math.floor(Math.random()*list.length);
+  return list[r];
 }
 
 /**
@@ -406,21 +375,21 @@ function learn(query, sender) {
 
   let learned = false;
 
-  for(let i=0; i<learnDB.length; i++) {
-    // 학습한게 있으면 learnDB 안에 있는 학습데이터 덮어쓰기
-    if(A == learnDB[i][0]) {
-      learnDB[i][1] = B;
-      learnDB[i][2] = sender;
+  for(let i=0; i<learnList.length; i++) {
+    // 학습한게 있으면 learnList 안에 있는 학습데이터 덮어쓰기
+    if(A == learnList[i][0]) {
+      learnList[i][1] = B;
+      learnList[i][2] = sender;
       learned = true;
       break;
     }
   }
 
-  // 학습한게 없으면 learnDB에 학습데이터 추가
+  // 학습한게 없으면 learnList에 학습데이터 추가
   if(!learned)
-    learnDB.push([A, B, sender]);
+    learnList.push([A, B, sender]);
 
-  saveLearnDB();
+  saveList("냥습", learnList);
   return "냥!";
 }
 
@@ -430,10 +399,10 @@ function learn(query, sender) {
 function confirmLearn(query) {
   let A = query[1];
 
-  for(let i=0; i<learnDB.length; i++) {
+  for(let i=0; i<learnList.length; i++) {
     // 학습한게 있으면 학습데이터 출력
-    if(A == learnDB[i][0])
-      return learnDB[i][1]+", "+learnDB[i][2]+"님이 냥습시켰다냥!";
+    if(A == learnList[i][0])
+      return learnList[i][1]+", "+learnList[i][2]+"님이 냥습시켰다냥!";
   }
 
   // 학습한게 없으면 없다고 출력
@@ -446,11 +415,11 @@ function confirmLearn(query) {
 function del(query) {
   let A = query[1];
 
-  for(let i=0; i<learnDB.length; i++) {
+  for(let i=0; i<learnList.length; i++) {
     // 학습한게 있으면 삭제
-    if(A == learnDB[i][0]) {
-      learnDB.splice(i, 1);
-      saveLearnDB();
+    if(A == learnList[i][0]) {
+      learnList.splice(i, 1);
+      saveList("냥습", learnList);
       return "냥!";
     }
   }
@@ -464,7 +433,7 @@ function del(query) {
  */
 function prevMsg(room, query) {
   let A = Number(query[1]);
-  let data = msgDB.get(room);
+  let data = msgList.get(room);
 
   // A가 정수여야 함
   if(!Number.isInteger(A))
@@ -518,6 +487,35 @@ function phone(query) {
 }
 
 /**
+ * 명령어: 순위/A
+ *   A ∈ { 꿀꺽 }
+ */
+function ranking(room, query) {
+  let A = query[1];
+
+  // 꿀꺽 순위 출력
+  if(A == "꿀꺽")
+    return rankingEat(room);
+
+  // 그 외의 순위는 없음
+  return "그런 순위는 없다냥!";
+}
+
+// 꿀꺽 순위
+function rankingEat(room) {
+  if(!rankingEatList.has(room))
+    rankingEatList.set(room, loadList("꿀꺽순위_"+room));
+
+  let data = rankingEatList.get(room);
+  let list = "< 순위/꿀꺽 >\n\n";
+
+  for(let i=0; i<data.length; i++)
+    list += "("+String(i+1)+") "+String(data[i][0])+": "+String(data[i][1])+'\n';
+
+  return list;
+}
+
+/**
  * 명령어: L, l, 엘
  */
 function L() {
@@ -537,8 +535,8 @@ function Death() {
 function learnList() {
   let list = "< 냥습목록 >\n\n";
 
-  for(let i=0; i<learnDB.length; i++)
-    list += "("+String(i+1)+") "+String(learnDB[i][0])+"/"+String(learnDB[i][2])+'\n';
+  for(let i=0; i<learnList.length; i++)
+    list += "("+String(i+1)+") "+String(learnList[i][0])+"/"+String(learnList[i][2])+'\n';
 
   return list;
 }
@@ -554,7 +552,7 @@ function today() {
 /**
  * 명령어: 요일은
  */
-function today_day() {
+function todayDay() {
   let now = new Date();
   return day[now.getDay()]+"요일이다냥!";
 }
@@ -594,6 +592,58 @@ function rsp(me) {
 
   // 봇이 짐
   return bot+"! 내가 졌다냥..";
+}
+
+/**
+ * 명령어: 꿀꺽
+ */
+function eat(room, sender) {
+  let data = msgList.get(room);
+
+  // msgList에 데이터가 없어서 꿀꺽할 수 없음
+  if(data.length == 0)
+    return "꿀꺽할 수 없다냥!";
+
+  let target = data[data.length-1][1];
+
+  // 자신을 꿀꺽할 수 없음
+  if(target == sender)
+    return "자신을 꿀꺽할 수 없다냥!";
+
+  // 꿀꺽 순위 불러오기
+  if(!rankingEatList.has(room))
+    rankingEatList.set(room, loadList("꿀꺽순위_"+room));
+
+  data = rankingEatList.get(room);
+
+  // 문자열 데이터를 수 데이터로
+  for(let i=0; i<data.length; i++)
+    data[i][1] = Number(data[i][1]);
+
+  let inName = false;
+
+  // 꿀꺽 횟수 +1
+  for(let i=0; i<data.length; i++) {
+    if(data[i][0] == sender) {
+      data[i][1]++;
+      inName = true;
+      break;
+    }
+  }
+
+  if(!inName)
+    data.push([sender, 1]);
+
+  // 꿀꺽 횟수가 큰 순으로 정렬
+  data.sort((a, b) => b[1]-a[1]);
+
+  // 수 데이터를 문자열 데이터로
+  for(let i=0; i<data.length; i++)
+    data[i][1] = String(data[i][1]);
+
+  saveList("꿀꺽순위_"+room, rankingEatList.get(room));
+
+  return target+"님을 꿀꺽했다냥!";
 }
 
 /**
@@ -793,9 +843,9 @@ function E() {
 }
 
 // Database에 있는 txt 불러오기 (메시지_room.txt는 제외)
-loadNyanLang();
+nyanLang = loadTxt("냥냥어");
 loadForbiddenWords();
-loadLearnDB();
+learnList = loadList("냥습");
 
 // 배열 초기화
 init_nCr();
@@ -807,18 +857,18 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
    *   room의 접두사가 WN
    */
   if(room == "화이트냥" || room.substring(0, 2) == "WN") {
-    // msgDB[room]에 데이터가 없는 경우 Database에 있는 메시지_room.txt 불러오기
-    if(!msgDB.has(room))
-      loadMsgDB(room);
+    // msgList[room]에 데이터가 없는 경우 Database에 있는 메시지_room.txt 불러오기
+    if(!msgList.has(room))
+      msgList.set(room, loadList("메시지_"+room));
 
-    // msgDB[room]에 msg, sender 추가
-    msgDB.get(room).push([msg, sender]);
-    while(msgDB.get(room).length > msgDBLimit) msgDB.get(room).shift();
-    saveMsgDB(room);
+    // msgList[room]에 msg, sender 추가
+    msgList.get(room).push([msg, sender]);
+    while(msgList.get(room).length > msgListLimit) msgList.get(room).shift();
+    saveList("메시지_"+room, msgList.get(room));
 
     // 일부 상황을 제외하고 L과 대화하는거 방지
     if(In(sender, LNames)) {
-      let data = msgDB.get(room);
+      let data = msgList.get(room);
 
       // L이 같은 말을 2번 이상 해서 무한루프 걸리게 되는거 방지
       if(!(data.length-2 >= 0 && In(data[data.length-2][1], LNames))) {
@@ -851,6 +901,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       if(query.length >= 2)
         replier.reply(phone(query)); // 화냥폰 정보 보여주기
     }
+    else if(query[0] == "순위") {
+      if(query.length >= 2)
+        replier.reply(ranking(room, query)); // 순위 보여주기
+    }
     else if(msg == "냥냥어") {
       replier.reply(nyanLang); // 명령어 목록 보여주기
     }
@@ -867,7 +921,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       replier.reply(today()); // 오늘 날짜 보여주기
     }
     else if(msg == "요일은") {
-      replier.reply(today_day()); // 오늘 요일 보여주기
+      replier.reply(todayDay()); // 오늘 요일 보여주기
     }
     else if(In(msg, ["안녕", "안녕하세요"])) {
       replier.reply(hello(sender)); // 인사하기
@@ -889,6 +943,9 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     }
     else if(msg == "내 이름은") {
       replier.reply(sender+"님이다냥!"); // 메시지 보낸 사람의 이름 말하기
+    }
+    else if(msg == "꿀꺽") {
+      replier.reply(eat(room, sender)); // 가장 최근에 메시지를 보낸 사람을 꿀꺽하기
     }
     else if(isCondStr(msg, "{int}!")) {
       replier.reply(nfact(msg)); // n! 보여주기
@@ -949,9 +1006,9 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     }
     else {
       // 메시지가 오면 학습데이터에 따라 반응하기
-      for(let i=0; i<learnDB.length; i++) {
-        if(msg == learnDB[i][0]) {
-          replier.reply(learnDB[i][1]);
+      for(let i=0; i<learnList.length; i++) {
+        if(msg == learnList[i][0]) {
+          replier.reply(learnList[i][1]);
           break;
         }
       }

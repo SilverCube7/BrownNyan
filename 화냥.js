@@ -625,7 +625,7 @@ function nPr(msg) {
   if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
     return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
 
-  return Math.round(factorial(n)/factorial(n-r))+" 이다냥!";
+  return factorial(n)/factorial(n-r)+" 이다냥!";
 }
 
 /**
@@ -695,7 +695,7 @@ function Cn(msg) {
     return "0 <= 2n <= "+factorialLimit+" 을 만족해야 한다냥!";
 
   let res = nCr(n*2+'C'+n).replace(" 이다냥!", "");
-  return Math.round(Number(res)/(n+1))+" 이다냥!";
+  return Number(res)/(n+1)+" 이다냥!";
 }
 
 /**

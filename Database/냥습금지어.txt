@@ -13,8 +13,6 @@
 안녕{enter}
 안녕하세요{enter}
 화냥봇{enter}
-가위{enter}
-바위{enter}
 너의 이름은{enter}
 내 이름은{enter}
 꿀꺽{enter}
@@ -24,11 +22,14 @@ Who's That Pokemon?{enter}
 예약{enter}
 예약목록{enter}
 결투{enter}
+대결{enter}
+PvP{enter}
 계산{enter}
 길드{enter}
 길드목록{enter}
-pi{enter}
-pI{enter}
-Pi{enter}
 PI{enter}
-목록
+목록{enter}
+출첵{enter}
+출석체크{enter}
+이모티콘을 보냈습니다.{enter}
+사진을 보냈습니다.

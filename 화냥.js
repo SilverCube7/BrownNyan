@@ -331,7 +331,7 @@ function learn(query, sender) {
 
   // A가 금지어인지 확인
   for(let i of forbiddenWords) {
-    if(A == i) {
+    if(A.toUpperCase() == i.toUpperCase()) {
       forbad = true;
       break;
     }
@@ -508,7 +508,7 @@ function rankingEat(room) {
     rankingEatList.set(room, loadList("꿀꺽순위_"+room));
 
   let data = rankingEatList.get(room);
-  let list = "< 순위/꿀꺽 >\n\n";
+  let list = "< 맛있게 꿀꺽한 사람 순위 >\n\n";
 
   for(let i=0; i<data.length; i++)
     list += "("+String(i+1)+") "+String(data[i][0])+": "+String(data[i][1])+'\n';
@@ -575,7 +575,14 @@ function nyanBot() {
 /**
  * 명령어: 가위, 바위, 보
  */
-function rsp(me) {
+function rsp(query) {
+  let me = query[1];
+
+  if(me == '가위') me = 1;
+  else if(me == '바위') me = 0;
+  else if(me == '보') me = 2;
+  else return "무엇을 낸거냥?";
+
   let bot = Math.floor(Math.random()*3);
   const res = resRSP[bot][me];
 
@@ -600,20 +607,23 @@ function rsp(me) {
  */
 function eat(room, sender) {
   let data = msgList.get(room);
+  let target = null;
 
-  // msgList에 데이터가 부족해서 꿀꺽할 수 없음
-  if(data.length < 2)
-    return "꿀꺽할 수 없다냥!";
+  for(let i=data.length-2; i>=0; i--) {
+    // L을 제외한 사람을 꿀꺽 목표로 지정
+    if(!In(data[i][1], LNames)) {
+      target = data[i][1];
+      break;
+    }
+  }
 
-  let target = data[data.length-2][1];
+  // 꿀꺽 목표가 없음
+  if(target == null)
+    return "꿀꺽할 사람이 없다냥!";
 
   // 자신을 꿀꺽할 수 없음
   if(target == sender)
     return "자신을 꿀꺽할 수 없다냥!";
-
-  // L을 꿀꺽할 수 없음
-  if(In(target, LNames))
-    return "L을 꿀꺽할 수 없다냥!";
 
   // 꿀꺽 실패
   if(Math.floor(Math.random()*eatFailPer) == 0)
@@ -914,6 +924,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       if(query.length >= 2)
         replier.reply(ranking(room, query)); // 순위 보여주기
     }
+    else if(In(query[0], ["가바보", "가위바위보"])) {
+      if(query.length >= 2)
+        replier.reply(rsp(query)); // 가위바위보를 하기
+    }
     else if(msg == "냥냥어") {
       replier.reply(nyanLang); // 명령어 목록 보여주기
     }
@@ -937,15 +951,6 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     }
     else if(msg == "화냥봇") {
       replier.reply(nyanBot()); // 화냥봇을 부르면 반응하기
-    }
-    else if(msg == "가위") {
-      replier.reply(rsp(1)); // 화냥봇과 가위바위보: 가위 내기
-    }
-    else if(msg == "바위") {
-      replier.reply(rsp(0)); // 화냥봇과 가위바위보: 바위 내기
-    }
-    else if(msg == "보") {
-      replier.reply(rsp(2)); // 화냥봇과 가위바위보: 보 내기
     }
     else if(msg == "너의 이름은") {
       replier.reply("화냥봇이다냥! 화이트냥님이 만들었다냥!"); // 화냥봇의 이름 말하기

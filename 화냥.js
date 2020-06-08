@@ -396,7 +396,7 @@ function learn(query, sender) {
   if(!learned)
     learnList.push([A, B, sender]);
 
-  saveList(makeTxtPath("NyanFiles/냥습"), learnList);
+  saveList(makeTxtPath("냥습"), learnList);
   return "냥!";
 }
 
@@ -426,7 +426,7 @@ function del(query) {
     // 학습한게 있으면 삭제
     if(A == learnList[i][0]) {
       learnList.splice(i, 1);
-      saveList(makeTxtPath("NyanFiles/냥습"), learnList);
+      saveList(makeTxtPath("냥습"), learnList);
       return "냥!";
     }
   }
@@ -614,13 +614,8 @@ function rsp(query) {
 function nyanTest(query) {
   let A = query[1];
 
-  if(A == "읽기") {
-    return DataBase.getDataBase("./디저트/호엥") == null;
-  }
-
-  if(A == "쓰기") {
-    return DataBase.setDataBase("./디저트/케잌", "딸기 케잌!!");
-  }
+  if(A == "냥습")
+    return learn(query.slice(1), query[4]);
 
   return "테스트!";
 }
@@ -887,7 +882,7 @@ function E() {
 // Database/NyanFiles에 있는 txt들 불러오기
 nyanLang = loadTxt(makeTxtPath("NyanFiles/냥냥어"));
 loadForbiddenWords();
-learnList = loadList(makeTxtPath("NyanFiles/냥습"));
+learnList = loadList(makeTxtPath("냥습"));
 
 // 배열 초기화
 init_nCr();

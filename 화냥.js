@@ -15,6 +15,7 @@ const scriptName = "화냥";
  * 봇: 화냥봇
  */
 
+const master = "화이트냥";
 let nyanLang = "";
 let forbiddenWords = [];
 let learnList = [];
@@ -24,7 +25,7 @@ const rankingEatList = new Map();
 const eatFailPer = 3; // 꿀꺽 실패 확률이 1/eatFailPer
 const factorialLimit = 100;
 const C = [];
-const PI_1000 = DataBase.getDataBase("파이");
+const PI_1000 = DataBase.getDataBase(makeTxtPath("NyanFiles/파이"));
 
 const LNames = ["L", "l", "엘", "死神", "사신"];
 
@@ -91,9 +92,14 @@ const condStrs = [
   "abs{number}"
 ];
 
+// txt 파일의 경로를 만들어주는 함수
+function makeTxtPath(p) {
+  return "./"+p+".txt";
+}
+
 // txt 파일 불러오기
-function loadTxt(name) {
-  let txt = DataBase.getDataBase(name);
+function loadTxt(path) {
+  let txt = DataBase.getDataBase(path);
 
   if(txt == null)
     txt = "";
@@ -101,9 +107,9 @@ function loadTxt(name) {
   return txt;
 }
 
-// txt 파일 불러온 후 {space}, {enter} 토큰을 분리하면서 리스트로 만들기
-function loadList(name) {
-  let list = loadTxt(name);
+// txt 파일 불러온 후 {space}, {enter} 토큰을 분리하면서 2차원 리스트로 만들기
+function loadList(path) {
+  let list = loadTxt(path);
 
   if(list == "")
     return [];
@@ -116,29 +122,29 @@ function loadList(name) {
   return list;
 }
 
-// 리스트를 txt 파일로 저장하기
-function saveList(name, list) {
-  let makeTxt = "";
+// 2차원 리스트를 txt 파일로 저장하기
+function saveList(path, list) {
+  let txt = "";
 
   for(let i=0; i<list.length; i++) {
     for(let j=0; j<list[i].length; j++) {
-      makeTxt += list[i][j];
+      txt += list[i][j];
 
       if(j != list[i].length-1)
-        makeTxt += "{space}";
+        txt += "{space}";
     }
 
     if(i != list.length-1)
-      makeTxt += "{enter}";
+      txt += "{enter}";
   }
 
-  DataBase.setDataBase(name, makeTxt);
+  DataBase.setDataBase(path, txt);
 }
 
 // 냥습금지어.txt 데이터 불러오기
 function loadForbiddenWords() {
-  const name = "냥습금지어";
-  forbiddenWords = DataBase.getDataBase(name);
+  const path = makeTxtPath("NyanFiles/냥습금지어");
+  forbiddenWords = DataBase.getDataBase(path);
 
   if(forbiddenWords == null || forbiddenWords == "") {
     forbiddenWords = [];
@@ -390,7 +396,7 @@ function learn(query, sender) {
   if(!learned)
     learnList.push([A, B, sender]);
 
-  saveList("냥습", learnList);
+  saveList(makeTxtPath("NyanFiles/냥습"), learnList);
   return "냥!";
 }
 
@@ -420,7 +426,7 @@ function del(query) {
     // 학습한게 있으면 삭제
     if(A == learnList[i][0]) {
       learnList.splice(i, 1);
-      saveList("냥습", learnList);
+      saveList(makeTxtPath("NyanFiles/냥습"), learnList);
       return "냥!";
     }
   }
@@ -505,7 +511,7 @@ function ranking(room, query) {
 // 꿀꺽 순위
 function rankingEat(room) {
   if(!rankingEatList.has(room))
-    rankingEatList.set(room, loadList("꿀꺽순위_"+room));
+    rankingEatList.set(room, loadList(makeTxtPath(room+"/순위/꿀꺽")));
 
   let data = rankingEatList.get(room);
   let list = "< 맛있게 꿀꺽한 사람 순위 >\n\n";
@@ -603,6 +609,23 @@ function rsp(query) {
 }
 
 /**
+ * 명령어: 테스트/A
+ */
+function nyanTest(query) {
+  let A = query[1];
+
+  if(A == "읽기") {
+    return DataBase.getDataBase("./디저트/호엥") == null;
+  }
+
+  if(A == "쓰기") {
+    return DataBase.setDataBase("./디저트/케잌", "딸기 케잌!!");
+  }
+
+  return "테스트!";
+}
+
+/**
  * 명령어: 꿀꺽
  */
 function eat(room, sender) {
@@ -631,7 +654,7 @@ function eat(room, sender) {
 
   // 꿀꺽 순위 불러오기
   if(!rankingEatList.has(room))
-    rankingEatList.set(room, loadList("꿀꺽순위_"+room));
+    rankingEatList.set(room, loadList(makeTxtPath(room+"/순위/꿀꺽")));
 
   data = rankingEatList.get(room);
 
@@ -660,7 +683,7 @@ function eat(room, sender) {
   for(let i=0; i<data.length; i++)
     data[i][1] = String(data[i][1]);
 
-  saveList("꿀꺽순위_"+room, rankingEatList.get(room));
+  saveList(makeTxtPath(room+"/순위/꿀꺽"), rankingEatList.get(room));
 
   return target+"님을 꿀꺽했다냥!";
 }
@@ -861,10 +884,10 @@ function E() {
   return Math.E+" 이다냥!";
 }
 
-// Database에 있는 txt 불러오기 (메시지_room.txt는 제외)
-nyanLang = loadTxt("냥냥어");
+// Database/NyanFiles에 있는 txt들 불러오기
+nyanLang = loadTxt(makeTxtPath("NyanFiles/냥냥어"));
 loadForbiddenWords();
-learnList = loadList("냥습");
+learnList = loadList(makeTxtPath("NyanFiles/냥습"));
 
 // 배열 초기화
 init_nCr();
@@ -875,15 +898,15 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
    *   room이 화이트냥
    *   room의 접두사가 WN
    */
-  if(room == "화이트냥" || room.substring(0, 2) == "WN") {
-    // msgList[room]에 데이터가 없는 경우 Database에 있는 메시지_room.txt 불러오기
+  if(room == master || room.substring(0, 2) == "WN") {
+    // msgList[room]에 데이터가 없는 경우 Database/room/메시지.txt 불러오기
     if(!msgList.has(room))
-      msgList.set(room, loadList("메시지_"+room));
+      msgList.set(room, loadList(makeTxtPath(room+"/메시지")));
 
     // msgList[room]에 msg, sender 추가
     msgList.get(room).push([msg, sender]);
     while(msgList.get(room).length > msgListLimit) msgList.get(room).shift();
-    saveList("메시지_"+room, msgList.get(room));
+    saveList(makeTxtPath(room+"/메시지"), msgList.get(room));
 
     // 일부 상황을 제외하고 L과 대화하는거 방지
     if(In(sender, LNames)) {
@@ -928,6 +951,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       if(query.length >= 2)
         replier.reply(rsp(query)); // 가위바위보를 하기
     }
+    else if(query[0] == "테스트") {
+      if(sender == master && query.length >= 2)
+        replier.reply(nyanTest(query)); // 테스트!
+    }
     else if(msg == "냥냥어") {
       replier.reply(nyanLang); // 명령어 목록 보여주기
     }
@@ -953,7 +980,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
       replier.reply(nyanBot()); // 화냥봇을 부르면 반응하기
     }
     else if(msg == "너의 이름은") {
-      replier.reply("화냥봇이다냥! 화이트냥님이 만들었다냥!"); // 화냥봇의 이름 말하기
+      replier.reply("화냥봇이다냥! "+master+"님이 만들었다냥!"); // 화냥봇의 이름 말하기
     }
     else if(msg == "내 이름은") {
       replier.reply(sender+"님이다냥!"); // 메시지 보낸 사람의 이름 말하기

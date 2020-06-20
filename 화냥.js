@@ -900,7 +900,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
 
     // msgList[room]에 msg, sender 추가
     msgList.get(room).push([msg, sender]);
-    while(msgList.get(room).length > msgListLimit) msgList.get(room).shift();
+    while(msgList.get(room).length > msgListLimit+1) msgList.get(room).shift();
     saveList(makeTxtPath(room+"/메시지"), msgList.get(room));
 
     // 일부 상황을 제외하고 L과 대화하는거 방지

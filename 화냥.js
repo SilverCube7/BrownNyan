@@ -170,7 +170,7 @@ function In(s, l) {
 
 // 리스트의 요소들 중 하나를 선택해주는 함수
 function choose(list) {
-  let r = Math.floor(Math.random()*list.length);
+  const r = Math.floor(Math.random()*list.length);
   return list[r];
 }
 
@@ -552,7 +552,7 @@ function showLearnList() {
  * 명령어: 오늘은
  */
 function today() {
-  let now = new Date();
+  const now = new Date();
   return now.getFullYear()+"년 "+(now.getMonth()+1)+"월 "+now.getDate()+"일이다냥!";
 }
 
@@ -560,7 +560,7 @@ function today() {
  * 명령어: 요일은
  */
 function todayDay() {
-  let now = new Date();
+  const now = new Date();
   return day[now.getDay()]+"요일이다냥!";
 }
 
@@ -789,7 +789,7 @@ function Cn(msg) {
  * 명령어: sinA
  */
 function sin(msg) {
-  let A = ston(msg.substring(3));
+  const A = ston(msg.substring(3));
   return Math.sin(A)+" 이다냥!";
 }
 
@@ -797,7 +797,7 @@ function sin(msg) {
  * 명령어: cosA
  */
 function cos(msg) {
-  let A = ston(msg.substring(3));
+  const A = ston(msg.substring(3));
   return Math.cos(A)+" 이다냥!";
 }
 
@@ -805,7 +805,7 @@ function cos(msg) {
  * 명령어: tanA
  */
 function tan(msg) {
-  let A = ston(msg.substring(3));
+  const A = ston(msg.substring(3));
   return Math.tan(A)+" 이다냥!";
 }
 
@@ -813,7 +813,7 @@ function tan(msg) {
  * 명령어: asinA
  */
 function asin(msg) {
-  let A = ston(msg.substring(4));
+  const A = ston(msg.substring(4));
   return Math.asin(A)+" 이다냥!";
 }
 
@@ -821,7 +821,7 @@ function asin(msg) {
  * 명령어: acosA
  */
 function acos(msg) {
-  let A = ston(msg.substring(4));
+  const A = ston(msg.substring(4));
   return Math.acos(A)+" 이다냥!";
 }
 
@@ -829,7 +829,7 @@ function acos(msg) {
  * 명령어: atanA
  */
 function atan(msg) {
-  let A = ston(msg.substring(4));
+  const A = ston(msg.substring(4));
   return Math.atan(A)+" 이다냥!";
 }
 
@@ -837,7 +837,7 @@ function atan(msg) {
  * 명령어: logA
  */
 function log(msg) {
-  let A = ston(msg.substring(3));
+  const A = ston(msg.substring(3));
   return Math.log10(A)+" 이다냥!";
 }
 
@@ -845,7 +845,7 @@ function log(msg) {
  * 명령어: lnA
  */
 function ln(msg) {
-  let A = ston(msg.substring(2));
+  const A = ston(msg.substring(2));
   return Math.log(A)+" 이다냥!";
 }
 
@@ -853,7 +853,7 @@ function ln(msg) {
  * 명령어: sqrtA
  */
 function sqrt(msg) {
-  let A = ston(msg.substring(4));
+  const A = ston(msg.substring(4));
   return Math.sqrt(A)+" 이다냥!";
 }
 
@@ -861,7 +861,7 @@ function sqrt(msg) {
  * 명령어: absA
  */
 function abs(msg) {
-  let A = ston(msg.substring(3));
+  const A = ston(msg.substring(3));
   return Math.abs(A)+" 이다냥!";
 }
 

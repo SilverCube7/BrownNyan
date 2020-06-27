@@ -21,11 +21,21 @@ let forbiddenWords = [];
 let learnList = [];
 const msgList = new Map();
 const msgListLimit = 500;
-const rankingEatList = new Map();
-const eatFailPer = 3; // 꿀꺽 실패 확률이 1/eatFailPer
+const eatFailPercent = 3; // 꿀꺽 실패 확률이 1/eatFailPercent
 const factorialLimit = 100;
 const C = [];
-const PI_1000 = DataBase.getDataBase(makeTxtPath("NyanFiles/파이"));
+const PI_1000 = DataBase.getDataBase(makeDBPath("NyanFiles/파이"));
+
+const msgRankList = new Map();
+const imgRankList = new Map();
+const emoticonRankList = new Map();
+const nyanBotRankList = new Map();
+const LRankList = new Map();
+const eatRankList = new Map();
+const vomitRankList = new Map();
+const runRankList = new Map();
+const eatDmgRankList = new Map();
+const vomitDmgRankList = new Map();
 
 const LNames = ["L", "l", "엘", "死神", "사신"];
 
@@ -72,7 +82,7 @@ const spaces = [
     String.fromCharCode(12288)
 ];
 
-const condStrs = [
+const expressions = [
     "{int}!",
     "{int}P{int}",
     "{int}C{int}",
@@ -92,13 +102,11 @@ const condStrs = [
     "abs{number}"
 ];
 
-// txt 파일의 경로를 만들어주는 함수
-function makeTxtPath(p) {
+function makeDBPath(p) {
     return "./"+p+".txt";
 }
 
-// txt 파일 불러오기
-function loadTxt(path) {
+function loadDB(path) {
     let txt = DataBase.getDataBase(path);
 
     if(txt == null)
@@ -107,9 +115,14 @@ function loadTxt(path) {
     return txt;
 }
 
-// txt 파일 불러온 후 {space}, {enter} 토큰을 분리하면서 2차원 리스트로 만들기
-function loadList(path) {
-    let list = loadTxt(path);
+/**
+ * < DB의 토큰 종류 >
+ * {enter}: '\n'을 의미
+ * {space}: ' '을 의미
+ */
+
+function loadDBAndSplit(path) {
+    let list = loadDB(path);
 
     if(list == "")
         return [];
@@ -122,11 +135,16 @@ function loadList(path) {
     return list;
 }
 
-// 2차원 리스트를 txt 파일로 저장하기
-function saveList(path, list) {
+function saveDB(path, list) {
     let txt = "";
 
     for(let i=0; i<list.length; i++) {
+        // XXX: 왜 가끔 list[i]가 undefined 되는거지?
+        if(list[i] == undefined) {
+            Log.e("Runtime Error\nTypeError: Cannot read property \"length\" from undefined\nPath: "+path);
+            return;
+        }
+
         for(let j=0; j<list[i].length; j++) {
             txt += list[i][j];
 
@@ -141,9 +159,8 @@ function saveList(path, list) {
     DataBase.setDataBase(path, txt);
 }
 
-// 냥습금지어.txt 데이터 불러오기
 function loadForbiddenWords() {
-    const path = makeTxtPath("NyanFiles/냥습금지어");
+    const path = makeDBPath("NyanFiles/냥습금지어");
     forbiddenWords = DataBase.getDataBase(path);
 
     if(forbiddenWords == null || forbiddenWords == "") {
@@ -159,7 +176,6 @@ function loadForbiddenWords() {
     }
 }
 
-// in 연산을 해주는 함수
 function In(s, l) {
     for(let i of l)
         if(s == i)
@@ -168,22 +184,22 @@ function In(s, l) {
     return false;
 }
 
-// 리스트의 요소들 중 하나를 선택해주는 함수
 function choose(list) {
     const r = Math.floor(Math.random()*list.length);
     return list[r];
 }
 
 /**
- * s1이 s2 표현식을 만족하는지 확인
+ * 문자열 s1이 표현식 s2와 같은 구조인지 확인하는 함수
  * 
  * < 표현식 문법 >
  * {int}: 정수
  * {number}: 실수
  * 
- * (주의!) 여는 중괄호를 해줬으면 닫는 중괄호도 해줘야 오류 안 남
+ * < 주의! >
+ * 여는 중괄호를 해줬으면 닫는 중괄호도 해줘야 오류 안 남
  */
-function isCondStr(s1, s2) {
+function isCondExp(s1, s2) {
     let l1 = [], l2 = [];
 
     // s1 파싱
@@ -193,44 +209,33 @@ function isCondStr(s1, s2) {
         if(Number.isInteger(Number(s1[i]))) {
             let inDot = false;
 
-            /**
-             * 예외 처리 해주면서 수 파싱
-             * 
-             * < 예시 >
-             * 0 (o)
-             * 0.9 (o)
-             * 000 (o)
-             * 00.090 (o)
-             * 0P (x)
-             * 0. (x)
-             * 0.P (x)
-             * 0.0.0 (x)
-             */
+            // Number로 형 변환 했을 때 정수 또는 실수가 되는 [i, j) 부분문자열 추출
             let j = i;
-
             for(; (j<s1.length && (Number.isInteger(Number(s1[j])) || (s1[j] == '.' && !inDot && j+1<s1.length && Number.isInteger(Number(s1[j+1]))))); j++) {
                 s += s1[j];
 
                 if(s1[j] == '.')
                     inDot = true;
             }
-            
+
             i = j-1;
         } else if(s1.substring(i, i+2).toUpperCase() == 'PI') {
+            // PI 추출
             s = String(Math.PI);
             i++;
         } else if(s1[i].toUpperCase() == 'E') {
+            // E 추출
             s = String(Math.E);
         } else {
+            // 그 외 [i, j) 부분문자열 추출
             let j = i;
-
             for(; (j<s1.length && !Number.isInteger(Number(s1[j])) && s1.substring(j, j+2).toUpperCase()!='PI' && s1[j].toUpperCase()!='E'); j++)
                 s += s1[j];
-            
+
             i = j-1;
         }
 
-        // 음수 판별
+        // 음수 처리
         if(Number.isFinite(Number(s)) && l1.length >= 1) {
             let last = l1[l1.length-1];
 
@@ -253,26 +258,24 @@ function isCondStr(s1, s2) {
 
         if(s2[i] == '{') {
             let j = i;
-
             for(; s2[j]!='}'; j++)
                 s += s2[j];
-            
+
             s += '}';
             i = j;
         } else {
             let j = i;
-
             for(; (j<s2.length && s2[j]!='{'); j++)
                 s += s2[j];
-            
+
             i = j-1;
         }
 
         l2.push(s);
     }
 
-    // 표현식을 만족하는 문자열인지 판별
-    // 실패
+    // s1이 s2와 같은 구조인지 확인해서 참 or 거짓 반환
+
     if(l1.length != l2.length)
         return false;
 
@@ -289,12 +292,11 @@ function isCondStr(s1, s2) {
         }
     }
 
-    // 성공
     return true;
 }
 
 /**
- * 문자열을 수로 변환
+ * 문자열을 수로 변환하는 함수
  * PI, E는 해당 상수로 자동 변환
  */
 function ston(s) {
@@ -311,8 +313,8 @@ function ston(s) {
     return Number(s);
 }
 
-// nCr 배열 초기화
 function init_nCr() {
+    // 배열 C 초기화
     for(let i=0; i<=factorialLimit; i++) {
         C.push([]);
 
@@ -320,6 +322,7 @@ function init_nCr() {
             C[i].push(0);
     }
 
+    // 배열 C 채우기
     for(let i=0; i<=factorialLimit; i++) {
         C[i][0] = 1;
 
@@ -361,9 +364,9 @@ function cmd_learn(query, sender) {
         }
     }
 
-    // A가 특정 수식인지 확인
-    for(let i of condStrs) {
-        if(isCondStr(A, i)) {
+    // A가 특정 표현식을 만족하는지 확인
+    for(let i of expressions) {
+        if(isCondExp(A, i)) {
             forbad = true;
             break;
         }
@@ -373,7 +376,7 @@ function cmd_learn(query, sender) {
     if(A.length <= 1 || B.length == 0)
         return "너무 짧다냥!";
 
-    // A가 금지어이거나 A 안에 금지기호가 있으면 안 됨
+    // A가 금지어이거나 특정 표현식을 만족하거나 A 안에 금지기호가 있으면 안 됨
     if(forbad)
         return "냥습할 수 없다냥!";
 
@@ -393,7 +396,7 @@ function cmd_learn(query, sender) {
     if(!learned)
         learnList.push([A, B, sender]);
 
-    saveList(makeTxtPath("냥습"), learnList);
+    saveDB(makeDBPath("냥습"), learnList);
     return "냥!";
 }
 
@@ -406,7 +409,6 @@ function cmd_confirmLearn(query) {
             return learnList[i][1]+", "+learnList[i][2]+"님이 냥습시켰다냥!";
     }
 
-    // 학습한게 없으면 없다고 출력
     return "냥습한게 없다냥!";
 }
 
@@ -417,12 +419,11 @@ function cmd_del(query) {
         // 학습한게 있으면 삭제
         if(A == learnList[i][0]) {
             learnList.splice(i, 1);
-            saveList(makeTxtPath("냥습"), learnList);
+            saveDB(makeDBPath("냥습"), learnList);
             return "냥!";
         }
     }
 
-    // 학습한게 없으면 아무것도 안함
     return "냥습한게 없다냥!";
 }
 
@@ -473,42 +474,152 @@ function cmd_phone(query) {
         return "충전 중이 아니다냥!";
     }
 
-    // 그 외의 정보는 출력할 수 없음
     return "이 정보는 1급기밀이다냥!";
 }
 
-function cmd_ranking(room, query) {
+function cmd_rank(room, query) {
     let A = query[1];
 
-    // 꿀꺽 순위 출력
-    if(A == "꿀꺽")
-        return rankingEat(room);
+    // 말 순위 출력
+    if(A == "말") return msgRank(room);
 
-    // 그 외의 순위는 없음
+    // 사진 순위 출력
+    if(A == "사진") return imgRank(room);
+
+    // 임티 순위 출력
+    if(A == "임티") return emoticonRank(room);
+
+    // 화냥봇 순위 출력
+    if(A == "화냥봇") return nyanBotRank(room);
+
+    // L 순위 출력
+    if(A == "L") return rankL(room);
+
+    // 꿀꺽 순위 출력
+    if(A == "꿀꺽") return eatRank(room);
+
+    // 퉤엣 순위 출력
+    if(A == "퉤엣") return vomitRank(room);
+
+    // 도망 순위 출력
+    if(A == "도망") return runRank(room);
+
+    // 꿀꺽당햇 순위 출력
+    if(A == "꿀꺽당햇") return eatDmgRank(room);
+
+    // 퉤엣당햇 순위 출력
+    if(A == "퉤엣당햇") return vomitDmgRank(room);
+
     return "그런 순위는 없다냥!";
 }
 
-// 꿀꺽 순위
-function rankingEat(room) {
-    if(!rankingEatList.has(room))
-        rankingEatList.set(room, loadList(makeTxtPath(room+"/순위/꿀꺽")));
+function loadRank(room, rankList, name) {
+    if(!rankList.has(room))
+        rankList.set(room, loadDBAndSplit(makeDBPath(room+"/순위/"+name)));
 
-    let data = rankingEatList.get(room);
-    let list = "< 맛있게 꿀꺽한 사람 순위 >\n\n";
+    return rankList.get(room);
+}
+
+function updateRank(room, sender, rankList, name, cnt) {
+    if(cnt == undefined)
+        cnt = 1;
+
+    let data = loadRank(room, rankList, name);
+
+    // 문자열 데이터를 수 데이터로
+    for(let i=0; i<data.length; i++)
+        data[i][1] = Number(data[i][1]);
+
+    let inName = false;
+
+    // 해당 데이터를 찾아서 cnt 만큼 횟수 증가
+    for(let i=0; i<data.length; i++) {
+        if(data[i][0] == sender) {
+            data[i][1] += cnt;
+            inName = true;
+            break;
+        }
+    }
+
+    if(!inName)
+        data.push([sender, 1]);
+
+    // 횟수가 큰 순으로 정렬
+    data.sort((a, b) => b[1]-a[1]);
+
+    // 수 데이터를 문자열 데이터로
+    for(let i=0; i<data.length; i++)
+        data[i][1] = String(data[i][1]);
+
+    saveDB(makeDBPath(room+"/순위/"+name), rankList.get(room));
+}
+
+function showRank(title, data) {
+    let show = "< "+title+" >\n\n";
 
     for(let i=0; i<data.length; i++)
-        list += "("+String(i+1)+") "+String(data[i][0])+": "+String(data[i][1])+'\n';
+        show += "("+String(i+1)+") "+String(data[i][0])+": "+String(data[i][1])+'\n';
 
-    return list;
+    return show;
+}
+
+function msgRank(room) {
+    loadRank(room, msgRankList, "말");
+    return showRank("수다쟁이", msgRankList.get(room));
+}
+
+function imgRank(room) {
+    loadRank(room, imgRankList, "사진");
+    return showRank("사진가", imgRankList.get(room));
+}
+
+function emoticonRank(room) {
+    loadRank(room, emoticonRankList, "임티");
+    return showRank("임티뿅", emoticonRankList.get(room));
+}
+
+function nyanBotRank(room) {
+    loadRank(room, nyanBotRankList, "화냥봇");
+    return showRank("외쳐 화냥봇", nyanBotRankList.get(room));
+}
+
+function rankL(room) {
+    loadRank(room, LRankList, "L");
+    return showRank("외쳐 L", LRankList.get(room));
+}
+
+function eatRank(room) {
+    loadRank(room, eatRankList, "꿀꺽");
+    return showRank("먹보", eatRankList.get(room));
+}
+
+function vomitRank(room) {
+    loadRank(room, vomitRankList, "퉤엣");
+    return showRank("퉤엣", vomitRankList.get(room));
+}
+
+function runRank(room) {
+    loadRank(room, runRankList, "도망");
+    return showRank("도망자", runRankList.get(room));
+}
+
+function eatDmgRank(room) {
+    loadRank(room, eatDmgRankList, "꿀꺽당햇");
+    return showRank("꿀꺽 희생자", eatDmgRankList.get(room));
+}
+
+function vomitDmgRank(room) {
+    loadRank(room, vomitDmgRankList, "퉤엣당햇");
+    return showRank("퉤엣 희생자", vomitDmgRankList.get(room));
 }
 
 function cmd_learnList() {
-    let list = "< 냥습목록 >\n\n";
+    let show = "< 냥습목록 >\n\n";
 
     for(let i=0; i<learnList.length; i++)
-        list += "("+String(i+1)+") "+String(learnList[i][0])+"/"+String(learnList[i][2])+'\n';
+        show += "("+String(i+1)+") "+String(learnList[i][0])+"/"+String(learnList[i][2])+'\n';
 
-    return list;
+    return show;
 }
 
 function cmd_today() {
@@ -559,8 +670,21 @@ function cmd_rsp(query) {
 function cmd_test(query) {
     let A = query[1];
 
-    /*if(A == "냥습")
-        return cmd_learn(query.slice(1), query[4]);*/
+    // 테스트/냥습/A/B/sender
+    if(A == "냥습")
+        return cmd_learn(query.slice(1), query[4]);
+
+    // 테스트/정보로그/A
+    if(A == "정보로그") {
+        Log.i(query[2]);
+        return "정보로그!";
+    }
+
+    // 테스트/로그클리어
+    if(A == "로그클리어") {
+        Log.clear();
+        return "로그클리어!";
+    }
 
     return "테스트!";
 }
@@ -586,41 +710,14 @@ function cmd_eat(room, sender) {
         return "자신을 꿀꺽할 수 없다냥!";
 
     // 꿀꺽 실패
-    if(Math.floor(Math.random()*eatFailPer) == 0)
+    if(Math.floor(Math.random()*eatFailPercent) == 0) {
+        updateRank(room, target, runRankList, "도망");
         return target+"님을 꿀꺽하려고 했지만, 도망갔다냥!";
-
-    // 꿀꺽 순위 불러오기
-    if(!rankingEatList.has(room))
-        rankingEatList.set(room, loadList(makeTxtPath(room+"/순위/꿀꺽")));
-
-    data = rankingEatList.get(room);
-
-    // 문자열 데이터를 수 데이터로
-    for(let i=0; i<data.length; i++)
-        data[i][1] = Number(data[i][1]);
-
-    let inName = false;
-
-    // 꿀꺽 횟수 +1
-    for(let i=0; i<data.length; i++) {
-        if(data[i][0] == sender) {
-            data[i][1]++;
-            inName = true;
-            break;
-        }
     }
 
-    if(!inName)
-        data.push([sender, 1]);
-
-    // 꿀꺽 횟수가 큰 순으로 정렬
-    data.sort((a, b) => b[1]-a[1]);
-
-    // 수 데이터를 문자열 데이터로
-    for(let i=0; i<data.length; i++)
-        data[i][1] = String(data[i][1]);
-
-    saveList(makeTxtPath(room+"/순위/꿀꺽"), rankingEatList.get(room));
+    // 순위 업뎃
+    updateRank(room, sender, eatRankList, "꿀꺽");
+    updateRank(room, target, eatDmgRankList, "꿀꺽당햇");
 
     return target+"님을 꿀꺽했다냥!";
 }
@@ -765,9 +862,9 @@ function cmd_E() {
 }
 
 // Database/NyanFiles에 있는 txt들 불러오기
-nyanLang = loadTxt(makeTxtPath("NyanFiles/냥냥어"));
+nyanLang = loadDB(makeDBPath("NyanFiles/냥냥어"));
 loadForbiddenWords();
-learnList = loadList(makeTxtPath("냥습"));
+learnList = loadDBAndSplit(makeDBPath("냥습"));
 
 // 배열 초기화
 init_nCr();
@@ -781,12 +878,12 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     if(room == master || room.substring(0, 2) == "WN") {
         // msgList[room]에 데이터가 없는 경우 Database/room/메시지.txt 불러오기
         if(!msgList.has(room))
-            msgList.set(room, loadList(makeTxtPath(room+"/메시지")));
+            msgList.set(room, loadDBAndSplit(makeDBPath(room+"/메시지")));
 
         // msgList[room]에 msg, sender 추가
         msgList.get(room).push([msg, sender]);
         while(msgList.get(room).length > msgListLimit+1) msgList.get(room).shift();
-        saveList(makeTxtPath(room+"/메시지"), msgList.get(room));
+        saveDB(makeDBPath(room+"/메시지"), msgList.get(room));
 
         // 일부 상황을 제외하고 L과 대화하는거 방지
         if(In(sender, LNames)) {
@@ -802,6 +899,13 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
 
             return;
         }
+
+        if(msg == "사진을 보냈습니다.")
+            updateRank(room, sender, imgRankList, "사진");
+        else if(msg == "이모티콘을 보냈습니다.")
+            updateRank(room, sender, emoticonRankList, "임티");
+        else
+            updateRank(room, sender, msgRankList, "말");
 
         let query = msg.split('/');
 
@@ -825,7 +929,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         }
         else if(query[0] == "순위") {
             if(query.length >= 2)
-                replier.reply(cmd_ranking(room, query)); // 순위 보여주기
+                replier.reply(cmd_rank(room, query)); // 순위 보여주기
         }
         else if(In(query[0], ["가바보", "가위바위보"])) {
             if(query.length >= 2)
@@ -852,6 +956,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         }
         else if(msg == "화냥봇") {
             replier.reply(cmd_nyanBot()); // 화냥봇을 부르면 반응하기
+            updateRank(room, sender, nyanBotRankList, "화냥봇");
+        }
+        else if(In(msg, LNames)) {
+            updateRank(room, sender, LRankList, "L");
         }
         else if(msg == "너의 이름은") {
             replier.reply("화냥봇이다냥! "+master+"님이 만들었다냥!"); // 화냥봇의 이름 말하기
@@ -862,55 +970,55 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         else if(msg == "꿀꺽") {
             replier.reply(cmd_eat(room, sender)); // 가장 최근에 메시지를 보낸 사람을 꿀꺽하기
         }
-        else if(isCondStr(msg, "{int}!")) {
+        else if(isCondExp(msg, "{int}!")) {
             replier.reply(cmd_factorial(msg)); // n! 보여주기
         }
-        else if(isCondStr(msg, "{int}P{int}")) {
+        else if(isCondExp(msg, "{int}P{int}")) {
             replier.reply(cmd_nPr(msg)); // nPr 보여주기
         }
-        else if(isCondStr(msg, "{int}C{int}")) {
+        else if(isCondExp(msg, "{int}C{int}")) {
             replier.reply(cmd_nCr(msg)); // nCr 보여주기
         }
-        else if(isCondStr(msg, "{int}π{int}")) {
+        else if(isCondExp(msg, "{int}π{int}")) {
             replier.reply(cmd_nπr(msg)); // nπr 보여주기
         }
-        else if(isCondStr(msg, "{int}^{int}")) {
+        else if(isCondExp(msg, "{int}^{int}")) {
             replier.reply(cmd_pow(msg)); // n^r 보여주기
         }
-        else if(isCondStr(msg, "{int}H{int}")) {
+        else if(isCondExp(msg, "{int}H{int}")) {
             replier.reply(cmd_nHr(msg)); // nHr 보여주기
         }
-        else if(isCondStr(msg, "C{int}")) {
+        else if(isCondExp(msg, "C{int}")) {
             replier.reply(cmd_Cn(msg)); // Cn 보여주기
         }
-        else if(isCondStr(msg, "sin{number}")) {
+        else if(isCondExp(msg, "sin{number}")) {
             replier.reply(cmd_sin(msg)); // sinA 보여주기
         }
-        else if(isCondStr(msg, "cos{number}")) {
+        else if(isCondExp(msg, "cos{number}")) {
             replier.reply(cmd_cos(msg)); // cosA 보여주기
         }
-        else if(isCondStr(msg, "tan{number}")) {
+        else if(isCondExp(msg, "tan{number}")) {
             replier.reply(cmd_tan(msg)); // tanA 보여주기
         }
-        else if(isCondStr(msg, "asin{number}")) {
+        else if(isCondExp(msg, "asin{number}")) {
             replier.reply(cmd_asin(msg)); // asinA 보여주기
         }
-        else if(isCondStr(msg, "acos{number}")) {
+        else if(isCondExp(msg, "acos{number}")) {
             replier.reply(cmd_acos(msg)); // acosA 보여주기
         }
-        else if(isCondStr(msg, "atan{number}")) {
+        else if(isCondExp(msg, "atan{number}")) {
             replier.reply(cmd_atan(msg)); // atanA 보여주기
         }
-        else if(isCondStr(msg, "log{number}")) {
+        else if(isCondExp(msg, "log{number}")) {
             replier.reply(cmd_log(msg)); // logA 보여주기
         }
-        else if(isCondStr(msg, "ln{number}")) {
+        else if(isCondExp(msg, "ln{number}")) {
             replier.reply(cmd_ln(msg)); // lnA 보여주기
         }
-        else if(isCondStr(msg, "sqrt{number}")) {
+        else if(isCondExp(msg, "sqrt{number}")) {
             replier.reply(cmd_sqrt(msg)); // sqrtA 보여주기
         }
-        else if(isCondStr(msg, "abs{number}")) {
+        else if(isCondExp(msg, "abs{number}")) {
             replier.reply(cmd_abs(msg)); // absA 보여주기
         }
         else if(msg.toUpperCase() == 'PI') {

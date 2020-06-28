@@ -22,6 +22,7 @@ let learnList = [];
 const msgList = new Map();
 const msgListLimit = 500;
 const eatFailPercent = 3; // 꿀꺽 실패 확률이 1/eatFailPercent
+const eatPocketLimit = 100;
 const factorialLimit = 100;
 const C = [];
 const PI_1000 = DataBase.getDataBase(makeDBPath("NyanFiles/파이"));
@@ -682,6 +683,11 @@ function pushEatPocket(room, sender, target) {
     let data = loadUserInfo(room, sender, eatPocket, "꿀꺽주머니");
 
     data.push([target]);
+
+    // data의 길이는 eatPocketLimit를 넘을 수 없음
+    while(data.length > eatPocketLimit+1)
+        data.shift();
+
     saveDB(makeDBPath(room+"/유저/"+sender+"/꿀꺽주머니"), data);
 }
 
@@ -740,7 +746,7 @@ function cmd_vomit(room, sender) {
     updateRank(room, sender, vomitRankList, "퉤엣");
     updateRank(room, target, vomitDmgRankList, "퉤엣당햇");
 
-    return target+"님을 퉤엣했다냥!";
+    return target+"님을 뱉었다냥!";
 }
 
 function cmd_eatPocket(room, sender) {
@@ -749,6 +755,40 @@ function cmd_eatPocket(room, sender) {
 
     for(let i=data.length-1; i>=0; i--)
         show += "("+String(data.length-i)+") "+String(data[i][0])+'\n';
+
+    return show;
+}
+
+function cmd_emoji(query) {
+    let A = query[1];
+
+    if(A.length != 1)
+        return "한 글자여야 한다냥!";
+
+    return A+String.fromCharCode(8205);
+}
+
+function retentionPeriod() {
+    const now = new Date();
+    const d = now.getDay();
+
+    const a = new Date();
+    const b = new Date();
+
+    a.setDate(now.getDate()-d);
+    b.setDate(now.getDate()-d+6);
+
+    return [[a.getFullYear(), a.getMonth()+1, a.getDate()], [b.getFullYear(), b.getMonth()+1, b.getDate()]];
+}
+
+function cmd_retentionPeriod() {
+    const r = retentionPeriod();
+    const a = r[0][0]+"/"+r[0][1]+"/"+r[0][2];
+    const b = r[1][0]+"/"+r[1][1]+"/"+r[1][2];
+
+    let show = "매주 일요일마다 초기화된다냥!\n"+"( "+a+" ~ "+b+" )";
+
+    // TODO: 보유기간목록도 보여줘야 함
 
     return show;
 }
@@ -1009,6 +1049,13 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         }
         else if(msg == "꿀꺽주머니") {
             replier.reply(cmd_eatPocket(room, sender)); // 꿀꺽주머니 보여주기
+        }
+        else if(query[0] == "이모지") {
+            if(query.length >= 2)
+                replier.reply(cmd_emoji(query)); // 글자 이모지 만들기
+        }
+        else if(msg == "보유기간") {
+            replier.reply(cmd_retentionPeriod()); // 보유기간 정보 보여주기
         }
         else if(isCondExp(msg, "{int}!")) {
             replier.reply(cmd_factorial(msg)); // n! 보여주기

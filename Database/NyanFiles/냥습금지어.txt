@@ -4,6 +4,8 @@
 삭제{enter}
 화냥폰{enter}
 순위{enter}
+가바보{enter}
+가위바위보{enter}
 테스트{enter}
 냥냥어{enter}
 사신{enter}
@@ -17,9 +19,10 @@
 너의 이름은{enter}
 내 이름은{enter}
 꿀꺽{enter}
+퉤엣{enter}
+꿀꺽주머니{enter}
+이모지{enter}
 운세지수{enter}
-Who's That Pokemon?{enter}
-포켓몬{enter}
 예약{enter}
 예약목록{enter}
 결투{enter}

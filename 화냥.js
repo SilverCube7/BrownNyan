@@ -23,6 +23,7 @@ const msgList = new Map();
 const msgListLimit = 500;
 const eatFailPercent = 3; // 꿀꺽 실패 확률이 1/eatFailPercent
 const eatPocketLimit = 100;
+const emojiLenLimit = 10;
 const factorialLimit = 100;
 const C = [];
 const PI_1000 = DataBase.getDataBase(makeDBPath("NyanFiles/파이"));
@@ -765,10 +766,13 @@ function cmd_eatPocket(room, sender) {
 function cmd_emoji(query) {
     let A = query[1];
 
-    if(A.length != 1)
-        return "한 글자여야 한다냥!";
+    if(!(1 <= A.length && A.length <= emojiLenLimit))
+        return ["길이는 "+"1~"+emojiLenLimit+" 사이여야 한다냥!"];
 
-    return A+String.fromCharCode(8205);
+    let emojiList = [];
+    for(let i of A) emojiList.push(i+String.fromCharCode(8205));
+
+    return emojiList;
 }
 
 function retentionPeriod() {
@@ -1053,9 +1057,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         else if(msg == "꿀꺽주머니") {
             replier.reply(cmd_eatPocket(room, sender)); // 꿀꺽주머니 보여주기
         }
-        else if(query[0] == "이모지") {
-            if(query.length >= 2)
-                replier.reply(cmd_emoji(query)); // 글자 이모지 만들기
+        else if(query[0] == "이모지")
+            if(query.length >= 2) {
+                for(let i of cmd_emoji(query))
+                    replier.reply(i); // 글자 이모지 만들기
         }
         else if(msg == "보유기간") {
             replier.reply(cmd_retentionPeriod()); // 보유기간 정보 보여주기

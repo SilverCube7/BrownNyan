@@ -38,6 +38,7 @@ const vomitRankList = new Map();
 const runRankList = new Map();
 const eatDmgRankList = new Map();
 const vomitDmgRankList = new Map();
+const eatBattleRankList = new Map();
 
 const eatPocket = new Map();
 
@@ -492,6 +493,7 @@ function cmd_rank(room, query) {
     if(A == "도망") return runRank(room);
     if(A == "꿀꺽당햇") return eatDmgRank(room);
     if(A == "퉤엣당햇") return vomitDmgRank(room);
+    if(A == "꿀꺽대결") return eatBattleRank(room);
 
     return "그런 순위는 없다냥!";
 }
@@ -595,6 +597,46 @@ function eatDmgRank(room) {
 function vomitDmgRank(room) {
     loadRank(room, vomitDmgRankList, "퉤엣당햇");
     return showRank("퉤엣 희생자 순위", vomitDmgRankList.get(room));
+}
+
+function updateEatBattleRank(room, rankList, name) {
+    let data = loadRank(room, rankList, name);
+    while(data.length > 0) data.pop();
+
+    let eatData = loadRank(room, eatRankList, "꿀꺽");
+    let eatDmgData = loadRank(room, eatDmgRankList, "꿀꺽당햇");
+
+    for(let i of eatData)
+        data.push([i[0], Number(i[1])]);
+
+    for(let i of eatDmgData) {
+        let inName = false;
+
+        for(let j=0; j<data.length; j++) {
+            if(data[j][0] == i[0]) {
+                data[j][1] -= Number(i[1]);
+                inName = true;
+                break;
+            }
+        }
+
+        if(!inName)
+            data.push([i[0], -Number(i[1])]);
+    }
+
+    // 횟수가 큰 순으로 정렬
+    data.sort((a, b) => b[1]-a[1]);
+
+    // 수 데이터를 문자열로 변환
+    for(let i=0; i<data.length; i++)
+        data[i][1] = String(data[i][1]);
+
+    saveDB(makeDBPath(room+"/순위/"+name), data);
+}
+
+function eatBattleRank(room) {
+    updateEatBattleRank(room, eatBattleRankList, "꿀꺽대결");
+    return showRank("꿀꺽 대결 순위 (먹은 수 - 먹힌 수)", eatBattleRankList.get(room));
 }
 
 function cmd_learnList() {
@@ -1057,8 +1099,8 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         else if(msg == "꿀꺽주머니") {
             replier.reply(cmd_eatPocket(room, sender)); // 꿀꺽주머니 보여주기
         }
-        else if(query[0] == "이모지")
-            if(query.length >= 2) {
+        else if(query[0] == "이모지") {
+            if(query.length >= 2)
                 for(let i of cmd_emoji(query))
                     replier.reply(i); // 글자 이모지 만들기
         }

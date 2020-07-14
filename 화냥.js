@@ -335,8 +335,11 @@ function init_nCr() {
 }
 
 function cmd_learn(query, sender) {
-    let A = query[1], B = query[2];
+    let A = query[1], B = "";
     let forbad = false;
+
+    for(let i=2; i<query.length; i++) B += query[i]+"/";
+    B = B.substring(0, B.length-1);
 
     // A가 금지어인지 확인
     for(let i of forbiddenWords) {

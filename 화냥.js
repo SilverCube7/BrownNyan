@@ -18,12 +18,12 @@ const scriptName = "화냥";
 const master = "화이트냥";
 let nyanLang = "";
 let forbiddenWords = [];
-let learnList = [];
+const learnList = new Map();
 const msgList = new Map();
 const msgListLimit = 500;
 const eatFailPercent = 3; // 꿀꺽 실패 확률이 1/eatFailPercent
 const eatPocketLimit = 100;
-const emojiLenLimit = 10;
+const emojiLenLimit = 5;
 const factorialLimit = 100;
 const C = [];
 
@@ -342,7 +342,7 @@ const User = {
 };
 
 const CMD = {
-    learn: function(query, sender) {
+    learn: function(room, query, sender) {
         let A = query[1], B = "";
         let forbad = false;
 
@@ -392,46 +392,49 @@ const CMD = {
         if(forbad)
             return "냥습할 수 없다냥!";
 
+        let data = learnList.get(room);
         let learned = false;
 
-        for(let i=0; i<learnList.length; i++) {
-            // 학습한게 있으면 learnList 안에 있는 학습데이터 덮어쓰기
-            if(A == learnList[i][0]) {
-                learnList[i][1] = B;
-                learnList[i][2] = sender;
+        for(let i=0; i<data.length; i++) {
+            // 학습한게 있으면 learnList[room] 안에 있는 학습데이터 덮어쓰기
+            if(A == data[i][0]) {
+                data[i][1] = B;
+                data[i][2] = sender;
                 learned = true;
                 break;
             }
         }
 
-        // 학습한게 없으면 learnList에 학습데이터 추가
+        // 학습한게 없으면 learnList[room]에 학습데이터 추가
         if(!learned)
-            learnList.push([A, B, sender]);
+            data.push([A, B, sender]);
 
-        DB.saveDB(DB.makeDBPath("냥습"), learnList);
+        DB.saveDB(DB.makeDBPath(room+"/냥습"), data);
         return "냥!";
     },
 
-    confirmLearn: function(query) {
+    confirmLearn: function(room, query) {
+        let data = learnList.get(room);
         let A = query[1];
 
-        for(let i=0; i<learnList.length; i++) {
+        for(let i=0; i<data.length; i++) {
             // 학습한게 있으면 학습데이터 출력
-            if(A == learnList[i][0])
-                return learnList[i][1]+", "+learnList[i][2]+"님이 냥습시켰다냥!";
+            if(A == data[i][0])
+                return data[i][1]+", "+data[i][2]+"님이 냥습시켰다냥!";
         }
 
         return "냥습한게 없다냥!";
     },
 
-    del: function(query) {
+    del: function(room, query) {
+        let data = learnList.get(room);
         let A = query[1];
 
-        for(let i=0; i<learnList.length; i++) {
+        for(let i=0; i<data.length; i++) {
             // 학습한게 있으면 삭제
-            if(A == learnList[i][0]) {
-                learnList.splice(i, 1);
-                DB.saveDB(DB.makeDBPath("냥습"), learnList);
+            if(A == data[i][0]) {
+                data.splice(i, 1);
+                DB.saveDB(DB.makeDBPath(room+"/냥습"), data);
                 return "냥!";
             }
         }
@@ -498,11 +501,12 @@ const CMD = {
         return "그런 순위는 없다냥!";
     },
 
-    showLearnList: function() {
+    showLearnList: function(room) {
+        let data = learnList.get(room);
         let show = "< 냥습목록 >\n\n";
 
-        for(let i=0; i<learnList.length; i++)
-            show += "("+String(i+1)+") "+String(learnList[i][0])+"/"+String(learnList[i][2])+'\n';
+        for(let i=0; i<data.length; i++)
+            show += "("+String(i+1)+") "+String(data[i][0])+"/"+String(data[i][2])+'\n';
 
         return show;
     },
@@ -554,10 +558,6 @@ const CMD = {
 
     test: function(query) {
         let A = query[1];
-
-        // 테스트/냥습/A/B/sender
-        if(A == "냥습")
-            return CMD.learn(query.slice(1), query[4]);
 
         // 테스트/정보로그/A
         if(A == "정보로그") {
@@ -642,14 +642,14 @@ const CMD = {
         return emojiList;
     },
 
-    showRetentionPeriod: function() {
-        const r = loadRetentionPeriod();
+    showTotalPeriod: function() {
+        const r = loadTotalPeriod();
         const a = r[0][0]+"/"+r[0][1]+"/"+r[0][2];
         const b = r[1][0]+"/"+r[1][1]+"/"+r[1][2];
 
         let show = "매주 일요일마다 초기화된다냥!\n"+"( "+a+" ~ "+b+" )";
 
-        // TODO: 보유기간목록도 보여줘야 함
+        // TODO: 집계목록도 보여줘야 함
 
         return show;
     },
@@ -788,6 +788,10 @@ const CMD = {
         return Math.E+" 이다냥!";
     }
 };
+
+function isRoomPrefix(room, prefix) {
+    return room.substring(0, prefix.length) == prefix;
+}
 
 function In(s, l) {
     for(let i of l)
@@ -944,7 +948,7 @@ function init_nCr() {
     }
 }
 
-function loadRetentionPeriod() {
+function loadTotalPeriod() {
     const now = new Date();
     const d = now.getDay();
 
@@ -964,17 +968,18 @@ function factorial(n) {
 
 nyanLang = DB.loadDB(DB.makeDBPath("NyanFiles/냥냥어"));
 forbiddenWords = DB.loadDBAndSplit(DB.makeDBPath("NyanFiles/냥습금지어"))[0];
-learnList = DB.loadDBAndSplit(DB.makeDBPath("냥습"));
 init_nCr();
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
     /**
      * 화냥봇이 참가하고 있는 room이 다음 조건들 중 하나를 만족해야 반응
      *     room이 화이트냥
-     *     room의 접두사가 WN
+     *     room의 접두사가 [WN] 또는 [WNmini]
      */
-    if(room == master || room.substring(0, 2) == "WN") {
-        // msgList[room]에 데이터가 없는 경우 DB에서 불러오기
+    if(room == master || isRoomPrefix(room, "[WN]") || isRoomPrefix(room, "[WNmini]")) {
+        if(!learnList.has(room))
+            learnList.set(room, DB.loadDBAndSplit(DB.makeDBPath(room+"/냥습")));
+
         if(!msgList.has(room))
             msgList.set(room, DB.loadDBAndSplit(DB.makeDBPath(room+"/메시지")));
 
@@ -1013,13 +1018,13 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
 
         if(query[0] == "냥습") {
             if(query.length >= 3)
-                replier.reply(CMD.learn(query, sender)); // 학습시키기
+                replier.reply(CMD.learn(room, query, sender)); // 학습시키기
             else if(query.length == 2)
-                replier.reply(CMD.confirmLearn(query)); // 학습했는지 확인
+                replier.reply(CMD.confirmLearn(room, query)); // 학습했는지 확인
         }
         else if(query[0] == "삭제") {
             if(query.length >= 2)
-                replier.reply(CMD.del(query)); // 학습한거 삭제
+                replier.reply(CMD.del(room, query)); // 학습한거 삭제
         }
         else if(query[0] == "말") {
             if(query.length >= 2)
@@ -1037,15 +1042,15 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             if(query.length >= 2)
                 replier.reply(CMD.playRSP(query)); // 가위바위보를 하기
         }
-        else if(query[0] == "테스트") {
-            if(sender == master && query.length >= 2)
+        else if(query[0] == "테스트" && sender == master) {
+            if(query.length >= 2)
                 replier.reply(CMD.test(query)); // 테스트!
         }
         else if(msg == "냥냥어") {
             replier.reply(nyanLang); // 명령어 목록 보여주기
         }
         else if(msg == "냥습목록") {
-            replier.reply(CMD.showLearnList()); // 학습 목록 보여주기
+            replier.reply(CMD.showLearnList(room)); // 학습 목록 보여주기
         }
         else if(msg == "오늘은") {
             replier.reply(CMD.showToday()); // 오늘 날짜 보여주기
@@ -1060,7 +1065,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             replier.reply(CMD.responseNyanBot()); // 화냥봇을 부르면 반응하기
             Rank.updateRank(room, sender, nyanBotRankList, "화냥봇");
         }
-        else if(In(msg, LNames)) {
+        else if(In(msg, LNames) && !isRoomPrefix(room, "[WNmini]")) {
             Rank.updateRank(room, sender, LRankList, "L");
         }
         else if(msg == "너의 이름은") {
@@ -1069,13 +1074,13 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         else if(msg == "내 이름은") {
             replier.reply(sender+"님이다냥!"); // 메시지 보낸 사람의 이름 말하기
         }
-        else if(msg == "꿀꺽") {
+        else if(msg == "꿀꺽" && !isRoomPrefix(room, "[WNmini]")) {
             replier.reply(CMD.eat(room, sender)); // 가장 최근에 메시지를 보낸 사람을 꿀꺽하기
         }
-        else if(In(msg, ["퉤엣", "퉷"])) {
+        else if(In(msg, ["퉤엣", "퉷"]) && !isRoomPrefix(room, "[WNmini]")) {
             replier.reply(CMD.vomit(room, sender)); // 가장 최근에 꿀꺽한 사람을 퉤엣하기
         }
-        else if(msg == "꿀꺽주머니") {
+        else if(msg == "꿀꺽주머니" && !isRoomPrefix(room, "[WNmini]")) {
             replier.reply(CMD.showEatPocket(room, sender)); // 꿀꺽주머니 보여주기
         }
         else if(query[0] == "이모지") {
@@ -1083,8 +1088,8 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
                 for(let i of CMD.makeEmoji(query))
                     replier.reply(i); // 글자 이모지 만들기
         }
-        else if(msg == "보유기간") {
-            replier.reply(CMD.showRetentionPeriod()); // 보유기간 정보 보여주기
+        else if(msg == "집계기간") {
+            replier.reply(CMD.showTotalPeriod()); // 집계기간 정보 보여주기
         }
         else if(isCondExp(msg, "{int}!")) {
             replier.reply(CMD.factorial(msg)); // n! 보여주기
@@ -1144,10 +1149,11 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             replier.reply(CMD.E()); // E 보여주기
         }
         else {
-            // 메시지가 오면 학습데이터에 따라 반응하기
-            for(let i=0; i<learnList.length; i++) {
-                if(msg == learnList[i][0]) {
-                    replier.reply(learnList[i][1]);
+            let data = learnList.get(room);
+
+            for(let i=0; i<data.length; i++) {
+                if(msg == data[i][0]) {
+                    replier.reply(data[i][1]); // 메시지가 오면 학습데이터에 따라 반응하기
                     break;
                 }
             }

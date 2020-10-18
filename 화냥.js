@@ -654,6 +654,8 @@ function choose(list) {
 }
 
 function findTarget() {
+    let data = msgList.get(room);
+
     for(let i=data.length-2; i>=0; i--)
         if(!In(data[i][1], LNames))
             return data[i][1];

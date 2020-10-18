@@ -974,9 +974,9 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     /**
      * 화냥봇이 참가하고 있는 room이 다음 조건들 중 하나를 만족해야 반응
      *     room이 화이트냥
-     *     room의 접두사가 [WN] 또는 [WNmini]
+     *     room의 접두사가 [WN]
      */
-    if(room == master || isRoomPrefix(room, "[WN]") || isRoomPrefix(room, "[WNmini]")) {
+    if(room == master || isRoomPrefix(room, "[WN]")) {
         if(!learnList.has(room))
             learnList.set(room, DB.loadDBAndSplit(DB.makeDBPath(room+"/냥습")));
 
@@ -1065,7 +1065,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             replier.reply(CMD.responseNyanBot()); // 화냥봇을 부르면 반응하기
             Rank.updateRank(room, sender, nyanBotRankList, "화냥봇");
         }
-        else if(In(msg, LNames) && !isRoomPrefix(room, "[WNmini]")) {
+        else if(In(msg, LNames)) {
             Rank.updateRank(room, sender, LRankList, "L");
         }
         else if(msg == "너의 이름은") {
@@ -1074,13 +1074,13 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         else if(msg == "내 이름은") {
             replier.reply(sender+"님이다냥!"); // 메시지 보낸 사람의 이름 말하기
         }
-        else if(msg == "꿀꺽" && !isRoomPrefix(room, "[WNmini]")) {
+        else if(msg == "꿀꺽") {
             replier.reply(CMD.eat(room, sender)); // 가장 최근에 메시지를 보낸 사람을 꿀꺽하기
         }
-        else if(In(msg, ["퉤엣", "퉷"]) && !isRoomPrefix(room, "[WNmini]")) {
+        else if(In(msg, ["퉤엣", "퉷"])) {
             replier.reply(CMD.vomit(room, sender)); // 가장 최근에 꿀꺽한 사람을 퉤엣하기
         }
-        else if(msg == "꿀꺽주머니" && !isRoomPrefix(room, "[WNmini]")) {
+        else if(msg == "꿀꺽주머니") {
             replier.reply(CMD.showEatPocket(room, sender)); // 꿀꺽주머니 보여주기
         }
         else if(query[0] == "이모지") {

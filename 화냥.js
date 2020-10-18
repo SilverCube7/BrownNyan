@@ -587,7 +587,6 @@ const CMD = {
     },
 
     vomit: function(room, sender) {
-        let data = User.loadUserInfo(room, sender, eatPocket, "꿀꺽주머니");
         let target = User.popEatPocket(room, sender);
 
         if(target == undefined)
@@ -610,6 +609,11 @@ const CMD = {
     },
 
     digest: function(room, sender) {
+        let data = User.loadUserInfo(room, sender, eatPocket, "꿀꺽주머니");
+
+        if(!data.length)
+            return "꿀꺽주머니에 아무것도 없다냥!";
+
         User.clearEatPocket(room, sender);
 
         return "소화제를 사용해서 강제로 소화했다냥!";

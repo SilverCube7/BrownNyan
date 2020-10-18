@@ -653,17 +653,21 @@ function choose(list) {
     return list[r];
 }
 
-function loadTotalPeriod() {
-    const now = new Date();
-    const d = now.getDay();
+function findTarget() {
+    for(let i=data.length-2; i>=0; i--)
+        if(!In(data[i][1], LNames))
+            return data[i][1];
 
-    const a = new Date();
-    const b = new Date();
+    return undefined;
+}
 
-    a.setDate(now.getDate()-d);
-    b.setDate(now.getDate()-d+6);
+function parseLearnDataValue(value, sender) {
+    target = findTarget();
 
-    return [[a.getFullYear(), a.getMonth()+1, a.getDate()], [b.getFullYear(), b.getMonth()+1, b.getDate()]];
+    value = value.replace("[m]", sender)
+                 .replace("[y]", target ? target : sender);
+
+    return value;
 }
 
 nyanLang = DB.loadDB(DB.makeDBPath("NyanFiles/냥냥어"));
@@ -798,7 +802,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
 
             for(let i=0; i<data.length; i++) {
                 if(msg == data[i][0]) {
-                    replier.reply(data[i][1]); // 메시지가 오면 학습데이터에 따라 반응하기
+                    replier.reply(parseLearnDataValue(sender, data[i][1])); // 메시지가 오면 학습데이터에 따라 반응하기
                     break;
                 }
             }

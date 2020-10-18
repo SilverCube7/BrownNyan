@@ -24,8 +24,6 @@ const msgListLimit = 500;
 const eatFailPercent = 3; // 꿀꺽 실패 확률이 1/eatFailPercent
 const eatPocketLimit = 100;
 const emojiLenLimit = 5;
-const factorialLimit = 100;
-const C = [];
 
 const msgRankList = new Map();
 const imgRankList = new Map();
@@ -84,26 +82,6 @@ const spaces = [
     String.fromCharCode(8287),
     String.fromCharCode(10240),
     String.fromCharCode(12288)
-];
-
-const expressions = [
-    "{int}!",
-    "{int}P{int}",
-    "{int}C{int}",
-    "{int}π{int}",
-    "{int}^{int}",
-    "{int}H{int}",
-    "C{int}",
-    "sin{number}",
-    "cos{number}",
-    "tan{number}",
-    "asin{number}",
-    "acos{number}",
-    "atan{number}",
-    "log{number}",
-    "ln{number}",
-    "sqrt{number}",
-    "abs{number}"
 ];
 
 const DB = {
@@ -656,24 +634,6 @@ function choose(list) {
     return list[r];
 }
 
-function init_nCr() {
-    // 배열 C 초기화
-    for(let i=0; i<=factorialLimit; i++) {
-        C.push([]);
-
-        for(let j=0; j<=factorialLimit; j++)
-            C[i].push(0);
-    }
-
-    // 배열 C 채우기
-    for(let i=0; i<=factorialLimit; i++) {
-        C[i][0] = 1;
-
-        for(let j=1; j<=i; j++)
-            C[i][j] = C[i-1][j-1]+C[i-1][j];
-    }
-}
-
 function loadTotalPeriod() {
     const now = new Date();
     const d = now.getDay();
@@ -689,7 +649,6 @@ function loadTotalPeriod() {
 
 nyanLang = DB.loadDB(DB.makeDBPath("NyanFiles/냥냥어"));
 forbiddenWords = DB.loadDBAndSplit(DB.makeDBPath("NyanFiles/냥습금지어"))[0];
-init_nCr();
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
     /**

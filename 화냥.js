@@ -642,18 +642,6 @@ const CMD = {
         return emojiList;
     },
 
-    showTotalPeriod: function() {
-        const r = loadTotalPeriod();
-        const a = r[0][0]+"/"+r[0][1]+"/"+r[0][2];
-        const b = r[1][0]+"/"+r[1][1]+"/"+r[1][2];
-
-        let show = "매주 일요일마다 초기화된다냥!\n"+"( "+a+" ~ "+b+" )";
-
-        // TODO: 집계목록도 보여줘야 함
-
-        return show;
-    },
-
     factorial: function(msg) {
         let n = Number(msg.substring(0, msg.length-1));
 
@@ -1087,9 +1075,6 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             if(query.length >= 2)
                 for(let i of CMD.makeEmoji(query))
                     replier.reply(i); // 글자 이모지 만들기
-        }
-        else if(msg == "집계기간") {
-            replier.reply(CMD.showTotalPeriod()); // 집계기간 정보 보여주기
         }
         else if(isCondExp(msg, "{int}!")) {
             replier.reply(CMD.factorial(msg)); // n! 보여주기

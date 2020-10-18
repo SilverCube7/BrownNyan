@@ -92,21 +92,21 @@ const DB = {
     loadDB: function(path) {
         let txt = DataBase.getDataBase(path);
 
-        if(txt == null)
+        if(!txt)
             txt = "";
 
         return txt;
     },
 
     /**
-     * < DB의 토큰 종류 >
-     * {enter}: '\n'을 의미
-     * {space}: ' '을 의미
+     * < DB 토큰 >
+     * {enter} = '\n'
+     * {space} = ' '
      */
     loadDBAndSplit: function(path) {
         let list = DB.loadDB(path);
 
-        if(list == "")
+        if(!list)
             return [];
 
         list = list.split("{enter}");
@@ -121,12 +121,6 @@ const DB = {
         let txt = "";
 
         for(let i=0; i<list.length; i++) {
-            // XXX: 왜 가끔 list[i]가 undefined 되는거지?
-            if(list[i] == undefined) {
-                Log.e("Runtime Error\nTypeError: Cannot read property \"length\" from undefined\nPath: "+path);
-                return;
-            }
-
             for(let j=0; j<list[i].length; j++) {
                 txt += list[i][j];
     
@@ -153,18 +147,17 @@ const Rank = {
     },
 
     updateRank: function(room, who, rankList, name, cnt) {
-        if(cnt == undefined)
+        if(!cnt)
             cnt = 1;
 
         let data = Rank.loadRank(room, rankList, name);
 
-        // 문자열 데이터를 수로 변환
         for(let i=0; i<data.length; i++)
             data[i][1] = Number(data[i][1]);
 
         let inName = false;
 
-        // who를 찾아서 cnt 만큼 횟수 증가
+        // who를 찾아서 순위 갱신
         for(let i=0; i<data.length; i++) {
             if(data[i][0] == who) {
                 data[i][1] += cnt;
@@ -173,11 +166,11 @@ const Rank = {
             }
         }
 
-        if(!inName) data.push([who, cnt]);
+        if(!inName)
+            data.push([who, cnt]);
 
         data.sort((a, b) => b[1]-a[1]);
 
-        // 수 데이터를 문자열로 변환
         for(let i=0; i<data.length; i++)
             data[i][1] = String(data[i][1]);
 
@@ -264,13 +257,12 @@ const Rank = {
                 }
             }
 
-            if(!inName) data.push([i[0], -Number(i[1])]);
+            if(!inName)
+                data.push([i[0], -Number(i[1])]);
         }
 
-        // 횟수가 큰 순으로 정렬
         data.sort((a, b) => b[1]-a[1]);
 
-        // 수 데이터를 문자열로 변환
         for(let i=0; i<data.length; i++)
             data[i][1] = String(data[i][1]);
 
@@ -299,7 +291,6 @@ const User = {
 
         data.push([target]);
 
-        // data의 길이는 eatPocketLimit를 넘을 수 없음
         while(data.length > eatPocketLimit+1)
             data.shift();
 
@@ -312,7 +303,7 @@ const User = {
         let top = data.pop();
         DB.saveDB(DB.makeDBPath(room+"/유저/"+sender+"/꿀꺽주머니"), data);
 
-        if(top == undefined)
+        if(!top)
             return undefined;
 
         return top[0];
@@ -350,7 +341,7 @@ const CMD = {
             }
         }
 
-        // A의 맨 앞 문자 or 맨 뒤 문자가 공백인지 확인
+        // A의 맨 앞 or 맨 뒤 문자가 공백인지 확인
         for(let i of spaces) {
             if(A[0] == i) {
                 forbad = true;
@@ -382,7 +373,6 @@ const CMD = {
             }
         }
 
-        // 학습한게 없으면 learnList[room]에 학습데이터 추가
         if(!learned)
             data.push([A, B, sender]);
 
@@ -423,15 +413,13 @@ const CMD = {
         let A = Number(query[1]);
         let data = msgList.get(room);
 
-        // A가 정수여야 함
         if(!Number.isInteger(A))
             return "정수가 아니다냥!";
 
-        // A가 [0, data.length) 범위 안에 있어야 함
+        // !(0 <= A < data.length)
         if(!(0 <= A && data.length-(A+1) >= 0))
             return "수가 범위를 초과했다냥!";
 
-        // 이전 메시지 출력
         return data[data.length-(A+1)][0]+", "+data[data.length-(A+1)][1]+"님이다냥!";
     },
 
@@ -514,7 +502,7 @@ const CMD = {
         if(me == '가위') me = 1;
         else if(me == '바위') me = 0;
         else if(me == '보') me = 2;
-        else return "무엇을 낸거냥?";
+        else return "무엇을 낸 거냥?";
 
         let bot = Math.floor(Math.random()*3);
         const res = resRSP[bot][me];
@@ -523,15 +511,8 @@ const CMD = {
         else if(bot == 1) bot = '가위';
         else bot = '보';
 
-        // 비김
-        if(res == 'tie')
-            return bot+"! "+choose(["무승부다냥!", "비겼다냥!"]);
-
-        // 봇이 이김
-        if(res == 'bot')
-            return bot+"! 내가 이겼다냥!";
-
-        // 봇이 짐
+        if(res == 'tie') return bot+"! "+choose(["무승부다냥!", "비겼다냥!"]);
+        if(res == 'bot') return bot+"! 내가 이겼다냥!";
         return bot+"! 내가 졌다냥..";
     },
 
@@ -555,25 +536,14 @@ const CMD = {
 
     eat: function(room, sender) {
         let data = msgList.get(room);
-        let target = null;
+        let target = findTarget(room);
 
-        for(let i=data.length-2; i>=0; i--) {
-            // L을 제외한 사람을 꿀꺽 목표로 지정
-            if(!In(data[i][1], LNames)) {
-                target = data[i][1];
-                break;
-            }
-        }
-
-        // 꿀꺽 목표가 없음
-        if(target == null)
+        if(!target)
             return "꿀꺽할 사람이 없다냥!";
 
-        // 자신을 꿀꺽할 수 없음
         if(target == sender)
             return "자신을 꿀꺽할 수 없다냥!";
 
-        // 꿀꺽 실패
         if(Math.floor(Math.random()*eatFailPercent) == 0) {
             Rank.updateRank(room, target, runRankList, "도망");
             return target+"님을 꿀꺽하려고 했지만, 도망갔다냥!";
@@ -589,7 +559,7 @@ const CMD = {
     vomit: function(room, sender) {
         let target = User.popEatPocket(room, sender);
 
-        if(target == undefined)
+        if(!target)
             return "꿀꺽주머니에 아무것도 없다냥!";
 
         Rank.updateRank(room, sender, vomitRankList, "퉤엣");

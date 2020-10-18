@@ -279,7 +279,7 @@ const Rank = {
 
     showEatBattleRank: function(room) {
         Rank.updateEatBattleRank(room, eatBattleRankList, "꿀꺽대결");
-        return Rank.showRank("꿀꺽 대결 순위 (먹은 수 - 먹힌 수)", eatBattleRankList.get(room));
+        return Rank.showRank("순위: 꿀꺽 대결 (먹은 수 - 먹힌 수)", eatBattleRankList.get(room));
     }
 };
 

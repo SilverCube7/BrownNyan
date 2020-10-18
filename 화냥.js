@@ -463,9 +463,11 @@ const CMD = {
         if(A == "L") return Rank.showLRank(room);
         if(A == "꿀꺽") return Rank.showEatRank(room);
         if(A == "퉤엣") return Rank.showVomitRank(room);
+        if(A == "퉷") return Rank.showVomitRank(room);
         if(A == "도망") return Rank.showRunRank(room);
         if(A == "꿀꺽당햇") return Rank.showEatDmgRank(room);
         if(A == "퉤엣당햇") return Rank.showVomitDmgRank(room);
+        if(A == "퉷당햇") return Rank.showVomitDmgRank(room);
         if(A == "꿀꺽대결") return Rank.showEatBattleRank(room);
 
         return "그런 순위는 없다냥!";

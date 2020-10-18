@@ -653,7 +653,7 @@ function choose(list) {
     return list[r];
 }
 
-function findTarget() {
+function findTarget(room) {
     let data = msgList.get(room);
 
     for(let i=data.length-2; i>=0; i--)
@@ -663,8 +663,8 @@ function findTarget() {
     return undefined;
 }
 
-function parseLearnDataValue(value, sender) {
-    target = findTarget();
+function parseLearnDataValue(room, sender, value) {
+    target = findTarget(room);
 
     value = value.replace("[m]", sender)
                  .replace("[y]", target ? target : sender);
@@ -804,7 +804,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
 
             for(let i=0; i<data.length; i++) {
                 if(msg == data[i][0]) {
-                    replier.reply(parseLearnDataValue(sender, data[i][1])); // 메시지가 오면 학습데이터에 따라 반응하기
+                    replier.reply(parseLearnDataValue(room, sender, data[i][1])); // 메시지가 오면 학습데이터에 따라 반응하기
                     break;
                 }
             }

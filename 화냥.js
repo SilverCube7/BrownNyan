@@ -378,14 +378,6 @@ const CMD = {
             }
         }
 
-        // A가 특정 표현식을 만족하는지 확인
-        for(let i of expressions) {
-            if(isCondExp(A, i)) {
-                forbad = true;
-                break;
-            }
-        }
-
         if(A.length <= 1 || B.length == 0)
             return "너무 짧다냥!";
 
@@ -642,138 +634,8 @@ const CMD = {
         return emojiList;
     },
 
-    factorial: function(msg) {
-        let n = Number(msg.substring(0, msg.length-1));
-
-        // n이 [0, factorialLimit] 범위 안에 있어야 함
-        if(!(0 <= n && n <= factorialLimit))
-            return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
-
-        return factorial(n)+" 이다냥!";
-    },
-
-    nPr: function(msg) {
-        let splitMsg = msg.split('P');
-        let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
-
-        // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
-        if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
-            return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
-
-        return factorial(n)/factorial(n-r)+" 이다냥!";
-    },
-
-    nCr: function(msg) {
-        let splitMsg = msg.split('C');
-        let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
-
-        // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
-        if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
-            return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
-
-        return C[n][r]+" 이다냥!";
-    },
-
-    nπr: function(msg) {
-        let splitMsg = msg.split('π');
-        let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
-
-        // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
-        if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
-            return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
-
-        return Math.pow(n, r)+" 이다냥!";
-    },
-
-    pow: function(msg) {
-        let splitMsg = msg.split('^');
-        let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
-
-        // n과 r이 [0, factorialLimit] 범위 안에 있어야 함
-        if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit))
-            return "0~"+factorialLimit+" 사이의 수여야 한다냥!";
-
-        return Math.pow(n, r)+" 이다냥!";
-    },
-
-    nHr: function(msg) {
-        let splitMsg = msg.split('H');
-        let n = Number(splitMsg[0]), r = Number(splitMsg[1]);
-
-        // n, r, n+r-1이 [0, factorialLimit] 범위 안에 있어야 함
-        if(!(0 <= n && n <= factorialLimit) || !(0 <= r && r <= factorialLimit) || !(0 <= n+r-1 && n+r-1 <= factorialLimit))
-            return "0 <= n, r, n+r-1 <= "+factorialLimit+" 을 만족해야 한다냥!";
-
-        return CMD.nCr((n+r-1)+'C'+r);
-    },
-
-    Cn: function(msg) {
-        let n = Number(msg.substring(1));
-
-        // 2n이 [0, factorialLimit] 범위 안에 있어야 함
-        if(!(0 <= n*2 && n*2 <= factorialLimit))
-            return "0 <= 2n <= "+factorialLimit+" 을 만족해야 한다냥!";
-
-        let res = CMD.nCr(n*2+'C'+n).replace(" 이다냥!", "");
-        return Number(res)/(n+1)+" 이다냥!";
-    },
-
-    sin: function(msg) {
-        const A = ston(msg.substring(3));
-        return Math.sin(A)+" 이다냥!";
-    },
-
-    cos: function(msg) {
-        const A = ston(msg.substring(3));
-        return Math.cos(A)+" 이다냥!";
-    },
-
-    tan: function(msg) {
-        const A = ston(msg.substring(3));
-        return Math.tan(A)+" 이다냥!";
-    },
-
-    asin: function(msg) {
-        const A = ston(msg.substring(4));
-        return Math.asin(A)+" 이다냥!";
-    },
-
-    acos: function(msg) {
-        const A = ston(msg.substring(4));
-        return Math.acos(A)+" 이다냥!";
-    },
-
-    atan: function(msg) {
-        const A = ston(msg.substring(4));
-        return Math.atan(A)+" 이다냥!";
-    },
-
-    log: function(msg) {
-        const A = ston(msg.substring(3));
-        return Math.log10(A)+" 이다냥!";
-    },
-
-    ln: function(msg) {
-        const A = ston(msg.substring(2));
-        return Math.log(A)+" 이다냥!";
-    },
-
-    sqrt: function(msg) {
-        const A = ston(msg.substring(4));
-        return Math.sqrt(A)+" 이다냥!";
-    },
-
-    abs: function(msg) {
-        const A = ston(msg.substring(3));
-        return Math.abs(A)+" 이다냥!";
-    },
-
     PI: function() {
         return PI_1000+" 이다냥!";
-    },
-
-    E: function() {
-        return Math.E+" 이다냥!";
     }
 };
 
@@ -792,130 +654,6 @@ function In(s, l) {
 function choose(list) {
     const r = Math.floor(Math.random()*list.length);
     return list[r];
-}
-
-/**
- * 문자열 s1이 표현식 s2와 같은 구조인지 확인하는 함수
- * 
- * < 표현식 문법 >
- * {int}: 정수
- * {number}: 실수
- * 
- * < 주의! >
- * 여는 중괄호를 해줬으면 닫는 중괄호도 해줘야 오류 안 남
- */
-function isCondExp(s1, s2) {
-    let l1 = [], l2 = [];
-
-    // s1 파싱
-    for(let i=0; i<s1.length; i++) {
-        let s = "";
-
-        if(Number.isInteger(Number(s1[i]))) {
-            let inDot = false;
-
-            // Number로 형 변환 했을 때 정수 또는 실수가 되는 [i, j) 부분문자열 추출
-            let j = i;
-            for(; (j<s1.length && (Number.isInteger(Number(s1[j])) || (s1[j] == '.' && !inDot && j+1<s1.length && Number.isInteger(Number(s1[j+1]))))); j++) {
-                s += s1[j];
-
-                if(s1[j] == '.')
-                    inDot = true;
-            }
-
-            i = j-1;
-        } else if(s1.substring(i, i+2).toUpperCase() == 'PI') {
-            // PI 추출
-            s = String(Math.PI);
-            i++;
-        } else if(s1[i].toUpperCase() == 'E') {
-            // E 추출
-            s = String(Math.E);
-        } else {
-            // 그 외 [i, j) 부분문자열 추출
-            let j = i;
-            for(; (j<s1.length && !Number.isInteger(Number(s1[j])) && s1.substring(j, j+2).toUpperCase()!='PI' && s1[j].toUpperCase()!='E'); j++)
-                s += s1[j];
-
-            i = j-1;
-        }
-
-        // 음수 처리
-        if(Number.isFinite(Number(s)) && l1.length >= 1) {
-            let last = l1[l1.length-1];
-
-            if(last[last.length-1] == '-') {
-                l1[l1.length-1] = last.substring(0, last.length-1);
-
-                if(l1[l1.length-1] == '')
-                    l1.pop();
-
-                s = '-'+s;
-            }
-        }
-
-        l1.push(s);
-    }
-
-    // s2 파싱
-    for(let i=0; i<s2.length; i++) {
-        let s = "";
-
-        if(s2[i] == '{') {
-            let j = i;
-            for(; s2[j]!='}'; j++)
-                s += s2[j];
-
-            s += '}';
-            i = j;
-        } else {
-            let j = i;
-            for(; (j<s2.length && s2[j]!='{'); j++)
-                s += s2[j];
-
-            i = j-1;
-        }
-
-        l2.push(s);
-    }
-
-    // s1이 s2와 같은 구조인지 확인해서 참 or 거짓 반환
-
-    if(l1.length != l2.length)
-        return false;
-
-    for(let i=0; i<l1.length; i++) {
-        if(l2[i] == "{int}") {
-            if(!Number.isInteger(Number(l1[i])))
-                return false;
-        } else if(l2[i] == "{number}") {
-            if(!Number.isFinite(Number(l1[i])))
-                return false;
-        } else {
-            if(l1[i] != l2[i])
-                return false;
-        }
-    }
-
-    return true;
-}
-
-/**
- * 문자열을 수로 변환하는 함수
- * PI, E는 해당 상수로 자동 변환
- */
-function ston(s) {
-    s = s.toUpperCase();
-
-    // PI 변환
-    if(s.substring(s.length-2) == 'PI')
-        s = s.substring(0, s.length-2)+Math.PI;
-
-    // E 변환
-    if(s[s.length-1] == 'E')
-        s = s.substring(0, s.length-1)+Math.E;
-
-    return Number(s);
 }
 
 function init_nCr() {
@@ -947,11 +685,6 @@ function loadTotalPeriod() {
     b.setDate(now.getDate()-d+6);
 
     return [[a.getFullYear(), a.getMonth()+1, a.getDate()], [b.getFullYear(), b.getMonth()+1, b.getDate()]];
-}
-
-function factorial(n) {
-    if(n <= 1) return 1;
-    return n*factorial(n-1);
 }
 
 nyanLang = DB.loadDB(DB.makeDBPath("NyanFiles/냥냥어"));
@@ -1076,62 +809,8 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
                 for(let i of CMD.makeEmoji(query))
                     replier.reply(i); // 글자 이모지 만들기
         }
-        else if(isCondExp(msg, "{int}!")) {
-            replier.reply(CMD.factorial(msg)); // n! 보여주기
-        }
-        else if(isCondExp(msg, "{int}P{int}")) {
-            replier.reply(CMD.nPr(msg)); // nPr 보여주기
-        }
-        else if(isCondExp(msg, "{int}C{int}")) {
-            replier.reply(CMD.nCr(msg)); // nCr 보여주기
-        }
-        else if(isCondExp(msg, "{int}π{int}")) {
-            replier.reply(CMD.nπr(msg)); // nπr 보여주기
-        }
-        else if(isCondExp(msg, "{int}^{int}")) {
-            replier.reply(CMD.pow(msg)); // n^r 보여주기
-        }
-        else if(isCondExp(msg, "{int}H{int}")) {
-            replier.reply(CMD.nHr(msg)); // nHr 보여주기
-        }
-        else if(isCondExp(msg, "C{int}")) {
-            replier.reply(CMD.Cn(msg)); // Cn 보여주기
-        }
-        else if(isCondExp(msg, "sin{number}")) {
-            replier.reply(CMD.sin(msg)); // sinA 보여주기
-        }
-        else if(isCondExp(msg, "cos{number}")) {
-            replier.reply(CMD.cos(msg)); // cosA 보여주기
-        }
-        else if(isCondExp(msg, "tan{number}")) {
-            replier.reply(CMD.tan(msg)); // tanA 보여주기
-        }
-        else if(isCondExp(msg, "asin{number}")) {
-            replier.reply(CMD.asin(msg)); // asinA 보여주기
-        }
-        else if(isCondExp(msg, "acos{number}")) {
-            replier.reply(CMD.acos(msg)); // acosA 보여주기
-        }
-        else if(isCondExp(msg, "atan{number}")) {
-            replier.reply(CMD.atan(msg)); // atanA 보여주기
-        }
-        else if(isCondExp(msg, "log{number}")) {
-            replier.reply(CMD.log(msg)); // logA 보여주기
-        }
-        else if(isCondExp(msg, "ln{number}")) {
-            replier.reply(CMD.ln(msg)); // lnA 보여주기
-        }
-        else if(isCondExp(msg, "sqrt{number}")) {
-            replier.reply(CMD.sqrt(msg)); // sqrtA 보여주기
-        }
-        else if(isCondExp(msg, "abs{number}")) {
-            replier.reply(CMD.abs(msg)); // absA 보여주기
-        }
         else if(msg.toUpperCase() == 'PI') {
             replier.reply(CMD.PI()); // PI 보여주기
-        }
-        else if(msg.toUpperCase() == 'E') {
-            replier.reply(CMD.E()); // E 보여주기
         }
         else {
             let data = learnList.get(room);

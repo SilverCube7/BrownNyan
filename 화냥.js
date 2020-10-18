@@ -316,6 +316,13 @@ const User = {
             return undefined;
 
         return top[0];
+    },
+
+    clearEatPocket: function(room, sender) {
+        let data = User.loadUserInfo(room, sender, eatPocket, "꿀꺽주머니");
+        while(data.pop());
+
+        DB.saveDB(DB.makeDBPath(room+"/유저/"+sender+"/꿀꺽주머니"), data);
     }
 };
 
@@ -602,6 +609,12 @@ const CMD = {
         return show;
     },
 
+    digest: function(room, sender) {
+        User.clearEatPocket(room, sender);
+
+        return "소화제를 사용해서 강제로 소화했다냥!";
+    },
+
     makeEmoji: function(query) {
         let A = query[1];
 
@@ -764,6 +777,9 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         }
         else if(msg == "꿀꺽주머니") {
             replier.reply(CMD.showEatPocket(room, sender)); // 꿀꺽주머니 보여주기
+        }
+        else if(msg == "소화") {
+            replier.reply(CMD.digest(room, sender)); // 소화하기
         }
         else if(query[0] == "이모지") {
             if(query.length >= 2)

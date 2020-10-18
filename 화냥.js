@@ -43,8 +43,10 @@ const NYAN_FILES = "NyanFiles";
 const SPACE_TOKEN = "{space}";
 const ENTER_TOKEN = "{enter}";
 const LEARNING = "냥습";
+const FORBIDDEN_WORD = "냥습금지어";
 const DEL = "삭제";
 const TALK = "말";
+const MSG = "메시지";
 const PHONE = "화냥폰";
 const VERSION = "버전";
 const BATTERY = "배터리";
@@ -660,8 +662,8 @@ function parseLearnDataValue(room, sender, value) {
     return value;
 }
 
-nyanLang = DB.loadDB(DB.makeDBPath(NYAN_FILES+"/냥냥어"));
-forbiddenWords = DB.loadDBAndSplit(DB.makeDBPath(NYAN_FILES+"/냥습금지어"))[0];
+nyanLang = DB.loadDB(DB.makeDBPath(NYAN_FILES+"/"+NYAN_LANG));
+forbiddenWords = DB.loadDBAndSplit(DB.makeDBPath(NYAN_FILES+"/"+FORBIDDEN_WORD))[0];
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
     /**
@@ -674,14 +676,14 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             learnList.set(room, DB.loadDBAndSplit(DB.makeDBPath(room+"/"+LEARNING)));
 
         if(!msgList.has(room))
-            msgList.set(room, DB.loadDBAndSplit(DB.makeDBPath(room+"/메시지")));
+            msgList.set(room, DB.loadDBAndSplit(DB.makeDBPath(room+"/"+MSG)));
 
         msgList.get(room).push([msg, sender]);
 
         while(msgList.get(room).length > msgListLimit+1)
             msgList.get(room).shift();
 
-        DB.saveDB(DB.makeDBPath(room+"/메시지"), msgList.get(room));
+        DB.saveDB(DB.makeDBPath(room+"/"+MSG), msgList.get(room));
 
         // L의 메시지에 반응하지 않음 (특정 메시지는 제외)
         if(In(sender, LNames)) {
@@ -690,9 +692,9 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             // L이 똑같은 메시지를 계속 보내서 무한정 반응해버리는 현상 방지
             if(!(data.length-2 >= 0 && In(data[data.length-2][1], LNames))) {
                 // L이 특정 메시지를 보내면 반응
-                if(msg == "화냥봇님, 죽어주세요 !")
+                if(msg == NYAN_BOT+"님, 죽어주세요 !")
                     replier.reply("꾸에에엑");
-                else if(msg.indexOf("화냥봇님") != -1)
+                else if(msg.indexOf(NYAN_BOT+"님") != -1)
                     replier.reply("냥!?");
             }
 
@@ -757,7 +759,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             Rank.updateRank(room, sender, LRankList, L);
         }
         else if(msg == YOUR_NAME) {
-            replier.reply("화냥봇이다냥! "+master+"님이 만들었다냥!"); // 화냥봇의 이름 말하기
+            replier.reply(NYAN_BOT+"이다냥! "+master+"님이 만들었다냥!"); // 화냥봇의 이름 말하기
         }
         else if(msg == MY_NAME) {
             replier.reply(sender+"님이다냥!"); // 메시지 보낸 사람의 이름 말하기

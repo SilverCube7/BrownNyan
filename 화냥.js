@@ -217,52 +217,52 @@ const Rank = {
 
     showMsgRank: function(room) {
         Rank.loadRank(room, msgRankList, "말");
-        return Rank.showRank("수다쟁이 순위", msgRankList.get(room));
+        return Rank.showRank("순위: 수다쟁이", msgRankList.get(room));
     },
 
     showImgRank: function(room) {
         Rank.loadRank(room, imgRankList, "사진");
-        return Rank.showRank("사진가 순위", imgRankList.get(room));
+        return Rank.showRank("순위: 사진을 많이 보낸 사람", imgRankList.get(room));
     },
 
     showEmoticonRank: function(room) {
         Rank.loadRank(room, emoticonRankList, "임티");
-        return Rank.showRank("임티뿅 순위", emoticonRankList.get(room));
+        return Rank.showRank("순위: 임티를 많이 보낸 사람", emoticonRankList.get(room));
     },
 
     showNyanBotRank: function(room) {
         Rank.loadRank(room, nyanBotRankList, "화냥봇");
-        return Rank.showRank("외쳐 화냥봇 순위", nyanBotRankList.get(room));
+        return Rank.showRank("순위: 화냥봇을 많이 부른 사람", nyanBotRankList.get(room));
     },
 
     showLRank: function(room) {
         Rank.loadRank(room, LRankList, "L");
-        return Rank.showRank("외쳐 L 순위", LRankList.get(room));
+        return Rank.showRank("순위: L을 많이 부른 사람", LRankList.get(room));
     },
 
     showEatRank: function(room) {
         Rank.loadRank(room, eatRankList, "꿀꺽");
-        return Rank.showRank("먹보 순위", eatRankList.get(room));
+        return Rank.showRank("순위: 먹보", eatRankList.get(room));
     },
 
     showVomitRank: function(room) {
         Rank.loadRank(room, vomitRankList, "퉤엣");
-        return Rank.showRank("퉤엣 순위", vomitRankList.get(room));
+        return Rank.showRank("순위: 퉤엣을 많이 한 사람", vomitRankList.get(room));
     },
 
     showRunRank: function(room) {
         Rank.loadRank(room, runRankList, "도망");
-        return Rank.showRank("도망자 순위", runRankList.get(room));
+        return Rank.showRank("순위: 도망자", runRankList.get(room));
     },
 
     showEatDmgRank: function(room) {
         Rank.loadRank(room, eatDmgRankList, "꿀꺽당햇");
-        return Rank.showRank("꿀꺽 희생자 순위", eatDmgRankList.get(room));
+        return Rank.showRank("순위: 꿀꺽당한 희생자", eatDmgRankList.get(room));
     },
 
     showVomitDmgRank: function(room) {
         Rank.loadRank(room, vomitDmgRankList, "퉤엣당햇");
-        return Rank.showRank("퉤엣 희생자 순위", vomitDmgRankList.get(room));
+        return Rank.showRank("순위: 퉤엣당한 희생자", vomitDmgRankList.get(room));
     },
 
     updateEatBattleRank: function(room, rankList, name) {

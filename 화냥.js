@@ -39,7 +39,7 @@ const eatBattleRankList = new Map();
 
 const eatPocket = new Map();
 
-const LNames = ["L", "l", "엘", "死神", "사신"];
+const LNames = ["L", "l", "ㅣ", "엘", "死神", "사신"];
 
 const day = ['일', '월', '화', '수', '목', '금', '토'];
 

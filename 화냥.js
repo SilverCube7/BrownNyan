@@ -42,6 +42,8 @@ const eatPocket = new Map();
 const NYAN_FILES = "NyanFiles";
 const SPACE_TOKEN = "{space}";
 const ENTER_TOKEN = "{enter}";
+const ME_TOKEN = "[m]";
+const YOU_TOKEN = "[y]";
 const LEARNING = "냥습";
 const FORBIDDEN_WORD = "냥습금지어";
 const DEL = "삭제";
@@ -643,6 +645,18 @@ function choose(list) {
     return list[r];
 }
 
+function strip(s) {
+    let l = 0, r = s.length-1;
+
+    while(l < s.length && In(s[l], spaces)) l++;
+    while(r >= 0 && In(s[r], spaces)) r--;
+
+    let new_s = "";
+    for(let i=l; i<=r; i++) new_s += s[i];
+
+    return new_s;
+}
+
 function findTarget(room) {
     let data = msgList.get(room);
 
@@ -655,11 +669,33 @@ function findTarget(room) {
 
 function parseLearnDataValue(room, sender, value) {
     target = findTarget(room);
+    if(!target) target = sender;
 
-    value = value.replace("[m]", sender)
-                 .replace("[y]", target ? target : sender);
+    while(value.indexOf(ME_TOKEN) != -1) value = value.replace(ME_TOKEN, sender);
+    while(value.indexOf(YOU_TOKEN) != -1) value = value.replace(YOU_TOKEN, target);
 
-    return value;
+    let new_value = "";
+
+    // % a1, a2, ... % 파싱
+    for(let i=0; i<value.length; i++) {
+        if(value[i] == '%') {
+            let token = "", j = i+1;
+
+            for(; (j<value.length && value[j]!='%'); j++)
+                token += value[j];
+
+            if(j < value.length) {
+                let choose_one = strip(choose(token.split(",")));
+                new_value += choose_one;
+                i = j;
+                continue;
+            }
+        }
+
+        new_value += value[i];
+    }
+
+    return new_value;
 }
 
 nyanLang = DB.loadDB(DB.makeDBPath(NYAN_FILES+"/"+NYAN_LANG));

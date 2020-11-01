@@ -1,98 +1,30 @@
-const scriptName = "화냥";
-
-/**
- * (string) room
- * (string) sender
- * (boolean) isGroupChat
- * (void) replier.reply(message)
- * (boolean) replier.reply(room, message, hideErrorToast = false) // 전송 성공시 true, 실패시 false 반환
- * (string) imageDB.getProfileBase64()
- * (string) packageName
- */
-
 /**
  * 봇주인: 화이트냥
  * 봇: 화냥봇
  */
 
-const master = "화이트냥";
-let nyanLang = "";
-let forbiddenWords = [];
-const learnList = new Map();
-const msgList = new Map();
-const msgListLimit = 500;
-const eatFailPercent = 3; // 꿀꺽 실패 확률이 1/eatFailPercent
-const eatPocketLimit = 100;
-const emojiLenLimit = 5;
+const scriptName = "화냥";
 
-const msgRankList = new Map();
-const imgRankList = new Map();
-const emoticonRankList = new Map();
-const nyanBotRankList = new Map();
-const LRankList = new Map();
-const eatRankList = new Map();
-const vomitRankList = new Map();
-const runRankList = new Map();
-const eatDmgRankList = new Map();
-const vomitDmgRankList = new Map();
-const eatBattleRankList = new Map();
+let nyan_lang = "";
+let forbidden_words = [];
 
-const eatPocket = new Map();
+const learn_map = new Map();
+const msg_map = new Map();
+const nyan_bot_msg_map = new Map();
 
-const NYAN_FILES = "NyanFiles";
-const SPACE_TOKEN = "{space}";
-const ENTER_TOKEN = "{enter}";
-const ME_TOKEN = "[m]";
-const YOU_TOKEN = "[y]";
-const LEARNING = "냥습";
-const FORBIDDEN_WORD = "냥습금지어";
-const DEL = "삭제";
-const TALK = "말";
-const MSG = "메시지";
-const PHONE = "화냥폰";
-const VERSION = "버전";
-const BATTERY = "배터리";
-const VOLTAGE = "전압";
-const TEMPERATURE = "온도";
-const IS_CHARGING = "충전중?";
-const RANK = "순위";
-const RSP = ["가바보", "가위바위보"];
-const SCISSOR = "가위";
-const ROCK = "바위";
-const PAPER = "보";
-const NYAN_LANG = "냥냥어";
-const LEARNING_LIST = "냥습목록";
-const TODAY = "오늘은";
-const TODAY_DAY = "요일은";
-const HELLO_LIST = ["안녕", "안녕하세요"];
-const NYAN_BOT = "화냥봇";
-const YOUR_NAME = "너의 이름은";
-const MY_NAME = "내 이름은";
-const EAT = "꿀꺽";
-const VOMIT = "퉤엣";
-const VOMIT_LIST = [VOMIT, "퉷"];
-const ESCAPE = "도망";
-const EATEN = "꿀꺽당햇";
-const VOMITED = "퉤엣당햇";
-const VOMITED_LIST = [VOMITED, "퉷당햇"];
-const EAT_VS = "꿀꺽대결";
-const EAT_POCKET = "꿀꺽주머니";
-const DIGESTION = "소화";
-const EMOJI = "이모지";
-const PI = "PI";
-const PICTURE = "사진";
-const EMOTICON = "임티";
-const L = "L";
-const USER = "유저";
+const msg_map_limit = 500;
+const nyan_bot_msg_map_limit = 100;
+const eat_fail_percent = 3; // 꿀꺽 실패 확률이 1/eat_fail_percent
+const eat_pocket_limit = 100;
+const emoji_len_limit = 5;
 
-const LNames = [L, "l", "ㅣ", "엘", "死神", "사신"];
 const day = ['일', '월', '화', '수', '목', '금', '토'];
-const resRSP = [
+const rsp_res = [
     ['tie', 'bot', 'me'],
     ['me', 'tie', 'bot'],
     ['bot', 'me', 'tie']
 ]
-const forbiddenSigns = [
+const forbidden_signs = [
     '{',
     '}',
     String.fromCharCode(8238) // 뒤집기 문자
@@ -126,238 +58,12 @@ const spaces = [
     String.fromCharCode(12288)
 ];
 
-const DB = {
-    makeDBPath: function(p) {
-        return "./"+p+".txt";
-    },
+const keyword = require("modules/NyanModules/keyword.js");
+const db = require("modules/NyanModules/db.js");
+const rank = require("modules/NyanModules/rank.js");
+const user = require("modules/NyanModules/user.js");
 
-    loadDB: function(path) {
-        let txt = DataBase.getDataBase(path);
-
-        if(!txt)
-            txt = "";
-
-        return txt;
-    },
-
-    /**
-     * < DB 토큰 >
-     * ENTER_TOKEN = '\n'
-     * SPACE_TOKEN = ' '
-     */
-    loadDBAndSplit: function(path) {
-        let list = DB.loadDB(path);
-
-        if(!list)
-            return [];
-
-        list = list.split(ENTER_TOKEN);
-
-        for(let i=0; i<list.length; i++)
-            list[i] = list[i].split(SPACE_TOKEN);
-
-        return list;
-    },
-
-    saveDB: function(path, list) {
-        let txt = "";
-
-        for(let i=0; i<list.length; i++) {
-            for(let j=0; j<list[i].length; j++) {
-                txt += list[i][j];
-    
-                if(j != list[i].length-1)
-                    txt += SPACE_TOKEN;
-            }
-
-            if(i != list.length-1)
-                txt += ENTER_TOKEN;
-        }
-
-        DataBase.setDataBase(path, txt);
-    }
-};
-
-const PI_1000 = DataBase.getDataBase(DB.makeDBPath(NYAN_FILES+"/"+PI));
-
-const Rank = {
-    loadRank: function(room, rankList, name) {
-        if(!rankList.has(room))
-            rankList.set(room, DB.loadDBAndSplit(DB.makeDBPath(room+"/"+RANK+"/"+name)));
-
-        return rankList.get(room);
-    },
-
-    updateRank: function(room, who, rankList, name, cnt) {
-        if(!cnt)
-            cnt = 1;
-
-        let data = Rank.loadRank(room, rankList, name);
-
-        for(let i=0; i<data.length; i++)
-            data[i][1] = Number(data[i][1]);
-
-        let inName = false;
-
-        // who를 찾아서 순위 갱신
-        for(let i=0; i<data.length; i++) {
-            if(data[i][0] == who) {
-                data[i][1] += cnt;
-                inName = true;
-                break;
-            }
-        }
-
-        if(!inName)
-            data.push([who, cnt]);
-
-        data.sort((a, b) => b[1]-a[1]);
-
-        for(let i=0; i<data.length; i++)
-            data[i][1] = String(data[i][1]);
-
-        DB.saveDB(DB.makeDBPath(room+"/"+RANK+"/"+name), data);
-    },
-
-    showRank: function(title, data) {
-        let show = "< "+title+" >\n\n";
-
-        for(let i=0; i<data.length; i++)
-            show += "("+String(i+1)+") "+String(data[i][0])+": "+String(data[i][1])+'\n';
-
-        return show;
-    },
-
-    showMsgRank: function(room) {
-        Rank.loadRank(room, msgRankList, TALK);
-        return Rank.showRank(RANK+": 수다쟁이", msgRankList.get(room));
-    },
-
-    showImgRank: function(room) {
-        Rank.loadRank(room, imgRankList, PICTURE);
-        return Rank.showRank(RANK+": 사진을 많이 보낸 사람", imgRankList.get(room));
-    },
-
-    showEmoticonRank: function(room) {
-        Rank.loadRank(room, emoticonRankList, EMOTICON);
-        return Rank.showRank(RANK+": 임티를 많이 보낸 사람", emoticonRankList.get(room));
-    },
-
-    showNyanBotRank: function(room) {
-        Rank.loadRank(room, nyanBotRankList, NYAN_BOT);
-        return Rank.showRank(RANK+": 화냥봇을 많이 부른 사람", nyanBotRankList.get(room));
-    },
-
-    showLRank: function(room) {
-        Rank.loadRank(room, LRankList, L);
-        return Rank.showRank(RANK+": L을 많이 부른 사람", LRankList.get(room));
-    },
-
-    showEatRank: function(room) {
-        Rank.loadRank(room, eatRankList, EAT);
-        return Rank.showRank(RANK+": 먹보", eatRankList.get(room));
-    },
-
-    showVomitRank: function(room) {
-        Rank.loadRank(room, vomitRankList, VOMIT);
-        return Rank.showRank(RANK+": 퉤엣을 많이 한 사람", vomitRankList.get(room));
-    },
-
-    showRunRank: function(room) {
-        Rank.loadRank(room, runRankList, ESCAPE);
-        return Rank.showRank(RANK+": 도망자", runRankList.get(room));
-    },
-
-    showEatDmgRank: function(room) {
-        Rank.loadRank(room, eatDmgRankList, EATEN);
-        return Rank.showRank(RANK+": 꿀꺽당한 희생자", eatDmgRankList.get(room));
-    },
-
-    showVomitDmgRank: function(room) {
-        Rank.loadRank(room, vomitDmgRankList, VOMITED);
-        return Rank.showRank(RANK+": 퉤엣당한 희생자", vomitDmgRankList.get(room));
-    },
-
-    updateEatBattleRank: function(room, rankList, name) {
-        let data = Rank.loadRank(room, rankList, name);
-        while(data.length > 0) data.pop();
-
-        let eatData = Rank.loadRank(room, eatRankList, EAT);
-        let eatDmgData = Rank.loadRank(room, eatDmgRankList, EATEN);
-
-        for(let i of eatData)
-            data.push([i[0], Number(i[1])]);
-
-        for(let i of eatDmgData) {
-            let inName = false;
-
-            for(let j=0; j<data.length; j++) {
-                if(data[j][0] == i[0]) {
-                    data[j][1] -= Number(i[1]);
-                    inName = true;
-                    break;
-                }
-            }
-
-            if(!inName)
-                data.push([i[0], -Number(i[1])]);
-        }
-
-        data.sort((a, b) => b[1]-a[1]);
-
-        for(let i=0; i<data.length; i++)
-            data[i][1] = String(data[i][1]);
-
-        DB.saveDB(DB.makeDBPath(room+"/"+RANK+"/"+name), data);
-    },
-
-    showEatBattleRank: function(room) {
-        Rank.updateEatBattleRank(room, eatBattleRankList, EAT_VS);
-        return Rank.showRank(RANK+": 꿀꺽 대결 (먹은 수 - 먹힌 수)", eatBattleRankList.get(room));
-    }
-};
-
-const User = {
-    loadUserInfo: function(room, who, userInfoList, name) {
-        if(!userInfoList.has(room))
-            userInfoList.set(room, new Map());
-
-        if(!userInfoList.get(room).has(who))
-            userInfoList.get(room).set(who, DB.loadDBAndSplit(DB.makeDBPath(room+"/"+USER+"/"+who+"/"+name)));
-
-        return userInfoList.get(room).get(who);
-    },
-
-    pushEatPocket: function(room, sender, target) {
-        let data = User.loadUserInfo(room, sender, eatPocket, EAT_POCKET);
-
-        data.push([target]);
-
-        while(data.length > eatPocketLimit+1)
-            data.shift();
-
-        DB.saveDB(DB.makeDBPath(room+"/"+USER+"/"+sender+"/"+EAT_POCKET), data);
-    },
-
-    popEatPocket: function(room, sender) {
-        let data = User.loadUserInfo(room, sender, eatPocket, EAT_POCKET);
-
-        let top = data.pop();
-        DB.saveDB(DB.makeDBPath(room+"/"+USER+"/"+sender+"/"+EAT_POCKET), data);
-
-        if(!top)
-            return undefined;
-
-        return top[0];
-    },
-
-    clearEatPocket: function(room, sender) {
-        let data = User.loadUserInfo(room, sender, eatPocket, EAT_POCKET);
-        while(data.pop());
-
-        DB.saveDB(DB.makeDBPath(room+"/"+USER+"/"+sender+"/"+EAT_POCKET), data);
-    }
-};
+const PI_1000 = db.load_txt(db.make_full_path(keyword.NYAN_FILES+"/"+keyword.PI));
 
 const CMD = {
     learn: function(room, query, sender) {
@@ -368,7 +74,7 @@ const CMD = {
         B = B.substring(0, B.length-1);
 
         // A가 금지어인지 확인
-        for(let i of forbiddenWords) {
+        for(let i of forbidden_words) {
             if(A.toUpperCase() == i.toUpperCase()) {
                 forbad = true;
                 break;
@@ -376,7 +82,7 @@ const CMD = {
         }
 
         // A 안에 금지기호가 있는지 확인
-        for(let i of forbiddenSigns) {
+        for(let i of forbidden_signs) {
             if(A.indexOf(i) != -1 || B.indexOf(i) != -1) {
                 forbad = true;
                 break;
@@ -402,11 +108,11 @@ const CMD = {
         if(forbad)
             return "냥습할 수 없다냥!";
 
-        let data = learnList.get(room);
+        let data = learn_map.get(room);
         let learned = false;
 
         for(let i=0; i<data.length; i++) {
-            // 학습한게 있으면 learnList[room] 안에 있는 학습데이터 덮어쓰기
+            // 학습한게 있으면 learn_map[room] 안에 있는 학습데이터 덮어쓰기
             if(A == data[i][0]) {
                 data[i][1] = B;
                 data[i][2] = sender;
@@ -418,12 +124,12 @@ const CMD = {
         if(!learned)
             data.push([A, B, sender]);
 
-        DB.saveDB(DB.makeDBPath(room+"/"+LEARNING), data);
+        db.save_list(db.make_full_path(room+"/"+keyword.LEARNING), data);
         return "냥!";
     },
 
     confirmLearn: function(room, query) {
-        let data = learnList.get(room);
+        let data = learn_map.get(room);
         let A = query[1];
 
         for(let i=0; i<data.length; i++) {
@@ -436,14 +142,14 @@ const CMD = {
     },
 
     del: function(room, query) {
-        let data = learnList.get(room);
+        let data = learn_map.get(room);
         let A = query[1];
 
         for(let i=0; i<data.length; i++) {
             // 학습한게 있으면 삭제
             if(A == data[i][0]) {
                 data.splice(i, 1);
-                DB.saveDB(DB.makeDBPath(room+"/"+LEARNING), data);
+                db.save_list(db.make_full_path(room+"/"+keyword.LEARNING), data);
                 return "냥!";
             }
         }
@@ -453,7 +159,7 @@ const CMD = {
 
     showPrevMsg: function(room, query) {
         let A = Number(query[1]);
-        let data = msgList.get(room);
+        let data = msg_map.get(room);
 
         if(!Number.isInteger(A))
             return "정수가 아니다냥!";
@@ -468,21 +174,21 @@ const CMD = {
     showPhoneInfo: function(query) {
         let A = query[1];
 
-        if(A == VERSION)
+        if(A == keyword.VERSION)
             return "ver"+Device.getAndroidVersionName()+" 이다냥!";
 
-        if(A == BATTERY) {
+        if(A == keyword.BATTERY) {
             if(Device.getBatteryLevel() == 100) return "풀 차지 상태다냥!!";
             return Device.getBatteryLevel()+"% 남았다냥!";
         }
 
-        if(A == VOLTAGE)
+        if(A == keyword.VOLTAGE)
             return Device.getBatteryVoltage()+"mV 이다냥!";
 
-        if(A == TEMPERATURE)
+        if(A == keyword.TEMPERATURE)
             return Device.getBatteryTemperature()/10+"℃ 이다냥!";
 
-        if(A == IS_CHARGING) {
+        if(A == keyword.IS_CHARGING) {
             if(Device.isCharging()) return "충전 중이다냥!";
             return "충전 중이 아니다냥!";
         }
@@ -493,24 +199,23 @@ const CMD = {
     showRank: function(room, query) {
         let A = query[1];
 
-        if(A == TALK) return Rank.showMsgRank(room);
-        if(A == PICTURE) return Rank.showImgRank(room);
-        if(A == EMOTICON) return Rank.showEmoticonRank(room);
-        if(A == NYAN_BOT) return Rank.showNyanBotRank(room);
-        if(A == L) return Rank.showLRank(room);
-        if(A == EAT) return Rank.showEatRank(room);
-        if(In(A, VOMIT_LIST)) return Rank.showVomitRank(room);
-        if(A == ESCAPE) return Rank.showRunRank(room);
-        if(A == EATEN) return Rank.showEatDmgRank(room);
-        if(In(A, VOMITED_LIST)) return Rank.showVomitDmgRank(room);
-        if(A == EAT_VS) return Rank.showEatBattleRank(room);
+        if(A == keyword.TALK) return rank.show_talk_rank(room);
+        if(A == keyword.PICTURE) return rank.show_picture_rank(room);
+        if(A == keyword.EMOTICON) return rank.show_emoticon_rank(room);
+        if(A == keyword.NYAN_BOT) return rank.show_nyan_bot_rank(room);
+        if(A == keyword.EAT) return rank.show_eat_rank(room);
+        if(In(A, keyword.VOMIT_LIST)) return rank.show_vomit_rank(room);
+        if(A == keyword.ESCAPE) return rank.show_escape_rank(room);
+        if(A == keyword.EATEN) return rank.show_eaten_rank(room);
+        if(In(A, keyword.VOMITED_LIST)) return rank.show_vomited_rank(room);
+        if(A == keyword.EAT_VS) return rank.show_eat_vs_rank(room);
 
         return "그런 순위는 없다냥!";
     },
 
     showLearnList: function(room) {
-        let data = learnList.get(room);
-        let show = "< "+LEARNING_LIST+" >\n\n";
+        let data = learn_map.get(room);
+        let show = "< "+keyword.LEARNING_LIST+" >\n\n";
 
         for(let i=0; i<data.length; i++)
             show += "("+String(i+1)+") "+String(data[i][0])+"/"+String(data[i][2])+'\n';
@@ -539,17 +244,17 @@ const CMD = {
     playRSP: function(query) {
         let me = query[1];
 
-        if(me == SCISSOR) me = 1;
-        else if(me == ROCK) me = 0;
-        else if(me == PAPER) me = 2;
+        if(me == keyword.SCISSOR) me = 1;
+        else if(me == keyword.ROCK) me = 0;
+        else if(me == keyword.PAPER) me = 2;
         else return "무엇을 낸 거냥?";
 
         let bot = Math.floor(Math.random()*3);
-        const res = resRSP[bot][me];
+        const res = rsp_res[bot][me];
 
-        if(bot == 0) bot = ROCK;
-        else if(bot == 1) bot = SCISSOR;
-        else bot = PAPER;
+        if(bot == 0) bot = keyword.ROCK;
+        else if(bot == 1) bot = keyword.SCISSOR;
+        else bot = keyword.PAPER;
 
         if(res == 'tie') return bot+"! "+choose(["무승부다냥!", "비겼다냥!"]);
         if(res == 'bot') return bot+"! 내가 이겼다냥!";
@@ -557,8 +262,8 @@ const CMD = {
     },
 
     eat: function(room, sender) {
-        let data = msgList.get(room);
-        let target = findTarget(room);
+        let data = msg_map.get(room);
+        let target = find_target(room);
 
         if(!target)
             return "꿀꺽할 사람이 없다냥!";
@@ -566,32 +271,32 @@ const CMD = {
         if(target == sender)
             return "자신을 꿀꺽할 수 없다냥!";
 
-        if(Math.floor(Math.random()*eatFailPercent) == 0) {
-            Rank.updateRank(room, target, runRankList, ESCAPE);
+        if(Math.floor(Math.random()*eat_fail_percent) == 0) {
+            rank.update_rank_map(room, target, rank.escape_rank_map, keyword.ESCAPE);
             return target+"님을 꿀꺽하려고 했지만, 도망갔다냥!";
         }
 
-        User.pushEatPocket(room, sender, target);
-        Rank.updateRank(room, sender, eatRankList, EAT);
-        Rank.updateRank(room, target, eatDmgRankList, EATEN);
+        user.push_in_eat_pocket(room, sender, target);
+        rank.update_rank_map(room, sender, rank.eat_rank_map, keyword.EAT);
+        rank.update_rank_map(room, target, rank.eaten_rank_map, keyword.EATEN);
 
         return target+"님을 꿀꺽했다냥!";
     },
 
     vomit: function(room, sender) {
-        let target = User.popEatPocket(room, sender);
+        let target = user.pop_in_eat_pocket(room, sender);
 
         if(!target)
             return "꿀꺽주머니에 아무것도 없다냥!";
 
-        Rank.updateRank(room, sender, vomitRankList, VOMIT);
-        Rank.updateRank(room, target, vomitDmgRankList, VOMITED);
+        rank.update_rank_map(room, sender, rank.vomit_rank_map, keyword.VOMIT);
+        rank.update_rank_map(room, target, rank.vomited_rank_map, keyword.VOMITED);
 
         return target+"님을 뱉었다냥!";
     },
 
     showEatPocket: function(room, sender) {
-        let data = User.loadUserInfo(room, sender, eatPocket, EAT_POCKET);
+        let data = user.load_user_info(room, sender, user.eat_pocket, keyword.EAT_POCKET);
         let show = "< "+sender+"님의 꿀꺽주머니 >\n\n";
 
         for(let i=data.length-1; i>=0; i--)
@@ -601,12 +306,12 @@ const CMD = {
     },
 
     digest: function(room, sender) {
-        let data = User.loadUserInfo(room, sender, eatPocket, EAT_POCKET);
+        let data = user.load_user_info(room, sender, user.eat_pocket, keyword.EAT_POCKET);
 
         if(!data.length)
             return "꿀꺽주머니에 아무것도 없다냥!";
 
-        User.clearEatPocket(room, sender);
+        user.clear_eat_pocket(room, sender);
 
         return "소화제를 사용해서 강제로 소화했다냥!";
     },
@@ -614,8 +319,8 @@ const CMD = {
     makeEmoji: function(query) {
         let A = query[1];
 
-        if(!(1 <= A.length && A.length <= emojiLenLimit))
-            return ["길이는 "+"1~"+emojiLenLimit+" 사이여야 한다냥!"];
+        if(!(1 <= A.length && A.length <= emoji_len_limit))
+            return ["길이는 "+"1~"+emoji_len_limit+" 사이여야 한다냥!"];
 
         let emojiList = [];
         for(let i of A) emojiList.push(i+String.fromCharCode(8205));
@@ -625,11 +330,41 @@ const CMD = {
 
     PI: function() {
         return PI_1000+" 이다냥!";
+    },
+
+    test: function(replier, imageDB) {
+        return sum;
     }
 };
 
-function isRoomPrefix(room, prefix) {
+function send_msg(replier, room, msg) {
+    push_in_nyan_bot_msg_map(room, msg);
+    return replier.reply(room, msg);
+}
+
+function push_in_nyan_bot_msg_map(room, msg) {
+    if(!nyan_bot_msg_map.has(room))
+        nyan_bot_msg_map.set(room, []);
+
+    while(nyan_bot_msg_map.get(room).length > nyan_bot_msg_map_limit)
+        nyan_bot_msg_map.get(room).shift();
+
+    nyan_bot_msg_map.get(room).push(msg);
+}
+
+function is_room_prefix(room, prefix) {
     return room.substring(0, prefix.length) == prefix;
+}
+
+function is_nyan_bot_last_msg(room, msg) {
+    if(nyan_bot_msg_map.has(room)) {
+        let len = nyan_bot_msg_map.get(room).length;
+
+        if(len > 0)
+            return nyan_bot_msg_map.get(room)[len-1] == msg;
+    }
+
+    return false;
 }
 
 function In(s, l) {
@@ -657,22 +392,22 @@ function strip(s) {
     return new_s;
 }
 
-function findTarget(room) {
-    let data = msgList.get(room);
+function find_target(room) {
+    let msg_list = msg_map.get(room);
 
-    for(let i=data.length-2; i>=0; i--)
-        if(!In(data[i][1], LNames))
-            return data[i][1];
+    for(let i=msg_list.length-2; i>=0; i--)
+        if(!In(msg_list[i][1], keyword.L_NAMES))
+            return msg_list[i][1];
 
     return undefined;
 }
 
-function parseLearnDataValue(room, sender, value) {
-    target = findTarget(room);
+function parse_learn_data_value(room, sender, value) {
+    target = find_target(room);
     if(!target) target = sender;
 
-    while(value.indexOf(ME_TOKEN) != -1) value = value.replace(ME_TOKEN, sender);
-    while(value.indexOf(YOU_TOKEN) != -1) value = value.replace(YOU_TOKEN, target);
+    while(value.indexOf(keyword.ME_TOKEN) != -1) value = value.replace(keyword.ME_TOKEN, sender);
+    while(value.indexOf(keyword.YOU_TOKEN) != -1) value = value.replace(keyword.YOU_TOKEN, target);
 
     let new_value = "";
 
@@ -698,8 +433,8 @@ function parseLearnDataValue(room, sender, value) {
     return new_value;
 }
 
-nyanLang = DB.loadDB(DB.makeDBPath(NYAN_FILES+"/"+NYAN_LANG));
-forbiddenWords = DB.loadDBAndSplit(DB.makeDBPath(NYAN_FILES+"/"+FORBIDDEN_WORD))[0];
+nyan_lang = db.load_txt(db.make_full_path(keyword.NYAN_FILES+"/"+keyword.NYAN_LANG));
+forbidden_words = db.load_list(db.make_full_path(keyword.NYAN_FILES+"/"+keyword.FORBIDDEN_WORD))[0];
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
     /**
@@ -707,125 +442,127 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
      *     room이 화이트냥
      *     room의 접두사가 [WN]
      */
-    if(room == master || isRoomPrefix(room, "[WN]")) {
-        if(!learnList.has(room))
-            learnList.set(room, DB.loadDBAndSplit(DB.makeDBPath(room+"/"+LEARNING)));
+    if(room == keyword.MASTER || is_room_prefix(room, "[WN]")) {
+        if(!learn_map.has(room))
+            learn_map.set(room, db.load_list(db.make_full_path(room+"/"+keyword.LEARNING)));
 
-        if(!msgList.has(room))
-            msgList.set(room, DB.loadDBAndSplit(DB.makeDBPath(room+"/"+MSG)));
+        if(!msg_map.has(room))
+            msg_map.set(room, db.load_list(db.make_full_path(room+"/"+keyword.MSG)));
 
-        msgList.get(room).push([msg, sender]);
+        msg_map.get(room).push([msg, sender]);
 
-        while(msgList.get(room).length > msgListLimit+1)
-            msgList.get(room).shift();
+        while(msg_map.get(room).length > msg_map_limit+1)
+            msg_map.get(room).shift();
 
-        DB.saveDB(DB.makeDBPath(room+"/"+MSG), msgList.get(room));
+        db.save_list(db.make_full_path(room+"/"+keyword.MSG), msg_map.get(room));
 
         // L의 메시지에 반응하지 않음 (특정 메시지는 제외)
-        if(In(sender, LNames)) {
-            let data = msgList.get(room);
+        if(In(sender, keyword.L_NAMES)) {
+            let msg_list = msg_map.get(room);
 
             // L이 똑같은 메시지를 계속 보내서 무한정 반응해버리는 현상 방지
-            if(!(data.length-2 >= 0 && In(data[data.length-2][1], LNames))) {
+            if(!(msg_list.length >= 2 && In(msg_list[msg_list.length-2][1], keyword.L_NAMES))) {
                 // L이 특정 메시지를 보내면 반응
-                if(msg == NYAN_BOT+"님, 죽어주세요 !")
-                    replier.reply("꾸에에엑");
-                else if(msg.indexOf(NYAN_BOT+"님") != -1)
-                    replier.reply("냥!?");
+                if((msg == keyword.NYAN_BOT+"님, 죽어주세요 !") ||
+                   (msg == "탕" && is_nyan_bot_last_msg(room, "러시안룰렛"))) { // FIXME: ;;;
+                    send_msg(replier, room, "꾸에에엑");
+                } else if(msg.indexOf(keyword.NYAN_BOT+"님") != -1) {
+                    send_msg(replier, room, "냥!?");
+                }
             }
 
             return;
         }
 
-        if(msg == "사진을 보냈습니다.")
-            Rank.updateRank(room, sender, imgRankList, PICTURE);
-        else if(msg == "이모티콘을 보냈습니다.")
-            Rank.updateRank(room, sender, emoticonRankList, EMOTICON);
+        if(msg == keyword.SEND_PICTURE)
+            rank.update_rank_map(room, sender, rank.picture_rank_map, keyword.PICTURE);
+        else if(msg == keyword.SEND_EMOTICON)
+            rank.update_rank_map(room, sender, rank.emoticon_rank_map, keyword.EMOTICON);
         else
-            Rank.updateRank(room, sender, msgRankList, TALK);
+            rank.update_rank_map(room, sender, rank.talk_rank_map, keyword.TALK);
 
         let query = msg.split('/');
 
-        if(query[0] == LEARNING) {
+        if(query[0] == keyword.LEARNING) {
             if(query.length >= 3)
-                replier.reply(CMD.learn(room, query, sender)); // 학습시키기
+                send_msg(replier, room, CMD.learn(room, query, sender)); // 학습시키기
             else if(query.length == 2)
-                replier.reply(CMD.confirmLearn(room, query)); // 학습했는지 확인
+                send_msg(replier, room, CMD.confirmLearn(room, query)); // 학습했는지 확인
         }
-        else if(query[0] == DEL) {
+        else if(query[0] == keyword.DEL) {
             if(query.length >= 2)
-                replier.reply(CMD.del(room, query)); // 학습한거 삭제
+                send_msg(replier, room, CMD.del(room, query)); // 학습한거 삭제
         }
-        else if(query[0] == TALK) {
+        else if(query[0] == keyword.TALK) {
             if(query.length >= 2)
-                replier.reply(CMD.showPrevMsg(room, query)); // 이전 메시지 보여주기
+                send_msg(replier, room, CMD.showPrevMsg(room, query)); // 이전 메시지 보여주기
         }
-        else if(query[0] == PHONE) {
+        else if(query[0] == keyword.PHONE) {
             if(query.length >= 2)
-                replier.reply(CMD.showPhoneInfo(query)); // 화냥폰 정보 보여주기
+                send_msg(replier, room, CMD.showPhoneInfo(query)); // 화냥폰 정보 보여주기
         }
-        else if(query[0] == RANK) {
+        else if(query[0] == keyword.RANK) {
             if(query.length >= 2)
-                replier.reply(CMD.showRank(room, query)); // 순위 보여주기
+                send_msg(replier, room, CMD.showRank(room, query)); // 순위 보여주기
         }
-        else if(In(query[0], RSP)) {
+        else if(In(query[0], keyword.RSP)) {
             if(query.length >= 2)
-                replier.reply(CMD.playRSP(query)); // 가위바위보를 하기
+                send_msg(replier, room, CMD.playRSP(query)); // 가위바위보를 하기
         }
-        else if(msg == NYAN_LANG) {
-            replier.reply(nyanLang); // 명령어 목록 보여주기
+        else if(msg == keyword.NYAN_LANG) {
+            send_msg(replier, room, nyan_lang); // 명령어 목록 보여주기
         }
-        else if(msg == LEARNING_LIST) {
-            replier.reply(CMD.showLearnList(room)); // 학습 목록 보여주기
+        else if(msg == keyword.LEARNING_LIST) {
+            send_msg(replier, room, CMD.showLearnList(room)); // 학습 목록 보여주기
         }
-        else if(msg == TODAY) {
-            replier.reply(CMD.showToday()); // 오늘 날짜 보여주기
+        else if(msg == keyword.TODAY) {
+            send_msg(replier, room, CMD.showToday()); // 오늘 날짜 보여주기
         }
-        else if(msg == TODAY_DAY) {
-            replier.reply(CMD.showTodayDay()); // 오늘 요일 보여주기
+        else if(msg == keyword.TODAY_DAY) {
+            send_msg(replier, room, CMD.showTodayDay()); // 오늘 요일 보여주기
         }
-        else if(In(msg, HELLO_LIST)) {
-            replier.reply(CMD.sayHello(sender)); // 인사하기
+        else if(In(msg, keyword.HELLO_LIST)) {
+            send_msg(replier, room, CMD.sayHello(sender)); // 인사하기
         }
-        else if(msg == NYAN_BOT) {
-            replier.reply(CMD.responseNyanBot()); // 화냥봇을 부르면 반응하기
-            Rank.updateRank(room, sender, nyanBotRankList, NYAN_BOT);
+        else if(msg == keyword.NYAN_BOT) {
+            send_msg(replier, room, CMD.responseNyanBot()); // 화냥봇을 부르면 반응하기
+            rank.update_rank_map(room, sender, rank.nyan_bot_rank_map, keyword.NYAN_BOT);
         }
-        else if(In(msg, LNames)) {
-            Rank.updateRank(room, sender, LRankList, L);
+        else if(msg == keyword.YOUR_NAME) {
+            send_msg(replier, room, keyword.NYAN_BOT+"이다냥! "+keyword.MASTER+"님이 만들었다냥!"); // 화냥봇의 이름 말하기
         }
-        else if(msg == YOUR_NAME) {
-            replier.reply(NYAN_BOT+"이다냥! "+master+"님이 만들었다냥!"); // 화냥봇의 이름 말하기
+        else if(msg == keyword.MY_NAME) {
+            send_msg(replier, room, sender+"님이다냥!"); // 메시지 보낸 사람의 이름 말하기
         }
-        else if(msg == MY_NAME) {
-            replier.reply(sender+"님이다냥!"); // 메시지 보낸 사람의 이름 말하기
+        else if(msg == keyword.EAT) {
+            send_msg(replier, room, CMD.eat(room, sender)); // 가장 최근에 메시지를 보낸 사람을 꿀꺽하기
         }
-        else if(msg == EAT) {
-            replier.reply(CMD.eat(room, sender)); // 가장 최근에 메시지를 보낸 사람을 꿀꺽하기
+        else if(In(msg, keyword.VOMIT_LIST)) {
+            send_msg(replier, room, CMD.vomit(room, sender)); // 가장 최근에 꿀꺽한 사람을 퉤엣하기
         }
-        else if(In(msg, VOMIT_LIST)) {
-            replier.reply(CMD.vomit(room, sender)); // 가장 최근에 꿀꺽한 사람을 퉤엣하기
+        else if(msg == keyword.EAT_POCKET) {
+            send_msg(replier, room, CMD.showEatPocket(room, sender)); // 꿀꺽주머니 보여주기
         }
-        else if(msg == EAT_POCKET) {
-            replier.reply(CMD.showEatPocket(room, sender)); // 꿀꺽주머니 보여주기
+        else if(msg == keyword.DIGESTION) {
+            send_msg(replier, room, CMD.digest(room, sender)); // 소화하기
         }
-        else if(msg == DIGESTION) {
-            replier.reply(CMD.digest(room, sender)); // 소화하기
-        }
-        else if(query[0] == EMOJI) {
+        else if(query[0] == keyword.EMOJI) {
             if(query.length >= 2)
                 for(let i of CMD.makeEmoji(query))
-                    replier.reply(i); // 글자 이모지 만들기
+                    send_msg(replier, room, i); // 글자 이모지 만들기
         }
-        else if(msg.toUpperCase() == PI) {
-            replier.reply(CMD.PI()); // PI 보여주기
+        else if(msg.toUpperCase() == keyword.PI) {
+            send_msg(replier, room, CMD.PI()); // PI 보여주기
+        }
+        else if(msg == keyword.TEST) {
+            send_msg(replier, room, CMD.test(replier, imageDB));
         }
         else {
-            let data = learnList.get(room);
+            let learn_list = learn_map.get(room);
 
-            for(let i=0; i<data.length; i++) {
-                if(msg == data[i][0]) {
-                    replier.reply(parseLearnDataValue(room, sender, data[i][1])); // 메시지가 오면 학습데이터에 따라 반응하기
+            for(let i=0; i<learn_list.length; i++) {
+                if(msg == learn_list[i][0]) {
+                    send_msg(replier, room, parse_learn_data_value(room, sender, learn_list[i][1])); // 메시지가 오면 학습데이터에 따라 반응하기
                     break;
                 }
             }

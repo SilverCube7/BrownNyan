@@ -62,6 +62,7 @@ const keyword = require("modules/NyanModules/keyword.js");
 const db = require("modules/NyanModules/db.js");
 const rank = require("modules/NyanModules/rank.js");
 const user = require("modules/NyanModules/user.js");
+const tmr = require("modules/NyanModules/timer.js");
 
 const PI_1000 = db.load_txt(db.make_full_path(keyword.NYAN_FILES+"/"+keyword.PI));
 
@@ -568,6 +569,15 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             }
         }
     }
+}
+
+const delay = 100;
+tmr.set_interval(enter_frame, delay, delay);
+
+function enter_frame() {
+
+    if(!Api.isOn(scriptName))
+        tmr.clear_all();
 }
 
 //아래 4개의 메소드는 액티비티 화면을 수정할때 사용됩니다.

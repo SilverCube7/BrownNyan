@@ -23,7 +23,7 @@ const rsp_res = [
     ['tie', 'bot', 'me'],
     ['me', 'tie', 'bot'],
     ['bot', 'me', 'tie']
-]
+];
 const forbidden_signs = [
     '{',
     '}',
@@ -571,7 +571,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     }
 }
 
-const delay = 100;
+const delay = 1000;
 tmr.set_interval(enter_frame, delay, delay);
 
 function enter_frame() {

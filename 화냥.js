@@ -339,7 +339,7 @@ const CMD = {
 
 function send_msg(replier, room, msg) {
     push_in_nyan_bot_msg_map(room, msg);
-    return replier.reply(room, msg);
+    return replier.reply(msg);
 }
 
 function push_in_nyan_bot_msg_map(room, msg) {

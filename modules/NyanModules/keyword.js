@@ -1,3 +1,5 @@
+const EMOJI_CODE = String.fromCharCode(8205);
+
 const ENTER_TOKEN = "{enter}";
 const SPACE_TOKEN = "{space}";
 
@@ -54,6 +56,8 @@ const VOMIT_LIST = [VOMIT, "퉷"];
 const VOMITED_LIST = [VOMITED, "퉷당햇"];
 
 const obj = {
+    EMOJI_CODE: EMOJI_CODE,
+
     ENTER_TOKEN: ENTER_TOKEN,
     SPACE_TOKEN: SPACE_TOKEN,
 

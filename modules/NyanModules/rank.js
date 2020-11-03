@@ -40,15 +40,12 @@ function push_in_rank_list(who, rank_list, cnt) {
     rank_list.push([who, cnt]);
 }
 
-function update_rank_map(room, who, rank_map, rank_name, cnt) {
-    if(!cnt)
-        cnt = 1;
-
+function update_rank_map(room, who, rank_map, rank_name, cnt=1) {
     let rank_list = load_rank_list(room, rank_map, rank_name);
 
     for(let i=0; i<rank_list.length; i++)
         convert_str_to_num(i, rank_list);
-    
+
     let k = find_who_in_rank_list(who, rank_list);
 
     if(k != -1)

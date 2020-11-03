@@ -154,6 +154,12 @@ function push_in_nyan_bot_msg_map(room, msg) {
     nyan_bot_msg_map.get(room).push(msg);
 }
 
+function send_emoji(replier, room, sender, query) {
+    if(query.length == 1)
+        for(let i of cmd.make_emoji(room, sender, query))
+            send_msg(replier, room, i);
+}
+
 function send_msg(replier, room, msg) {
     push_in_nyan_bot_msg_map(room, msg);
     if(!msg) return false;
@@ -236,9 +242,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             send_msg(replier, room, cmd.PI(room, sender, query.slice(1)));
         }
         else if(query[0] == kw.EMOJI) {
-            if(query.length == 2)
-                for(let i of cmd.make_emoji(room, sender, query.slice(1)))
-                    send_msg(replier, room, i);
+            send_emoji(replier, room, sender, query.slice(1));
         }
         else if(cmd_map.get(query[0])) {
             send_msg(replier, room, cmd_map.get(query[0])(room, sender, query.slice(1)));

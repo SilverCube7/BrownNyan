@@ -87,23 +87,14 @@ const tmr = require("modules/NyanModules/timer.js");
 const cmd = require("modules/NyanModules/cmd.js");
 const password = require("modules/NyanModules/password.js");
 
-function send_msg(replier, room, msg) {
-    push_in_nyan_bot_msg_map(room, msg);
-    return replier.reply(msg);
-}
+function find_target(room) {
+    let msg_list = msg_map.get(room);
 
-function push_in_nyan_bot_msg_map(room, msg) {
-    if(!nyan_bot_msg_map.has(room))
-        nyan_bot_msg_map.set(room, []);
+    for(let i=msg_list.length-2; i>=0; i--)
+        if(!lib.in_list(msg_list[i][1], kw.L_NAMES))
+            return msg_list[i][1];
 
-    while(nyan_bot_msg_map.get(room).length > nyan_bot_msg_map_limit)
-        nyan_bot_msg_map.get(room).shift();
-
-    nyan_bot_msg_map.get(room).push(msg);
-}
-
-function is_room_prefix(room, prefix) {
-    return room.substring(0, prefix.length) == prefix;
+    return undefined;
 }
 
 function is_nyan_bot_last_msg(room, msg) {
@@ -117,14 +108,8 @@ function is_nyan_bot_last_msg(room, msg) {
     return false;
 }
 
-function find_target(room) {
-    let msg_list = msg_map.get(room);
-
-    for(let i=msg_list.length-2; i>=0; i--)
-        if(!lib.in_list(msg_list[i][1], kw.L_NAMES))
-            return msg_list[i][1];
-
-    return undefined;
+function is_room_prefix(room, prefix) {
+    return room.substring(0, prefix.length) == prefix;
 }
 
 function parse_learn_data_value(room, sender, value) {
@@ -156,6 +141,21 @@ function parse_learn_data_value(room, sender, value) {
     }
 
     return new_value;
+}
+
+function push_in_nyan_bot_msg_map(room, msg) {
+    if(!nyan_bot_msg_map.has(room))
+        nyan_bot_msg_map.set(room, []);
+
+    while(nyan_bot_msg_map.get(room).length > nyan_bot_msg_map_limit)
+        nyan_bot_msg_map.get(room).shift();
+
+    nyan_bot_msg_map.get(room).push(msg);
+}
+
+function send_msg(replier, room, msg) {
+    push_in_nyan_bot_msg_map(room, msg);
+    return replier.reply(msg);
 }
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {

@@ -48,6 +48,7 @@ const IS_CHARGING = "충전중?";
 const TEST = "테스트";
 const VOMIT = "퉤엣";
 const VOMITED = "퉤엣당햇";
+const PROFILE = "프로필";
 const NYAN_BOT = "화냥봇";
 const PHONE = "화냥폰";
 const MASTER = "화이트냥";
@@ -115,6 +116,7 @@ const obj = {
     TEST: TEST,
     VOMIT: VOMIT,
     VOMITED: VOMITED,
+    PROFILE: PROFILE,
     NYAN_BOT: NYAN_BOT,
     PHONE: PHONE,
     MASTER: MASTER

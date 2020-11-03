@@ -11,7 +11,7 @@ const eat_vs_rank_map = new Map();
 
 function load_rank_list(room, rank_map, rank_name) {
     if(!rank_map.has(room))
-        rank_map.set(room, db.load_list(db.make_full_path(room+"/"+keyword.RANK+"/"+rank_name)));
+        rank_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.RANK+kw.SLASH+rank_name)));
 
     return rank_map.get(room);
 }
@@ -60,15 +60,15 @@ function update_rank_map(room, who, rank_map, rank_name, cnt) {
     for(let i=0; i<rank_list.length; i++)
         convert_num_to_str(i, rank_list);
 
-    db.save_list(db.make_full_path(room+"/"+keyword.RANK+"/"+rank_name), rank_list);
+    db.save_list(db.make_full_path(room+kw.SLASH+kw.RANK+kw.SLASH+rank_name), rank_list);
 }
 
 function update_eat_vs_rank_map(room, rank_map, rank_name) {
     let rank_list = load_rank_list(room, rank_map, rank_name);
     while(rank_list.length > 0) rank_list.pop();
 
-    let eat_rank_list = load_rank_list(room, eat_rank_map, keyword.EAT);
-    let eaten_rank_list = load_rank_list(room, eaten_rank_map, keyword.EATEN);
+    let eat_rank_list = load_rank_list(room, eat_rank_map, kw.EAT);
+    let eaten_rank_list = load_rank_list(room, eaten_rank_map, kw.EATEN);
 
     for(let i of eat_rank_list)
         rank_list.push([i[0], Number(i[1])]);
@@ -88,7 +88,7 @@ function update_eat_vs_rank_map(room, rank_map, rank_name) {
     for(let i=0; i<rank_list.length; i++)
         convert_num_to_str(i, rank_list);
 
-    db.save_list(db.make_full_path(room+"/"+keyword.RANK+"/"+rank_name), rank_list);
+    db.save_list(db.make_full_path(room+kw.SLASH+kw.RANK+kw.SLASH+rank_name), rank_list);
 }
 
 function show_rank(title, rank_list) {
@@ -101,55 +101,55 @@ function show_rank(title, rank_list) {
 }
 
 function show_talk_rank(room) {
-    let rank_list = load_rank_list(room, talk_rank_map, keyword.TALK);
-    return show_rank(keyword.RANK+": 수다쟁이", rank_list);
+    let rank_list = load_rank_list(room, talk_rank_map, kw.TALK);
+    return show_rank(kw.RANK+": 수다쟁이", rank_list);
 }
 
 function show_picture_rank(room) {
-    let rank_list = load_rank_list(room, picture_rank_map, keyword.PICTURE);
-    return show_rank(keyword.RANK+": 사진을 많이 보낸 사람", rank_list);
+    let rank_list = load_rank_list(room, picture_rank_map, kw.PICTURE);
+    return show_rank(kw.RANK+": 사진을 많이 보낸 사람", rank_list);
 }
 
 function show_emoticon_rank(room) {
-    let rank_list = load_rank_list(room, emoticon_rank_map, keyword.EMOTICON);
-    return show_rank(keyword.RANK+": 임티를 많이 보낸 사람", rank_list);
+    let rank_list = load_rank_list(room, emoticon_rank_map, kw.EMOTICON);
+    return show_rank(kw.RANK+": 임티를 많이 보낸 사람", rank_list);
 }
 
 function show_nyan_bot_rank(room) {
-    let rank_list = load_rank_list(room, nyan_bot_rank_map, keyword.NYAN_BOT);
-    return show_rank(keyword.RANK+": 화냥봇을 많이 부른 사람", rank_list);
+    let rank_list = load_rank_list(room, nyan_bot_rank_map, kw.NYAN_BOT);
+    return show_rank(kw.RANK+": 화냥봇을 많이 부른 사람", rank_list);
 }
 
 function show_eat_rank(room) {
-    let rank_list = load_rank_list(room, eat_rank_map, keyword.EAT);
-    return show_rank(keyword.RANK+": 먹보", rank_list);
+    let rank_list = load_rank_list(room, eat_rank_map, kw.EAT);
+    return show_rank(kw.RANK+": 먹보", rank_list);
 }
 
 function show_vomit_rank(room) {
-    let rank_list = load_rank_list(room, vomit_rank_map, keyword.VOMIT);
-    return show_rank(keyword.RANK+": 퉤엣을 많이 한 사람", rank_list);
+    let rank_list = load_rank_list(room, vomit_rank_map, kw.VOMIT);
+    return show_rank(kw.RANK+": 퉤엣을 많이 한 사람", rank_list);
 }
 
 function show_escape_rank(room) {
-    let rank_list = load_rank_list(room, escape_rank_map, keyword.ESCAPE);
-    return show_rank(keyword.RANK+": 도망자", rank_list);
+    let rank_list = load_rank_list(room, escape_rank_map, kw.ESCAPE);
+    return show_rank(kw.RANK+": 도망자", rank_list);
 }
 
 function show_eaten_rank(room) {
-    let rank_list = load_rank_list(room, eaten_rank_map, keyword.EATEN);
-    return show_rank(keyword.RANK+": 꿀꺽당한 희생자", rank_list);
+    let rank_list = load_rank_list(room, eaten_rank_map, kw.EATEN);
+    return show_rank(kw.RANK+": 꿀꺽당한 희생자", rank_list);
 }
 
 function show_vomited_rank(room) {
-    let rank_list = load_rank_list(room, vomited_rank_map, keyword.VOMITED);
-    return show_rank(keyword.RANK+": 퉤엣당한 희생자", rank_list);
+    let rank_list = load_rank_list(room, vomited_rank_map, kw.VOMITED);
+    return show_rank(kw.RANK+": 퉤엣당한 희생자", rank_list);
 }
 
 function show_eat_vs_rank(room) {
-    update_eat_vs_rank_map(room, eat_vs_rank_map, keyword.EAT_VS);
+    update_eat_vs_rank_map(room, eat_vs_rank_map, kw.EAT_VS);
 
-    let rank_list = load_rank_list(room, eat_vs_rank_map, keyword.EAT_VS);
-    return show_rank(keyword.RANK+": 꿀꺽 대결 (먹은 수 - 먹힌 수)", rank_list);
+    let rank_list = load_rank_list(room, eat_vs_rank_map, kw.EAT_VS);
+    return show_rank(kw.RANK+": 꿀꺽 대결 (먹은 수 - 먹힌 수)", rank_list);
 }
 
 const obj = {

@@ -1,13 +1,13 @@
 const day = ['일', '월', '화', '수', '목', '금', '토'];
 const rsp_stoi = new Map([
-    [keyword.ROCK, 0],
-    [keyword.SCISSOR, 1],
-    [keyword.PAPER, 2]
+    [kw.ROCK, 0],
+    [kw.SCISSOR, 1],
+    [kw.PAPER, 2]
 ]);
 const rsp_itos = new Map([
-    [0, keyword.ROCK],
-    [1, keyword.SCISSOR],
-    [2, keyword.PAPER]
+    [0, kw.ROCK],
+    [1, kw.SCISSOR],
+    [2, kw.PAPER]
 ]);
 const rsp_res = [
     ['tie', 'bot', 'me'],
@@ -26,7 +26,7 @@ function find_in_learn_list(s) {
 function learn(room, query, sender) {
     let A = query[1], B = "";
 
-    for(let i=2; i<query.length; i++) B += query[i]+"/";
+    for(let i=2; i<query.length; i++) B += query[i]+kw.SLASH;
     B = B.substring(0, B.length-1);
 
     if(A.length <= 1 || B.length == 0)
@@ -49,7 +49,7 @@ function learn(room, query, sender) {
         learn_list.push([A, B, sender]);
     }
 
-    db.save_list(db.make_full_path(room+"/"+keyword.LEARNING), learn_list);
+    db.save_list(db.make_full_path(room+kw.SLASH+kw.LEARNING), learn_list);
     return "냥!";
 }
 
@@ -73,7 +73,7 @@ function del(room, query) {
 
     if(learn_id != -1) {
         learn_list.splice(learn_id, 1);
-        db.save_list(db.make_full_path(room+"/"+keyword.LEARNING), learn_list);
+        db.save_list(db.make_full_path(room+kw.SLASH+kw.LEARNING), learn_list);
         return "냥!";
     }
 
@@ -96,21 +96,21 @@ function show_prev_msg(room, query) {
 function show_phone_info(query) {
     let A = query[1];
 
-    if(A == keyword.VERSION)
+    if(A == kw.VERSION)
         return "ver"+Device.getAndroidVersionName()+" 이다냥!";
 
-    if(A == keyword.BATTERY) {
+    if(A == kw.BATTERY) {
         if(Device.getBatteryLevel() == 100) return "풀 차지 상태다냥!!";
         return Device.getBatteryLevel()+"% 남았다냥!";
     }
 
-    if(A == keyword.VOLTAGE)
+    if(A == kw.VOLTAGE)
         return Device.getBatteryVoltage()+"mV 이다냥!";
 
-    if(A == keyword.TEMPERATURE)
+    if(A == kw.TEMPERATURE)
         return Device.getBatteryTemperature()/10+"℃ 이다냥!";
 
-    if(A == keyword.IS_CHARGING) {
+    if(A == kw.IS_CHARGING) {
         if(Device.isCharging()) return "충전 중이다냥!";
         return "충전 중이 아니다냥!";
     }
@@ -121,26 +121,26 @@ function show_phone_info(query) {
 function show_rank(room, query) {
     let A = query[1];
 
-    if(A == keyword.TALK) return rank.show_talk_rank(room);
-    if(A == keyword.PICTURE) return rank.show_picture_rank(room);
-    if(A == keyword.EMOTICON) return rank.show_emoticon_rank(room);
-    if(A == keyword.NYAN_BOT) return rank.show_nyan_bot_rank(room);
-    if(A == keyword.EAT) return rank.show_eat_rank(room);
-    if(lib.in_list(A, keyword.VOMIT_LIST)) return rank.show_vomit_rank(room);
-    if(A == keyword.ESCAPE) return rank.show_escape_rank(room);
-    if(A == keyword.EATEN) return rank.show_eaten_rank(room);
-    if(lib.in_list(A, keyword.VOMITED_LIST)) return rank.show_vomited_rank(room);
-    if(A == keyword.EAT_VS) return rank.show_eat_vs_rank(room);
+    if(A == kw.TALK) return rank.show_talk_rank(room);
+    if(A == kw.PICTURE) return rank.show_picture_rank(room);
+    if(A == kw.EMOTICON) return rank.show_emoticon_rank(room);
+    if(A == kw.NYAN_BOT) return rank.show_nyan_bot_rank(room);
+    if(A == kw.EAT) return rank.show_eat_rank(room);
+    if(lib.in_list(A, kw.VOMIT_LIST)) return rank.show_vomit_rank(room);
+    if(A == kw.ESCAPE) return rank.show_escape_rank(room);
+    if(A == kw.EATEN) return rank.show_eaten_rank(room);
+    if(lib.in_list(A, kw.VOMITED_LIST)) return rank.show_vomited_rank(room);
+    if(A == kw.EAT_VS) return rank.show_eat_vs_rank(room);
 
     return "그런 순위는 없다냥!";
 }
 
 function show_learn_list(room) {
     let learn_list = learn_map.get(room);
-    let show = "< "+keyword.LEARNING_LIST+" >\n\n";
+    let show = "< "+kw.LEARNING_LIST+" >\n\n";
 
     for(let i=0; i<learn_list.length; i++)
-        show += "("+String(i+1)+") "+String(learn_list[i][0])+"/"+String(learn_list[i][2])+'\n';
+        show += "("+String(i+1)+") "+String(learn_list[i][0])+kw.SLASH+String(learn_list[i][2])+'\n';
 
     return show;
 }
@@ -190,13 +190,13 @@ function eat(room, sender) {
         return "자신을 꿀꺽할 수 없다냥!";
 
     if(lib.randint(0, eat_fail_percent-1) == 0) {
-        rank.update_rank_map(room, target, rank.escape_rank_map, keyword.ESCAPE);
+        rank.update_rank_map(room, target, rank.escape_rank_map, kw.ESCAPE);
         return target+"님을 꿀꺽하려고 했지만, 도망갔다냥!";
     }
 
     user.push_in_eat_pocket(room, sender, target);
-    rank.update_rank_map(room, sender, rank.eat_rank_map, keyword.EAT);
-    rank.update_rank_map(room, target, rank.eaten_rank_map, keyword.EATEN);
+    rank.update_rank_map(room, sender, rank.eat_rank_map, kw.EAT);
+    rank.update_rank_map(room, target, rank.eaten_rank_map, kw.EATEN);
 
     return target+"님을 꿀꺽했다냥!";
 }
@@ -207,14 +207,14 @@ function vomit(room, sender) {
     if(!target)
         return "꿀꺽주머니에 아무것도 없다냥!";
 
-    rank.update_rank_map(room, sender, rank.vomit_rank_map, keyword.VOMIT);
-    rank.update_rank_map(room, target, rank.vomited_rank_map, keyword.VOMITED);
+    rank.update_rank_map(room, sender, rank.vomit_rank_map, kw.VOMIT);
+    rank.update_rank_map(room, target, rank.vomited_rank_map, kw.VOMITED);
 
     return target+"님을 뱉었다냥!";
 }
 
 function show_eat_pocket(room, sender) {
-    let user_info = user.load_user_info(room, sender, user.eat_pocket, keyword.EAT_POCKET);
+    let user_info = user.load_user_info(room, sender, user.eat_pocket, kw.EAT_POCKET);
     let show = "< "+sender+"님의 꿀꺽주머니 >\n\n";
 
     for(let i=user_info.length-1; i>=0; i--)
@@ -224,7 +224,7 @@ function show_eat_pocket(room, sender) {
 }
 
 function digest(room, sender) {
-    let user_info = user.load_user_info(room, sender, user.eat_pocket, keyword.EAT_POCKET);
+    let user_info = user.load_user_info(room, sender, user.eat_pocket, kw.EAT_POCKET);
 
     if(!user_info.length)
         return "꿀꺽주머니에 아무것도 없다냥!";
@@ -241,7 +241,7 @@ function make_emoji(query) {
         return ["길이는 "+"1~"+emoji_len_limit+" 사이여야 한다냥!"];
 
     let emoji_list = [];
-    for(let i of A) emoji_list.push(i+keyword.EMOJI_CODE);
+    for(let i of A) emoji_list.push(i+kw.EMOJI_CODE);
 
     return emoji_list;
 }

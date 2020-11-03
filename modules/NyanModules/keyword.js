@@ -6,6 +6,8 @@ const SPACE_TOKEN = "{space}";
 const ME_TOKEN = "[m]";
 const YOU_TOKEN = "[y]";
 
+const SLASH = "/";
+
 const L = "L";
 const NYAN_FILES = "NyanFiles";
 const PI = "PI";
@@ -27,6 +29,7 @@ const MSG = "메시지";
 const ROCK = "바위";
 const VERSION = "버전";
 const PAPER = "보";
+const PW = "패스워드";
 const BATTERY = "배터리";
 const PICTURE = "사진";
 const SEND_PICTURE = "사진을 보냈습니다.";
@@ -64,6 +67,8 @@ const obj = {
     ME_TOKEN: ME_TOKEN,
     YOU_TOKEN: YOU_TOKEN,
 
+    SLASH: SLASH,
+
     RSP: RSP,
     HELLO_LIST: HELLO_LIST,
     L_NAMES: L_NAMES,
@@ -91,6 +96,7 @@ const obj = {
     ROCK: ROCK,
     VERSION: VERSION,
     PAPER: PAPER,
+    PW: PW,
     BATTERY: BATTERY,
     PICTURE: PICTURE,
     SEND_PICTURE: SEND_PICTURE,

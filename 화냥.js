@@ -73,18 +73,19 @@ function is_space(c) {
     return false;
 }
 
-const keyword = require("modules/NyanModules/keyword.js");
+const kw = require("modules/NyanModules/keyword.js");
 const lib = require("modules/NyanModules/lib.js");
 const db = require("modules/NyanModules/db.js");
 
-const PI_1000 = db.load_txt(db.make_full_path(keyword.NYAN_FILES+"/"+keyword.PI));
-const nyan_lang = db.load_txt(db.make_full_path(keyword.NYAN_FILES+"/"+keyword.NYAN_LANG));
-const forbidden_words = db.load_list(db.make_full_path(keyword.NYAN_FILES+"/"+keyword.FORBIDDEN_WORD))[0];
+const PI_1000 = db.load_txt(db.make_full_path(kw.NYAN_FILES+kw.SLASH+kw.PI));
+const nyan_lang = db.load_txt(db.make_full_path(kw.NYAN_FILES+kw.SLASH+kw.NYAN_LANG));
+const forbidden_words = db.load_list(db.make_full_path(kw.NYAN_FILES+kw.SLASH+kw.FORBIDDEN_WORD))[0];
 
 const rank = require("modules/NyanModules/rank.js");
 const user = require("modules/NyanModules/user.js");
 const tmr = require("modules/NyanModules/timer.js");
 const cmd = require("modules/NyanModules/cmd.js");
+const password = require("modules/NyanModules/password.js");
 
 function send_msg(replier, room, msg) {
     push_in_nyan_bot_msg_map(room, msg);
@@ -120,7 +121,7 @@ function find_target(room) {
     let msg_list = msg_map.get(room);
 
     for(let i=msg_list.length-2; i>=0; i--)
-        if(!lib.in_list(msg_list[i][1], keyword.L_NAMES))
+        if(!lib.in_list(msg_list[i][1], kw.L_NAMES))
             return msg_list[i][1];
 
     return undefined;
@@ -130,8 +131,8 @@ function parse_learn_data_value(room, sender, value) {
     target = find_target(room);
     if(!target) target = sender;
 
-    while(value.indexOf(keyword.ME_TOKEN) != -1) value = value.replace(keyword.ME_TOKEN, sender);
-    while(value.indexOf(keyword.YOU_TOKEN) != -1) value = value.replace(keyword.YOU_TOKEN, target);
+    while(value.indexOf(kw.ME_TOKEN) != -1) value = value.replace(kw.ME_TOKEN, sender);
+    while(value.indexOf(kw.YOU_TOKEN) != -1) value = value.replace(kw.YOU_TOKEN, target);
 
     let new_value = "";
 
@@ -163,31 +164,31 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
      *     room이 화이트냥
      *     room의 접두사가 [WN]
      */
-    if(room == keyword.MASTER || is_room_prefix(room, "[WN]")) {
+    if(room == kw.MASTER || is_room_prefix(room, "[WN]")) {
         if(!learn_map.has(room))
-            learn_map.set(room, db.load_list(db.make_full_path(room+"/"+keyword.LEARNING)));
+            learn_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.LEARNING)));
 
         if(!msg_map.has(room))
-            msg_map.set(room, db.load_list(db.make_full_path(room+"/"+keyword.MSG)));
+            msg_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.MSG)));
 
         msg_map.get(room).push([msg, sender]);
 
         while(msg_map.get(room).length > msg_map_limit+1)
             msg_map.get(room).shift();
 
-        db.save_list(db.make_full_path(room+"/"+keyword.MSG), msg_map.get(room));
+        db.save_list(db.make_full_path(room+kw.SLASH+kw.MSG), msg_map.get(room));
 
         // L의 메시지에 반응하지 않음 (특정 메시지는 제외)
-        if(lib.in_list(sender, keyword.L_NAMES)) {
+        if(lib.in_list(sender, kw.L_NAMES)) {
             let msg_list = msg_map.get(room);
 
             // L이 똑같은 메시지를 계속 보내서 무한정 반응해버리는 현상 방지
-            if(!(msg_list.length >= 2 && lib.in_list(msg_list[msg_list.length-2][1], keyword.L_NAMES))) {
+            if(!(msg_list.length >= 2 && lib.in_list(msg_list[msg_list.length-2][1], kw.L_NAMES))) {
                 // L이 특정 메시지를 보내면 반응
-                if((msg == keyword.NYAN_BOT+"님, 죽어주세요 !") ||
+                if((msg == kw.NYAN_BOT+"님, 죽어주세요 !") ||
                    (msg == "탕" && is_nyan_bot_last_msg(room, "러시안룰렛"))) { // FIXME: ;;;
                     send_msg(replier, room, "꾸에에엑");
-                } else if(msg.indexOf(keyword.NYAN_BOT+"님") != -1) {
+                } else if(msg.indexOf(kw.NYAN_BOT+"님") != -1) {
                     send_msg(replier, room, "냥!?");
                 }
             }
@@ -195,84 +196,84 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             return;
         }
 
-        if(msg == keyword.SEND_PICTURE)
-            rank.update_rank_map(room, sender, rank.picture_rank_map, keyword.PICTURE);
-        else if(msg == keyword.SEND_EMOTICON)
-            rank.update_rank_map(room, sender, rank.emoticon_rank_map, keyword.EMOTICON);
+        if(msg == kw.SEND_PICTURE)
+            rank.update_rank_map(room, sender, rank.picture_rank_map, kw.PICTURE);
+        else if(msg == kw.SEND_EMOTICON)
+            rank.update_rank_map(room, sender, rank.emoticon_rank_map, kw.EMOTICON);
         else
-            rank.update_rank_map(room, sender, rank.talk_rank_map, keyword.TALK);
+            rank.update_rank_map(room, sender, rank.talk_rank_map, kw.TALK);
 
         let query = msg.split('/');
 
-        if(query[0] == keyword.LEARNING) {
+        if(query[0] == kw.LEARNING) {
             if(query.length >= 3)
                 send_msg(replier, room, cmd.learn(room, query, sender)); // 학습시키기
             else if(query.length == 2)
                 send_msg(replier, room, cmd.confirm_learn(room, query)); // 학습했는지 확인
         }
-        else if(query[0] == keyword.DEL) {
+        else if(query[0] == kw.DEL) {
             if(query.length >= 2)
                 send_msg(replier, room, cmd.del(room, query)); // 학습한거 삭제
         }
-        else if(query[0] == keyword.TALK) {
+        else if(query[0] == kw.TALK) {
             if(query.length >= 2)
                 send_msg(replier, room, cmd.show_prev_msg(room, query)); // 이전 메시지 보여주기
         }
-        else if(query[0] == keyword.PHONE) {
+        else if(query[0] == kw.PHONE) {
             if(query.length >= 2)
                 send_msg(replier, room, cmd.show_phone_info(query)); // 화냥폰 정보 보여주기
         }
-        else if(query[0] == keyword.RANK) {
+        else if(query[0] == kw.RANK) {
             if(query.length >= 2)
                 send_msg(replier, room, cmd.show_rank(room, query)); // 순위 보여주기
         }
-        else if(lib.in_list(query[0], keyword.RSP)) {
+        else if(lib.in_list(query[0], kw.RSP)) {
             if(query.length >= 2)
                 send_msg(replier, room, cmd.play_rsp(query)); // 가위바위보를 하기
         }
-        else if(msg == keyword.NYAN_LANG) {
+        else if(msg == kw.NYAN_LANG) {
             send_msg(replier, room, nyan_lang); // 명령어 목록 보여주기
         }
-        else if(msg == keyword.LEARNING_LIST) {
+        else if(msg == kw.LEARNING_LIST) {
             send_msg(replier, room, cmd.show_learn_list(room)); // 학습 목록 보여주기
         }
-        else if(msg == keyword.TODAY) {
+        else if(msg == kw.TODAY) {
             send_msg(replier, room, cmd.show_today()); // 오늘 날짜 보여주기
         }
-        else if(msg == keyword.TODAY_DAY) {
+        else if(msg == kw.TODAY_DAY) {
             send_msg(replier, room, cmd.show_today_day()); // 오늘 요일 보여주기
         }
-        else if(lib.in_list(msg, keyword.HELLO_LIST)) {
+        else if(lib.in_list(msg, kw.HELLO_LIST)) {
             send_msg(replier, room, cmd.say_hello(sender)); // 인사하기
         }
-        else if(msg == keyword.NYAN_BOT) {
+        else if(msg == kw.NYAN_BOT) {
             send_msg(replier, room, cmd.response_nyan_bot()); // 화냥봇을 부르면 반응하기
-            rank.update_rank_map(room, sender, rank.nyan_bot_rank_map, keyword.NYAN_BOT);
+            rank.update_rank_map(room, sender, rank.nyan_bot_rank_map, kw.NYAN_BOT);
         }
-        else if(msg == keyword.YOUR_NAME) {
-            send_msg(replier, room, keyword.NYAN_BOT+"이다냥! "+keyword.MASTER+"님이 만들었다냥!"); // 화냥봇의 이름 말하기
+        else if(msg == kw.YOUR_NAME) {
+            send_msg(replier, room, kw.NYAN_BOT+"이다냥! "+kw.MASTER+"님이 만들었다냥!"); // 화냥봇의 이름 말하기
         }
-        else if(msg == keyword.MY_NAME) {
+        else if(msg == kw.MY_NAME) {
             send_msg(replier, room, sender+"님이다냥!"); // 메시지 보낸 사람의 이름 말하기
         }
-        else if(msg == keyword.EAT) {
+        else if(msg == kw.EAT) {
             send_msg(replier, room, cmd.eat(room, sender)); // 가장 최근에 메시지를 보낸 사람을 꿀꺽하기
         }
-        else if(lib.in_list(msg, keyword.VOMIT_LIST)) {
+        else if(lib.in_list(msg, kw.VOMIT_LIST)) {
             send_msg(replier, room, cmd.vomit(room, sender)); // 가장 최근에 꿀꺽한 사람을 퉤엣하기
         }
-        else if(msg == keyword.EAT_POCKET) {
+        else if(msg == kw.EAT_POCKET) {
             send_msg(replier, room, cmd.show_eat_pocket(room, sender)); // 꿀꺽주머니 보여주기
         }
-        else if(msg == keyword.DIGESTION) {
+        else if(msg == kw.DIGESTION) {
             send_msg(replier, room, cmd.digest(room, sender)); // 소화하기
         }
-        else if(query[0] == keyword.EMOJI) {
+        else if(query[0] == kw.EMOJI) {
             if(query.length >= 2)
                 for(let i of cmd.make_emoji(query))
                     send_msg(replier, room, i); // 글자 이모지 만들기
         }
-        else if(msg.toUpperCase() == keyword.PI) {
+        else if(msg.toUpperCase() == kw.PI) {
             send_msg(replier, room, cmd.PI()); // PI 보여주기
         }
         else {

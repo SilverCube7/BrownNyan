@@ -11,6 +11,10 @@ function load_txt(path) {
     return txt;
 }
 
+function save_txt(path, txt) {
+    DataBase.setDataBase(path, txt);
+}
+
 /**
  * < DB 토큰 >
  * ENTER_TOKEN = '\n'
@@ -22,10 +26,10 @@ function load_list(path) {
     if(!list)
         return [];
 
-    list = list.split(keyword.ENTER_TOKEN);
+    list = list.split(kw.ENTER_TOKEN);
 
     for(let i=0; i<list.length; i++)
-        list[i] = list[i].split(keyword.SPACE_TOKEN);
+        list[i] = list[i].split(kw.SPACE_TOKEN);
 
     return list;
 }
@@ -38,11 +42,11 @@ function save_list(path, list) {
             txt += list[i][j];
 
             if(j < list[i].length-1)
-                txt += keyword.SPACE_TOKEN;
+                txt += kw.SPACE_TOKEN;
         }
 
         if(i < list.length-1)
-            txt += keyword.ENTER_TOKEN;
+            txt += kw.ENTER_TOKEN;
     }
 
     DataBase.setDataBase(path, txt);
@@ -51,6 +55,7 @@ function save_list(path, list) {
 const obj = {
     make_full_path: make_full_path,
     load_txt: load_txt,
+    save_txt: save_txt,
     load_list: load_list,
     save_list: save_list
 };

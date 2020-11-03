@@ -5,17 +5,17 @@ function load_user_info(room, who, user_info_map, info_name) {
         user_info_map.set(room, new Map());
 
     if(!user_info_map.get(room).has(who))
-        user_info_map.get(room).set(who, db.load_list(db.make_full_path(room+"/"+keyword.USER+"/"+who+"/"+info_name)));
+        user_info_map.get(room).set(who, db.load_list(db.make_full_path(room+kw.SLASH+kw.USER+kw.SLASH+who+kw.SLASH+info_name)));
 
     return user_info_map.get(room).get(who);
 }
 
 function save_eat_pocket_in_db(room, sender, user_info_list) {
-    db.save_list(db.make_full_path(room+"/"+keyword.USER+"/"+sender+"/"+keyword.EAT_POCKET), user_info_list);
+    db.save_list(db.make_full_path(room+kw.SLASH+kw.USER+kw.SLASH+sender+kw.SLASH+kw.EAT_POCKET), user_info_list);
 }
 
 function push_in_eat_pocket(room, sender, target) {
-    let user_info_list = load_user_info(room, sender, eat_pocket, keyword.EAT_POCKET);
+    let user_info_list = load_user_info(room, sender, eat_pocket, kw.EAT_POCKET);
 
     user_info_list.push([target]);
 
@@ -26,7 +26,7 @@ function push_in_eat_pocket(room, sender, target) {
 }
 
 function pop_in_eat_pocket(room, sender) {
-    let user_info_list = load_user_info(room, sender, eat_pocket, keyword.EAT_POCKET);
+    let user_info_list = load_user_info(room, sender, eat_pocket, kw.EAT_POCKET);
 
     let top = user_info_list.pop();
     save_eat_pocket_in_db(room, sender, user_info_list);
@@ -38,7 +38,7 @@ function pop_in_eat_pocket(room, sender) {
 }
 
 function clear_eat_pocket(room, sender) {
-    let user_info_list = load_user_info(room, sender, eat_pocket, keyword.EAT_POCKET);
+    let user_info_list = load_user_info(room, sender, eat_pocket, kw.EAT_POCKET);
     while(user_info_list.pop());
 
     save_eat_pocket_in_db(room, sender, user_info_list);

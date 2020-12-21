@@ -144,7 +144,7 @@ function show_rank(room, sender, query) {
         if(A == kw.TALK) return rank.show_talk_rank(room);
         if(A == kw.PICTURE) return rank.show_picture_rank(room);
         if(A == kw.EMOTICON) return rank.show_emoticon_rank(room);
-        if(A == kw.NYAN_BOT) return rank.show_nyan_bot_rank(room);
+        if(A == kw.BROWN_NYAN) return rank.show_brown_nyan_rank(room);
         if(A == kw.EAT) return rank.show_eat_rank(room);
         if(lib.in_list(A, kw.VOMIT_LIST)) return rank.show_vomit_rank(room);
         if(A == kw.ESCAPE) return rank.show_escape_rank(room);
@@ -204,9 +204,9 @@ function say_hello(room, sender, query) {
     return "";
 }
 
-function response_nyan_bot(room, sender, query) {
+function response_brown_nyan(room, sender, query) {
     if(!query.length) {
-        rank.update_rank_map(room, sender, rank.nyan_bot_rank_map, kw.NYAN_BOT);
+        rank.update_rank_map(room, sender, rank.brown_nyan_rank_map, kw.BROWN_NYAN);
         return lib.choose(["냥?", "냐앙?", "왜 불렀냥?", "무슨 일이냥?"]);
     }
 
@@ -215,7 +215,7 @@ function response_nyan_bot(room, sender, query) {
 
 function show_your_name(room, sender, query) {
     if(!query.length)
-        return kw.NYAN_BOT+"이다냥! "+kw.MASTER+"님이 만들었다냥!";
+        return kw.BROWN_NYAN+"이다냥! "+kw.MASTER+"님이 만들었다냥!";
 
     return "";
 }
@@ -371,7 +371,7 @@ const obj = {
     show_today: show_today,
     show_today_day: show_today_day,
     say_hello: say_hello,
-    response_nyan_bot: response_nyan_bot,
+    response_brown_nyan: response_brown_nyan,
     show_your_name: show_your_name,
     show_my_name: show_my_name,
     play_rsp: play_rsp,

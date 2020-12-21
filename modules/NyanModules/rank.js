@@ -1,7 +1,7 @@
 const talk_rank_map = new Map();
 const picture_rank_map = new Map();
 const emoticon_rank_map = new Map();
-const nyan_bot_rank_map = new Map();
+const brown_nyan_rank_map = new Map();
 const eat_rank_map = new Map();
 const vomit_rank_map = new Map();
 const escape_rank_map = new Map();
@@ -115,9 +115,9 @@ function show_emoticon_rank(room) {
     return show_rank(kw.RANK+": 임티를 많이 보낸 사람", rank_list);
 }
 
-function show_nyan_bot_rank(room) {
-    let rank_list = load_rank_list(room, nyan_bot_rank_map, kw.NYAN_BOT);
-    return show_rank(kw.RANK+": 화냥봇을 많이 부른 사람", rank_list);
+function show_brown_nyan_rank(room) {
+    let rank_list = load_rank_list(room, brown_nyan_rank_map, kw.BROWN_NYAN);
+    return show_rank(kw.RANK+": 브라운냥을 많이 부른 사람", rank_list);
 }
 
 function show_eat_rank(room) {
@@ -156,7 +156,7 @@ const obj = {
     talk_rank_map: talk_rank_map,
     picture_rank_map: picture_rank_map,
     emoticon_rank_map: emoticon_rank_map,
-    nyan_bot_rank_map: nyan_bot_rank_map,
+    brown_nyan_rank_map: brown_nyan_rank_map,
     eat_rank_map: eat_rank_map,
     vomit_rank_map: vomit_rank_map,
     escape_rank_map: escape_rank_map,
@@ -169,7 +169,7 @@ const obj = {
     show_talk_rank: show_talk_rank,
     show_picture_rank: show_picture_rank,
     show_emoticon_rank: show_emoticon_rank,
-    show_nyan_bot_rank: show_nyan_bot_rank,
+    show_brown_nyan_rank: show_brown_nyan_rank,
     show_eat_rank: show_eat_rank,
     show_vomit_rank: show_vomit_rank,
     show_escape_rank: show_escape_rank,

@@ -51,7 +51,7 @@ const VOMIT = "퉤엣";
 const VOMITED = "퉤엣당햇";
 const PROFILE = "프로필";
 const PW = "패스워드";
-const NYAN_BOT = "화냥봇";
+const BROWN_NYAN = "브라운냥";
 const PHONE = "화냥폰";
 const MASTER = "화이트냥";
 
@@ -116,7 +116,7 @@ const obj = {
     VOMITED: VOMITED,
     PROFILE: PROFILE,
     PW: PW,
-    NYAN_BOT: NYAN_BOT,
+    BROWN_NYAN: BROWN_NYAN,
     PHONE: PHONE,
     MASTER: MASTER,
 

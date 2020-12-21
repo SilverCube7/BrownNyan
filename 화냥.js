@@ -1,9 +1,9 @@
 /**
  * 봇주인: 화이트냥
- * 봇: 화냥봇
+ * 봇: 브라운냥
  */
 
-const scriptName = "화냥";
+const scriptName = "브라운냥";
 
 const learn_map = new Map();
 const msg_map = new Map();
@@ -191,7 +191,7 @@ for(let k of kw.ADMIN_LIST) cmd_map.set(k, cmd.admin_command);
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
     /**
-     * 화냥봇이 참가하고 있는 room이 다음 조건들 중 하나를 만족해야 반응
+     * 브라운냥이 참가하고 있는 room이 다음 조건들 중 하나를 만족해야 반응
      *     room이 화이트냥
      *     room의 접두사가 [WN]
      */

@@ -193,9 +193,9 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     /**
      * 브라운냥이 참가하고 있는 room이 다음 조건들 중 하나를 만족해야 반응
      *     room이 화이트냥
-     *     room의 접두사가 [WN]
+     *     room의 접두사가 [BN]
      */
-    if(room == kw.MASTER || is_room_prefix(room, "[WN]")) {
+    if(room == kw.MASTER || is_room_prefix(room, "[BN]")) {
         if(!learn_map.has(room))
             learn_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.LEARNING)));
 

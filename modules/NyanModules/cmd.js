@@ -215,7 +215,7 @@ function response_brown_nyan(room, sender, query) {
 
 function show_your_name(room, sender, query) {
     if(!query.length)
-        return kw.BROWN_NYAN+"이다냥! "+kw.MASTER+"님이 만들었다냥!";
+        return kw.BROWN_NYAN+"이다냥! "+kw.MASTER+"과 친구다냥!";
 
     return "";
 }

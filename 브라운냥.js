@@ -7,10 +7,10 @@ const scriptName = "브라운냥";
 
 const learn_map = new Map();
 const msg_map = new Map();
-const nyan_bot_msg_map = new Map();
+const brown_nyan_msg_map = new Map();
 
 const msg_map_limit = 500;
-const nyan_bot_msg_map_limit = 100;
+const brown_nyan_msg_map_limit = 100;
 const eat_fail_percent = 3; // 꿀꺽 실패 확률이 1/eat_fail_percent
 const eat_pocket_limit = 100;
 const emoji_len_limit = 5;
@@ -98,12 +98,12 @@ function find_target(room) {
     return undefined;
 }
 
-function is_nyan_bot_last_msg(room, msg) {
-    if(nyan_bot_msg_map.has(room)) {
-        let len = nyan_bot_msg_map.get(room).length;
+function is_brown_nyan_last_msg(room, msg) {
+    if(brown_nyan_msg_map.has(room)) {
+        let len = brown_nyan_msg_map.get(room).length;
 
         if(len > 0)
-            return nyan_bot_msg_map.get(room)[len-1] == msg;
+            return brown_nyan_msg_map.get(room)[len-1] == msg;
     }
 
     return false;
@@ -144,14 +144,14 @@ function parse_learn_data_value(room, sender, value) {
     return new_value;
 }
 
-function push_in_nyan_bot_msg_map(room, msg) {
-    if(!nyan_bot_msg_map.has(room))
-        nyan_bot_msg_map.set(room, []);
+function push_in_brown_nyan_msg_map(room, msg) {
+    if(!brown_nyan_msg_map.has(room))
+        brown_nyan_msg_map.set(room, []);
 
-    while(nyan_bot_msg_map.get(room).length > nyan_bot_msg_map_limit)
-        nyan_bot_msg_map.get(room).shift();
+    while(brown_nyan_msg_map.get(room).length > brown_nyan_msg_map_limit)
+        brown_nyan_msg_map.get(room).shift();
 
-    nyan_bot_msg_map.get(room).push(msg);
+    brown_nyan_msg_map.get(room).push(msg);
 }
 
 function send_emoji(replier, room, sender, query) {
@@ -161,7 +161,7 @@ function send_emoji(replier, room, sender, query) {
 }
 
 function send_msg(replier, room, msg) {
-    push_in_nyan_bot_msg_map(room, msg);
+    push_in_brown_nyan_msg_map(room, msg);
     if(!msg) return false;
     return replier.reply(msg);
 }
@@ -176,7 +176,7 @@ const cmd_map = new Map([
     [kw.LEARNING_LIST, cmd.show_learn_list],
     [kw.TODAY, cmd.show_today],
     [kw.TODAY_DAY, cmd.show_today_day],
-    [kw.NYAN_BOT, cmd.response_nyan_bot],
+    [kw.BROWN_NYAN, cmd.response_brown_nyan],
     [kw.YOUR_NAME, cmd.show_your_name],
     [kw.MY_NAME, cmd.show_my_name],
     [kw.EAT, cmd.eat],
@@ -218,10 +218,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             // L이 똑같은 메시지를 계속 보내서 무한정 반응해버리는 현상 방지
             if(!(msg_list.length >= 2 && lib.in_list(msg_list[msg_list.length-2][1], kw.L_NAMES))) {
                 // L이 특정 메시지를 보내면 반응
-                if((msg == kw.NYAN_BOT+"님, 죽어주세요 !") ||
-                   (msg == "탕" && is_nyan_bot_last_msg(room, "러시안룰렛"))) { // FIXME: ;;;
+                if((msg == kw.BROWN_NYAN+"님, 죽어주세요 !") ||
+                   (msg == "탕" && is_brown_nyan_last_msg(room, "러시안룰렛"))) { // FIXME: ;;;
                     send_msg(replier, room, "꾸에에엑");
-                } else if(msg.indexOf(kw.NYAN_BOT+"님") != -1) {
+                } else if(msg.indexOf(kw.BROWN_NYAN+"님") != -1) {
                     send_msg(replier, room, "냥!?");
                 }
             }

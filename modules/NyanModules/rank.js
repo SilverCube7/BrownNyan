@@ -10,8 +10,9 @@ const vomited_rank_map = new Map();
 const eat_vs_rank_map = new Map();
 
 function load_rank_list(room, rank_map, rank_name) {
-    if(!rank_map.has(room))
+    if(!rank_map.has(room)) {
         rank_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.RANK+kw.SLASH+rank_name)));
+    }
 
     return rank_map.get(room);
 }
@@ -25,9 +26,11 @@ function convert_num_to_str(k, rank_list) {
 }
 
 function find_who_in_rank_list(who, rank_list) {
-    for(let i=0; i<rank_list.length; i++)
-        if(rank_list[i][0] == who)
+    for(let i=0; i<rank_list.length; i++) {
+        if(rank_list[i][0] == who) {
             return i;
+        }
+    }
 
     return -1;
 }
@@ -41,52 +44,63 @@ function push_in_rank_list(who, rank_list, cnt) {
 }
 
 function update_rank_map(room, who, rank_map, rank_name, cnt) {
-    if(!cnt) cnt = 1;
+    if(!cnt) {
+        cnt = 1;
+    }
 
     let rank_list = load_rank_list(room, rank_map, rank_name);
 
-    for(let i=0; i<rank_list.length; i++)
+    for(let i=0; i<rank_list.length; i++) {
         convert_str_to_num(i, rank_list);
+    }
 
     let k = find_who_in_rank_list(who, rank_list);
 
-    if(k != -1)
+    if(k != -1) {
         update_rank_list(k, rank_list, cnt);
-    else
+    } else {
         push_in_rank_list(who, rank_list, cnt);
+    }
 
     rank_list.sort((a, b) => b[1]-a[1]); // 내림차순 정렬
 
-    for(let i=0; i<rank_list.length; i++)
+    for(let i=0; i<rank_list.length; i++) {
         convert_num_to_str(i, rank_list);
+    }
 
     db.save_list(db.make_full_path(room+kw.SLASH+kw.RANK+kw.SLASH+rank_name), rank_list);
 }
 
 function update_eat_vs_rank_map(room, rank_map, rank_name) {
     let rank_list = load_rank_list(room, rank_map, rank_name);
-    while(rank_list.length > 0) rank_list.pop();
+
+    while(rank_list.length > 0) {
+        rank_list.pop();
+    }
 
     let eat_rank_list = load_rank_list(room, eat_rank_map, kw.EAT);
     let eaten_rank_list = load_rank_list(room, eaten_rank_map, kw.EATEN);
 
-    for(let i of eat_rank_list)
+    for(let i of eat_rank_list) {
         rank_list.push([i[0], Number(i[1])]);
+    }
 
     for(let i of eaten_rank_list) {
         let who = i[0], cnt = -Number(i[1]);
         let k = find_who_in_rank_list(who, rank_list);
 
-        if(k != -1)
+        if(k != -1) {
             update_rank_list(k, rank_list, cnt);
-        else
+        } else {
             push_in_rank_list(who, rank_list, cnt);
+        }
     }
 
     rank_list.sort((a, b) => b[1]-a[1]); // 내림차순 정렬
 
-    for(let i=0; i<rank_list.length; i++)
+    for(let i=0; i<rank_list.length; i++) {
         convert_num_to_str(i, rank_list);
+    }
 
     db.save_list(db.make_full_path(room+kw.SLASH+kw.RANK+kw.SLASH+rank_name), rank_list);
 }
@@ -94,8 +108,9 @@ function update_eat_vs_rank_map(room, rank_map, rank_name) {
 function show_rank(title, rank_list) {
     let s = "< "+title+" >\n\n";
 
-    for(let i=0; i<rank_list.length; i++)
+    for(let i=0; i<rank_list.length; i++) {
         s += "("+String(i+1)+") "+String(rank_list[i][0])+": "+String(rank_list[i][1])+'\n';
+    }
 
     return s;
 }

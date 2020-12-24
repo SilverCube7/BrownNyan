@@ -5,8 +5,9 @@ function make_full_path(small_path) {
 function load_txt(path) {
     let txt = DataBase.getDataBase(path);
 
-    if(!txt)
+    if(!txt) {
         txt = "";
+    }
 
     return txt;
 }
@@ -23,13 +24,15 @@ function save_txt(path, txt) {
 function load_list(path) {
     let list = load_txt(path);
 
-    if(!list)
+    if(!list) {
         return [];
+    }
 
     list = list.split(kw.ENTER_TOKEN);
 
-    for(let i=0; i<list.length; i++)
+    for(let i=0; i<list.length; i++) {
         list[i] = list[i].split(kw.SPACE_TOKEN);
+    }
 
     return list;
 }
@@ -41,12 +44,14 @@ function save_list(path, list) {
         for(let j=0; j<list[i].length; j++) {
             txt += list[i][j];
 
-            if(j < list[i].length-1)
+            if(j < list[i].length-1) {
                 txt += kw.SPACE_TOKEN;
+            }
         }
 
-        if(i < list.length-1)
+        if(i < list.length-1) {
             txt += kw.ENTER_TOKEN;
+        }
     }
 
     DataBase.setDataBase(path, txt);

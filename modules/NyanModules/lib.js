@@ -1,7 +1,9 @@
 function in_list(s, list) {
-    for(let i of list)
-        if(s == i)
+    for(let i of list) {
+        if(s == i) {
             return true;
+        }
+    }
 
     return false;
 }
@@ -18,11 +20,17 @@ function choose(list) {
 function strip(s) {
     let l = 0, r = s.length-1;
 
-    while(l < s.length && in_list(s[l], spaces)) l++;
-    while(r >= 0 && in_list(s[r], spaces)) r--;
+    while(l < s.length && in_list(s[l], spaces)) {
+        l++;
+    }
+    while(r >= 0 && in_list(s[r], spaces)) {
+        r--;
+    }
 
     let new_s = "";
-    for(let i=l; i<=r; i++) new_s += s[i];
+    for(let i=l; i<=r; i++) {
+        new_s += s[i];
+    }
 
     return new_s;
 }

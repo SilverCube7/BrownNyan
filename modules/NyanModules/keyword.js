@@ -16,7 +16,7 @@ const SCISSOR = "가위";
 const EAT = "꿀꺽";
 const EATEN = "꿀꺽당햇";
 const EAT_VS = "꿀꺽대결";
-const EAT_POCKET = "꿀꺽주머니";
+const EATING_POCKET = "꿀꺽주머니";
 const DEV = "개발자";
 const NYAN_LANG = "냥냥어";
 const LEARNING = "냥습";
@@ -81,7 +81,7 @@ const obj = {
     EAT: EAT,
     EATEN: EATEN,
     EAT_VS: EAT_VS,
-    EAT_POCKET: EAT_POCKET,
+    EATING_POCKET: EATING_POCKET,
     DEV: DEV,
     NYAN_LANG: NYAN_LANG,
     LEARNING: LEARNING,

@@ -12,7 +12,7 @@ const brown_nyan_msg_map = new Map();
 const msg_map_limit = 500;
 const brown_nyan_msg_map_limit = 100;
 const eat_fail_percent = 3; // 꿀꺽 실패 확률이 1/eat_fail_percent
-const eat_pocket_limit = 100;
+const eating_pocket_limit = 100;
 const emoji_len_limit = 5;
 
 const forbidden_signs = [
@@ -50,31 +50,38 @@ const spaces = [
 ];
 
 function is_forbidden_word(s) {
-    for(let i of forbidden_words)
-        if(s.toUpperCase() == i.toUpperCase())
+    for(let i of forbidden_words) {
+        if(s.toUpperCase() == i.toUpperCase()) {
             return true;
+        }
+    }
 
     return false;
 }
 
 function in_forbidden_sign(s) {
-    for(let i of forbidden_signs)
-        if(s.indexOf(i) != -1)
+    for(let i of forbidden_signs) {
+        if(s.indexOf(i) != -1) {
             return true;
+        }
+    }
 
     return false;
 }
 
 function is_space(c) {
-    for(let i of spaces)
-        if(c == i)
+    for(let i of spaces) {
+        if(c == i) {
             return true;
+        }
+    }
 
     return false;
 }
 
 const kw = require("modules/NyanModules/keyword.js");
 const lib = require("modules/NyanModules/lib.js");
+const ans = require("modules/NyanModules/ans.js");
 const db = require("modules/NyanModules/db.js");
 
 const PI_1000 = db.load_txt(db.make_full_path(kw.NYAN_FILES+kw.SLASH+kw.PI));
@@ -91,9 +98,11 @@ const tmr = require("modules/NyanModules/timer.js");
 function find_target(room) {
     let msg_list = msg_map.get(room);
 
-    for(let i=msg_list.length-2; i>=0; i--)
-        if(!lib.in_list(msg_list[i][1], kw.L_NAMES))
+    for(let i=msg_list.length-2; i>=0; i--) {
+        if(!lib.in_list(msg_list[i][1], kw.L_NAMES)) {
             return msg_list[i][1];
+        }
+    }
 
     return undefined;
 }
@@ -102,8 +111,9 @@ function is_brown_nyan_last_msg(room, msg) {
     if(brown_nyan_msg_map.has(room)) {
         let len = brown_nyan_msg_map.get(room).length;
 
-        if(len > 0)
+        if(len > 0) {
             return brown_nyan_msg_map.get(room)[len-1] == msg;
+        }
     }
 
     return false;
@@ -115,10 +125,16 @@ function is_room_prefix(room, prefix) {
 
 function parse_learn_data_value(room, sender, value) {
     target = find_target(room);
-    if(!target) target = sender;
+    if(!target) {
+        target = sender;
+    }
 
-    while(value.indexOf(kw.ME_TOKEN) != -1) value = value.replace(kw.ME_TOKEN, sender);
-    while(value.indexOf(kw.YOU_TOKEN) != -1) value = value.replace(kw.YOU_TOKEN, target);
+    while(value.indexOf(kw.ME_TOKEN) != -1) {
+        value = value.replace(kw.ME_TOKEN, sender);
+    }
+    while(value.indexOf(kw.YOU_TOKEN) != -1) {
+        value = value.replace(kw.YOU_TOKEN, target);
+    }
 
     let new_value = "";
 
@@ -127,8 +143,9 @@ function parse_learn_data_value(room, sender, value) {
         if(value[i] == '%') {
             let token = "", j = i+1;
 
-            for(; (j<value.length && value[j]!='%'); j++)
+            for(; (j<value.length && value[j]!='%'); j++) {
                 token += value[j];
+            }
 
             if(j < value.length) {
                 let choose_one = lib.strip(lib.choose(token.split(",")));
@@ -145,24 +162,32 @@ function parse_learn_data_value(room, sender, value) {
 }
 
 function push_in_brown_nyan_msg_map(room, msg) {
-    if(!brown_nyan_msg_map.has(room))
+    if(!brown_nyan_msg_map.has(room)) {
         brown_nyan_msg_map.set(room, []);
+    }
 
-    while(brown_nyan_msg_map.get(room).length > brown_nyan_msg_map_limit)
+    while(brown_nyan_msg_map.get(room).length > brown_nyan_msg_map_limit) {
         brown_nyan_msg_map.get(room).shift();
+    }
 
     brown_nyan_msg_map.get(room).push(msg);
 }
 
 function send_emoji(replier, room, sender, query) {
-    if(query.length == 1)
-        for(let i of cmd.make_emoji(room, sender, query))
+    if(query.length == 1) {
+        for(let i of cmd.make_emoji(room, sender, query)) {
             send_msg(replier, room, i);
+        }
+    }
 }
 
 function send_msg(replier, room, msg) {
     push_in_brown_nyan_msg_map(room, msg);
-    if(!msg) return false;
+
+    if(!msg) {
+        return false;
+    }
+
     return replier.reply(msg);
 }
 
@@ -180,14 +205,22 @@ const cmd_map = new Map([
     [kw.YOUR_NAME, cmd.show_your_name],
     [kw.MY_NAME, cmd.show_my_name],
     [kw.EAT, cmd.eat],
-    [kw.EAT_POCKET, cmd.show_eat_pocket],
+    [kw.EATING_POCKET, cmd.show_eating_pocket],
     [kw.DIGESTION, cmd.digest],
     [kw.DEV, cmd.dev_command]
 ]);
-for(let k of kw.RSP) cmd_map.set(k, cmd.play_rsp);
-for(let k of kw.HELLO_LIST) cmd_map.set(k, cmd.say_hello);
-for(let k of kw.VOMIT_LIST) cmd_map.set(k, cmd.vomit);
-for(let k of kw.ADMIN_LIST) cmd_map.set(k, cmd.admin_command);
+for(let k of kw.RSP) {
+    cmd_map.set(k, cmd.play_rsp);
+}
+for(let k of kw.HELLO_LIST) {
+    cmd_map.set(k, cmd.say_hello);
+}
+for(let k of kw.VOMIT_LIST) {
+    cmd_map.set(k, cmd.vomit);
+}
+for(let k of kw.ADMIN_LIST) {
+    cmd_map.set(k, cmd.admin_command);
+}
 
 function response(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
     /**
@@ -196,16 +229,19 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
      *     room의 접두사가 [BN]
      */
     if(room == kw.MASTER || is_room_prefix(room, "[BN]")) {
-        if(!learn_map.has(room))
+        if(!learn_map.has(room)) {
             learn_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.LEARNING)));
+        }
 
-        if(!msg_map.has(room))
+        if(!msg_map.has(room)) {
             msg_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.MSG)));
+        }
 
         msg_map.get(room).push([msg, sender]);
 
-        while(msg_map.get(room).length > msg_map_limit+1)
+        while(msg_map.get(room).length > msg_map_limit+1) {
             msg_map.get(room).shift();
+        }
 
         db.save_list(db.make_full_path(room+kw.SLASH+kw.MSG), msg_map.get(room));
 
@@ -229,30 +265,29 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             return;
         }
 
-        if(msg == kw.SEND_PICTURE)
+        if(msg == kw.SEND_PICTURE) {
             rank.update_rank_map(room, sender, rank.picture_rank_map, kw.PICTURE);
-        else if(msg == kw.SEND_EMOTICON)
+        } else if(msg == kw.SEND_EMOTICON) {
             rank.update_rank_map(room, sender, rank.emoticon_rank_map, kw.EMOTICON);
-        else
+        } else {
             rank.update_rank_map(room, sender, rank.talk_rank_map, kw.TALK);
+        }
 
         let query = msg.split('/');
 
         if(query[0].toUpperCase() == kw.PI) {
             send_msg(replier, room, cmd.PI(room, sender, query.slice(1)));
-        }
-        else if(query[0] == kw.EMOJI) {
+        } else if(query[0] == kw.EMOJI) {
             send_emoji(replier, room, sender, query.slice(1));
-        }
-        else if(cmd_map.get(query[0])) {
+        } else if(cmd_map.get(query[0])) {
             send_msg(replier, room, cmd_map.get(query[0])(room, sender, query.slice(1)));
-        }
-        else {
+        } else {
             let learn_list = learn_map.get(room);
 
+            // 메시지가 오면 학습데이터에 따라 반응하기
             for(let i=0; i<learn_list.length; i++) {
                 if(msg == learn_list[i][0]) {
-                    send_msg(replier, room, parse_learn_data_value(room, sender, learn_list[i][1])); // 메시지가 오면 학습데이터에 따라 반응하기
+                    send_msg(replier, room, parse_learn_data_value(room, sender, learn_list[i][1]));
                     break;
                 }
             }

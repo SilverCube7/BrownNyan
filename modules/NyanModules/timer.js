@@ -25,8 +25,9 @@ function set_interval(f, start, delay) {
 const clear_interval = clear_timeout;
 
 function clear_all() {
-    for(let v of ids.values())
+    for(let v of ids.values()) {
         v.cancel();
+    }
 
     timer.purge();
     ids.clear();

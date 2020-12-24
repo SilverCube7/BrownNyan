@@ -28,8 +28,10 @@ const ESCAPE = "도망";
 const TALK = "말";
 const MSG = "메시지";
 const ROCK = "바위";
+const ROCK_2 = "주먹";
 const VERSION = "버전";
 const PAPER = "보";
+const PAPER_2 = "보자기";
 const BATTERY = "배터리";
 const PICTURE = "사진";
 const SEND_PICTURE = "사진을 보냈습니다.";
@@ -100,8 +102,10 @@ const obj = {
     TALK: TALK,
     MSG: MSG,
     ROCK: ROCK,
+    ROCK_2: ROCK_2,
     VERSION: VERSION,
     PAPER: PAPER,
+    PAPER_2: PAPER_2,
     BATTERY: BATTERY,
     PICTURE: PICTURE,
     SEND_PICTURE: SEND_PICTURE,

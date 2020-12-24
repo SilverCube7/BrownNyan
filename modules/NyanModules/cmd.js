@@ -3,8 +3,10 @@ const { rsp_lose } = require("./ans");
 const day = ['일', '월', '화', '수', '목', '금', '토'];
 const rsp_stoi = new Map([
     [kw.ROCK, 0],
+    [kw.ROCK_2, 0],
     [kw.SCISSOR, 1],
-    [kw.PAPER, 2]
+    [kw.PAPER, 2],
+    [kw.PAPER_2, 2]
 ]);
 const rsp_itos = new Map([
     [0, kw.ROCK],

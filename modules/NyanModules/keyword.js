@@ -1,7 +1,7 @@
 const EMOJI_CODE = String.fromCharCode(8205);
 
-const ENTER_TOKEN = "{enter}";
-const SPACE_TOKEN = "{space}";
+const ENTER_TOKEN = "<en!>";
+const SPACE_TOKEN = "<sp!>";
 
 const ME_TOKEN = "[m]";
 const YOU_TOKEN = "[y]";

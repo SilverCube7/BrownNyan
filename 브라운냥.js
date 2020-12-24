@@ -11,7 +11,7 @@ const brown_nyan_msg_map = new Map();
 
 const msg_map_limit = 500;
 const brown_nyan_msg_map_limit = 100;
-const eat_fail_percent = 3; // 꿀꺽 실패 확률이 1/eat_fail_percent
+const eat_fail_percent = 4; // 꿀꺽 실패 확률이 1/eat_fail_percent
 const eating_pocket_limit = 100;
 const emoji_len_limit = 5;
 

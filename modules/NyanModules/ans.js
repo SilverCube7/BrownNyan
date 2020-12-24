@@ -40,11 +40,11 @@ function show_phone_temperature(temperature) {
     return temperature+"℃ 이다냥!";
 }
 
-function show_today(year, month, date) {
+function show_date(year, month, date) {
     return year+"년 "+month+"월 "+date+"일이다냥!";
 }
 
-function show_today_day(day) {
+function show_date_day(day) {
     return day+"요일이다냥!";
 }
 
@@ -121,8 +121,8 @@ const obj = {
     show_phone_battery: show_phone_battery,
     show_phone_voltage: show_phone_voltage,
     show_phone_temperature: show_phone_temperature,
-    show_today: show_today,
-    show_today_day: show_today_day,
+    show_date: show_date,
+    show_date_day: show_date_day,
     say_hello: say_hello,
     response_brown_nyan: response_brown_nyan,
     show_your_name: show_your_name,

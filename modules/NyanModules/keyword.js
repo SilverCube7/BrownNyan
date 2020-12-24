@@ -38,6 +38,13 @@ const DIGESTION = "소화";
 const RANK = "순위";
 const ADMIN = "어드민";
 const TODAY = "오늘은";
+const TOMORROW = "내일은";
+const TWO_DAYS_FROM_TODAY = "모레는";
+const THREE_DAYS_FROM_TODAY = "글피는";
+const FOUR_DAYS_FROM_TODAY = "그글피는";
+const YESTERDAY = "어제는";
+const TWO_DAYS_AGO = "그제는";
+const THREE_DAYS_AGO = "그끄저께는";
 const TEMPERATURE = "온도";
 const TODAY_DAY = "요일은";
 const USER = "유저";
@@ -103,6 +110,13 @@ const obj = {
     RANK: RANK,
     ADMIN: ADMIN,
     TODAY: TODAY,
+    TOMORROW: TOMORROW,
+    TWO_DAYS_FROM_TODAY: TWO_DAYS_FROM_TODAY,
+    THREE_DAYS_FROM_TODAY: THREE_DAYS_FROM_TODAY,
+    FOUR_DAYS_FROM_TODAY: FOUR_DAYS_FROM_TODAY,
+    YESTERDAY: YESTERDAY,
+    TWO_DAYS_AGO: TWO_DAYS_AGO,
+    THREE_DAYS_AGO: THREE_DAYS_AGO,
     TEMPERATURE: TEMPERATURE,
     TODAY_DAY: TODAY_DAY,
     USER: USER,

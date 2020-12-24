@@ -196,19 +196,52 @@ function show_learn_list(room, sender, query) {
     return ans.BLANK;
 }
 
-function show_today(room, sender, query) {
+function show_date(room, sender, query, add) {
     if(!query.length) {
-        const now = new Date();
-        return ans.show_today(now.getFullYear(), now.getMonth()+1, now.getDate());
+        const date = new Date();
+        date.setDate(date.getDate()+add);
+        return ans.show_date(date.getFullYear(), date.getMonth()+1, date.getDate());
     }
 
     return ans.BLANK;
 }
 
+function show_today(room, sender, query) {
+    return show_date(room, sender, query, 0);
+}
+
+function show_tomorrow(room, sender, query) {
+    return show_date(room, sender, query, 1);
+}
+
+function show_two_days_from_today(room, sender, query) {
+    return show_date(room, sender, query, 2);
+}
+
+function show_three_days_from_today(room, sender, query) {
+    return show_date(room, sender, query, 3);
+}
+
+function show_four_days_from_today(room, sender, query) {
+    return show_date(room, sender, query, 4);
+}
+
+function show_yesterday(room, sender, query) {
+    return show_date(room, sender, query, -1);
+}
+
+function show_two_days_ago(room, sender, query) {
+    return show_date(room, sender, query, -2);
+}
+
+function show_three_days_ago(room, sender, query) {
+    return show_date(room, sender, query, -3);
+}
+
 function show_today_day(room, sender, query) {
     if(!query.length) {
         const now = new Date();
-        return ans.show_today_day(day[now.getDay()]);
+        return ans.show_date_day(day[now.getDay()]);
     }
 
     return ans.BLANK;
@@ -403,6 +436,13 @@ const obj = {
     show_nyan_lang: show_nyan_lang,
     show_learn_list: show_learn_list,
     show_today: show_today,
+    show_tomorrow: show_tomorrow,
+    show_two_days_from_today: show_two_days_from_today,
+    show_three_days_from_today : show_three_days_from_today,
+    show_four_days_from_today : show_four_days_from_today,
+    show_yesterday : show_yesterday,
+    show_two_days_ago : show_two_days_ago,
+    show_three_days_ago : show_three_days_ago,
     show_today_day: show_today_day,
     say_hello: say_hello,
     response_brown_nyan: response_brown_nyan,

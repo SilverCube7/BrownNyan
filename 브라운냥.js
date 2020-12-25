@@ -12,6 +12,7 @@ const brown_nyan_msg_map = new Map();
 const msg_map_limit = 500;
 const brown_nyan_msg_map_limit = 100;
 const eat_fail_percent = 4; // 꿀꺽 실패 확률이 1/eat_fail_percent
+const lick_and_eat_percent = 4; // 핥짝하고 꿀꺽할 확률이 1/lick_and_eat_percent
 const eating_pocket_limit = 100;
 const emoji_len_limit = 5;
 
@@ -224,6 +225,9 @@ for(let k of kw.HELLO_LIST) {
 }
 for(let k of kw.VOMIT_LIST) {
     cmd_map.set(k, cmd.vomit);
+}
+for(let k of kw.LICK_LIST) {
+    cmd_map.set(k, cmd.lick);
 }
 for(let k of kw.ADMIN_LIST) {
     cmd_map.set(k, cmd.admin_command);

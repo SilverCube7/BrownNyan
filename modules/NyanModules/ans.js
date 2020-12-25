@@ -1,11 +1,12 @@
 const BLANK = "";
 const CAN_NOT_EAT_ME = "자신을 꿀꺽할 수 없다냥!";
 const CAN_NOT_LEARNING = "냥습할 수 없다냥!";
+const CAN_NOT_LICK_ME = "자신을 핥짝할 수 없다냥!";
 const EMPTY_EATING_POCKET = "꿀꺽주머니에 아무것도 없다냥!";
 const FORCIBLY_DIGEST = "소화제를 사용해서 강제로 소화했다냥!";
 const FULL_CHARGING = "풀 차지 상태다냥!!";
 const HAVE_NOT_LEARNING = "냥습한게 없다냥!";
-const HAVE_NOT_TARGET = "꿀꺽할 사람이 없다냥!";
+const HAVE_NOT_TARGET = "대상이 없다냥!";
 const IS_CHARGING = "충전 중이다냥!";
 const IS_NOT_CHARGING = "충전 중이 아니다냥!";
 const IS_NOT_INT = "정수가 아니다냥!";
@@ -88,6 +89,14 @@ function vomit(target) {
     return target+"님을 뱉었다냥!";
 }
 
+function lick_and_eat(target) {
+    return target+"님을 핥짝.. 어랏, 넘 맛있어서 꿀꺽해버렸다냥!";
+}
+
+function lick(target) {
+    return target+"님을 핥짝했다냥!";
+}
+
 function len_between_a_and_b(a, b) {
     return "길이는 "+a+"~"+b+" 사이여야 한다냥!";
 }
@@ -100,6 +109,7 @@ const obj = {
     BLANK: BLANK,
     CAN_NOT_EAT_ME: CAN_NOT_EAT_ME,
     CAN_NOT_LEARNING: CAN_NOT_LEARNING,
+    CAN_NOT_LICK_ME: CAN_NOT_LICK_ME,
     EMPTY_EATING_POCKET: EMPTY_EATING_POCKET,
     FORCIBLY_DIGEST: FORCIBLY_DIGEST,
     FULL_CHARGING: FULL_CHARGING,
@@ -133,6 +143,8 @@ const obj = {
     escape: escape,
     eat: eat,
     vomit: vomit,
+    lick_and_eat: lick_and_eat,
+    lick: lick,
     len_between_a_and_b: len_between_a_and_b,
     show: show
 };

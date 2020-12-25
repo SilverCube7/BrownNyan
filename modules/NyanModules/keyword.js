@@ -58,6 +58,8 @@ const IS_CHARGING = "충전중?";
 const TEST = "테스트";
 const VOMIT = "퉤엣";
 const VOMITED = "퉤엣당햇";
+const LICK = "핥짝";
+const LICKED = "핥짝당햇";
 const PROFILE = "프로필";
 const PW = "패스워드";
 const BROWN_NYAN = "브라운냥";
@@ -70,6 +72,8 @@ const ADMIN_LIST = [ADMIN, "어"];
 const L_NAMES = [L, "l", "ㅣ", "엘", "死神", "사신"];
 const VOMIT_LIST = [VOMIT, "퉷"];
 const VOMITED_LIST = [VOMITED, "퉷당햇"];
+const LICK_LIST = [LICK, "할짝"];
+const LICKED_LIST = [LICKED, "할짝당햇"];
 
 const obj = {
     EMOJI_CODE: EMOJI_CODE,
@@ -132,6 +136,8 @@ const obj = {
     TEST: TEST,
     VOMIT: VOMIT,
     VOMITED: VOMITED,
+    LICK: LICK,
+    LICKED: LICKED,
     PROFILE: PROFILE,
     PW: PW,
     BROWN_NYAN: BROWN_NYAN,
@@ -143,7 +149,9 @@ const obj = {
     ADMIN_LIST: ADMIN_LIST,
     L_NAMES: L_NAMES,
     VOMIT_LIST: VOMIT_LIST,
-    VOMITED_LIST: VOMITED_LIST
+    VOMITED_LIST: VOMITED_LIST,
+    LICK_LIST: LICK_LIST,
+    LICKED_LIST: LICKED_LIST
 };
 
 module.exports = obj;

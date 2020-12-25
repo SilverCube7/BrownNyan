@@ -168,6 +168,8 @@ function show_rank(room, sender, query) {
         if(A == kw.EATEN) return rank.show_eaten_rank(room);
         if(lib.in_list(A, kw.VOMITED_LIST)) return rank.show_vomited_rank(room);
         if(A == kw.EAT_VS) return rank.show_eat_vs_rank(room);
+        if(lib.in_list(A, kw.LICK_LIST)) return rank.show_lick_rank(room);
+        if(lib.in_list(A, kw.LICKED_LIST)) return rank.show_licked_rank(room);
 
         return ans.IS_NOT_RANK;
     }
@@ -383,6 +385,35 @@ function digest(room, sender, query) {
     return ans.BLANK;
 }
 
+function lick(room, sender, query) {
+    if(!query.length) {
+        let target = find_target(room);
+
+        if(!target) {
+            return ans.HAVE_NOT_TARGET;
+        }
+
+        if(target == sender) {
+            return ans.CAN_NOT_LICK_ME;
+        }
+
+        rank.update_rank_map(room, sender, rank.lick_rank_map, kw.LICK);
+        rank.update_rank_map(room, target, rank.licked_rank_map, kw.LICKED);
+
+        if(lib.randint(0, lick_and_eat_percent-1) == 0) {
+            user.push_in_eating_pocket(room, sender, target);
+            rank.update_rank_map(room, sender, rank.eat_rank_map, kw.EAT);
+            rank.update_rank_map(room, target, rank.eaten_rank_map, kw.EATEN);
+
+            return ans.lick_and_eat(target);
+        }
+
+        return ans.lick(target);
+    }
+
+    return ans.BLANK;
+}
+
 function make_emoji(room, sender, query) {
     let A = query[0];
 
@@ -455,6 +486,7 @@ const obj = {
     vomit: vomit,
     show_eating_pocket: show_eating_pocket,
     digest: digest,
+    lick: lick,
     make_emoji: make_emoji,
     PI: PI,
     dev_command: dev_command,

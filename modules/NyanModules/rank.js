@@ -8,6 +8,8 @@ const escape_rank_map = new Map();
 const eaten_rank_map = new Map();
 const vomited_rank_map = new Map();
 const eat_vs_rank_map = new Map();
+const lick_rank_map = new Map();
+const licked_rank_map = new Map();
 
 function load_rank_list(room, rank_map, rank_name) {
     if(!rank_map.has(room)) {
@@ -167,6 +169,16 @@ function show_eat_vs_rank(room) {
     return show_rank(kw.RANK+": 꿀꺽 대결 (먹은 수 - 먹힌 수)", rank_list);
 }
 
+function show_lick_rank(room) {
+    let rank_list = load_rank_list(room, lick_rank_map, kw.LICK);
+    return show_rank(kw.RANK+": 많이 핥은 사람", rank_list);
+}
+
+function show_licked_rank(room) {
+    let rank_list = load_rank_list(room, licked_rank_map, kw.LICKED);
+    return show_rank(kw.RANK+": 핥짝당한 희생자", rank_list);
+}
+
 const obj = {
     talk_rank_map: talk_rank_map,
     picture_rank_map: picture_rank_map,
@@ -178,6 +190,8 @@ const obj = {
     eaten_rank_map: eaten_rank_map,
     vomited_rank_map: vomited_rank_map,
     eat_vs_rank_map: eat_vs_rank_map,
+    lick_rank_map: lick_rank_map,
+    licked_rank_map: licked_rank_map,
 
     update_rank_map: update_rank_map,
     update_eat_vs_rank_map: update_eat_vs_rank_map,
@@ -190,7 +204,9 @@ const obj = {
     show_escape_rank: show_escape_rank,
     show_eaten_rank: show_eaten_rank,
     show_vomited_rank: show_vomited_rank,
-    show_eat_vs_rank: show_eat_vs_rank
+    show_eat_vs_rank: show_eat_vs_rank,
+    show_lick_rank: show_lick_rank,
+    show_licked_rank: show_licked_rank
 };
 
 module.exports = obj;

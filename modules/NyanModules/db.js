@@ -16,11 +16,6 @@ function save_txt(path, txt) {
     DataBase.setDataBase(path, txt);
 }
 
-/**
- * < DB 토큰 >
- * ENTER_TOKEN = '\n'
- * SPACE_TOKEN = ' '
- */
 function load_list(path) {
     let list = load_txt(path);
 

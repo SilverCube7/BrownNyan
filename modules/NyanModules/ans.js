@@ -2,15 +2,19 @@ const BLANK = "";
 const CAN_NOT_EAT_ME = "자신을 꿀꺽할 수 없다냥!";
 const CAN_NOT_LEARNING = "냥습할 수 없다냥!";
 const CAN_NOT_LICK_ME = "자신을 핥짝할 수 없다냥!";
+const CAN_NOT_SET_STATEMENT = "명제를 만들 수 없다냥!";
 const EMPTY_EATING_POCKET = "꿀꺽주머니에 아무것도 없다냥!";
 const FORCIBLY_DIGEST = "소화제를 사용해서 강제로 소화했다냥!";
 const FULL_CHARGING = "풀 차지 상태다냥!!";
 const HAVE_NOT_LEARNING = "냥습한게 없다냥!";
+const HAVE_NOT_STATEMENT = "명제가 없다냥!";
 const HAVE_NOT_TARGET = "대상이 없다냥!";
 const IS_CHARGING = "충전 중이다냥!";
+const IS_FALSE_STATEMENT = "거짓이다냥!";
 const IS_NOT_CHARGING = "충전 중이 아니다냥!";
 const IS_NOT_INT = "정수가 아니다냥!";
 const IS_NOT_RANK = "그런 순위는 없다냥!";
+const IS_TRUE_STATEMENT = "참이다냥!";
 const NOT_IN_RANGE = "수가 범위를 초과했다냥!";
 const OK = "냥!";
 const SECRET = "이 정보는 1급기밀이다냥!";
@@ -19,6 +23,10 @@ const TOO_SHORT = "너무 짧다냥!";
 
 function confirm_learn(learning, who) {
     return learning+", "+who+"님이 냥습시켰다냥!";
+}
+
+function confirm_statement(a, b, who) {
+    return a+"->"+b+", "+who+"님이 만들었다냥!";
 }
 
 function show_prev_msg(msg, who) {
@@ -110,15 +118,19 @@ const obj = {
     CAN_NOT_EAT_ME: CAN_NOT_EAT_ME,
     CAN_NOT_LEARNING: CAN_NOT_LEARNING,
     CAN_NOT_LICK_ME: CAN_NOT_LICK_ME,
+    CAN_NOT_SET_STATEMENT: CAN_NOT_SET_STATEMENT,
     EMPTY_EATING_POCKET: EMPTY_EATING_POCKET,
     FORCIBLY_DIGEST: FORCIBLY_DIGEST,
     FULL_CHARGING: FULL_CHARGING,
     HAVE_NOT_LEARNING: HAVE_NOT_LEARNING,
+    HAVE_NOT_STATEMENT: HAVE_NOT_STATEMENT,
     HAVE_NOT_TARGET: HAVE_NOT_TARGET,
     IS_CHARGING: IS_CHARGING,
+    IS_FALSE_STATEMENT: IS_FALSE_STATEMENT,
     IS_NOT_CHARGING: IS_NOT_CHARGING,
     IS_NOT_INT: IS_NOT_INT,
     IS_NOT_RANK: IS_NOT_RANK,
+    IS_TRUE_STATEMENT: IS_TRUE_STATEMENT,
     NOT_IN_RANGE: NOT_IN_RANGE,
     OK: OK,
     SECRET: SECRET,
@@ -126,6 +138,7 @@ const obj = {
     TOO_SHORT: TOO_SHORT,
 
     confirm_learn: confirm_learn,
+    confirm_statement: confirm_statement,
     show_prev_msg: show_prev_msg,
     show_phone_version: show_phone_version,
     show_phone_battery: show_phone_battery,

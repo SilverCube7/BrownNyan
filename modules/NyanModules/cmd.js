@@ -429,6 +429,161 @@ function make_emoji(room, sender, query) {
     return emoji_list;
 }
 
+function find_in_statement_list(statement_list, s1, s2) {
+    for(let i=0; i<statement_list.length; i++) {
+        if(s1 == statement_list[i][0] && s2 == statement_list[i][1]) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+function process_statement(room, sender, query) {
+    if(query.length == 1) {
+        let A = query[0];
+
+        if(A == kw.LIST) return show_statement_list(room, sender, query.slice(1));
+    }
+
+    if(query.length == 2) {
+        return confirm_statement(room, sender, query);
+    }
+
+    if(query.length == 3) {
+        let A = query[0];
+
+        if(A == kw.ADD) return set_statement(room, sender, query.slice(1));
+        if(A == kw.DEL) return del_statement(room, sender, query.slice(1));
+    }
+
+    return ans.BLANK;
+}
+
+function set_statement(room, sender, query) {
+    let A = query[0], B = query[1];
+
+    if(!(A.length && B.length)) {
+        return ans.TOO_SHORT;
+    }
+
+    if(is_forbidden_word(A) ||
+       is_forbidden_word(B) ||
+       in_forbidden_sign(A) ||
+       in_forbidden_sign(B) ||
+       is_space(A[0]) ||
+       is_space(A[A.length-1]) ||
+       is_space(B[0]) ||
+       is_space(B[B.length-1])) {
+        return ans.CAN_NOT_SET_STATEMENT;
+    }
+
+    let statement_list = statement_map.get(room);
+    let statement_id = find_in_statement_list(statement_list, A, B);
+
+    if(statement_id != -1) {
+        statement_list[statement_id][0] = A;
+        statement_list[statement_id][1] = B;
+        statement_list[statement_id][2] = sender;
+    } else {
+        statement_list.push([A, B, sender]);
+    }
+
+    db.save_list(db.make_full_path(room+kw.SLASH+kw.STATEMENT), statement_list);
+    return ans.OK;
+}
+
+function confirm_statement(room, sender, query) {
+    let A = query[0], B = query[1];
+
+    let statement_list = statement_map.get(room);
+    let statement_id = find_in_statement_list(statement_list, A, B);
+
+    if(statement_id != -1) {
+        return ans.confirm_statement(statement_list[statement_id][0], statement_list[statement_id][1], statement_list[statement_id][2]);
+    }
+
+    return ans.HAVE_NOT_STATEMENT;
+}
+
+function del_statement(room, sender, query) {
+    let A = query[0], B = query[1];
+
+    let statement_list = statement_map.get(room);
+    let statement_id = find_in_statement_list(statement_list, A, B);
+
+    if(statement_id != -1) {
+        statement_list.splice(statement_id, 1);
+        db.save_list(db.make_full_path(room+kw.SLASH+kw.STATEMENT), statement_list);
+        return ans.OK;
+    }
+
+    return ans.HAVE_NOT_STATEMENT;
+}
+
+function show_statement_list(room, sender, query) {
+    if(!query.length) {
+        let statement_list = statement_map.get(room);
+        let show = "< "+kw.STATEMENT_LIST+" >\n\n";
+
+        for(let i=0; i<statement_list.length; i++) {
+            show += "("+String(i+1)+") "+String(statement_list[i][0])+kw.RIGHT_ARROW+String(statement_list[i][1])+kw.SLASH+String(statement_list[i][2])+'\n';
+        }
+
+        return show;
+    }
+
+    return ans.BLANK;
+}
+
+function convert_statement_split(msg, a, b) {
+    if(msg.indexOf(a) != -1 && msg.substring(msg.length-b.length) == b) {
+        let query = msg.split(a);
+        query[1] = query[1].substring(0, query[1].length-b.length);
+        return query;
+    }
+
+    return undefined;
+}
+
+function convert_statement(msg) {
+    let list = convert_statement_split(msg, "는 ", "이다");
+    if(list) return list;
+
+    list = convert_statement_split(msg, "은 ", "이다");
+    if(list) return list;
+
+    list = convert_statement_split(msg, "는 ", "다");
+    if(list) return list;
+
+    list = convert_statement_split(msg, "은 ", "다");
+    if(list) return list;
+    
+    list = convert_statement_split(msg, "->", "");
+    if(list) return list;
+
+    list = convert_statement_split(msg, "→", "");
+    if(list) return list;
+
+    return undefined;
+}
+
+function is_true_statement(statement_list, query) {
+    let A = query[0], B = query[1];
+
+    statement_graph.clear();
+
+    for(let i of statement_list) {
+        statement_graph.connect(i[0], i[1]);
+    }
+
+    if(statement_graph.dfs(A, B)) {
+        return ans.IS_TRUE_STATEMENT;
+    }
+
+    return ans.IS_FALSE_STATEMENT;
+}
+
 function PI(room, sender, query) {
     if(!query.length) {
         return ans.show(PI_1000);
@@ -488,6 +643,13 @@ const obj = {
     digest: digest,
     lick: lick,
     make_emoji: make_emoji,
+    process_statement: process_statement,
+    set_statement: set_statement,
+    confirm_statement: confirm_statement,
+    del_statement: del_statement,
+    show_statement_list: show_statement_list,
+    convert_statement: convert_statement,
+    is_true_statement: is_true_statement,
     PI: PI,
     dev_command: dev_command,
     admin_command: admin_command

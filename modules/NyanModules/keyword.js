@@ -6,6 +6,7 @@ const SPACE_TOKEN = "<sp!>";
 const ME_TOKEN = "[m]";
 const YOU_TOKEN = "[y]";
 
+const RIGHT_ARROW = "->";
 const SLASH = "/";
 
 const L = "L";
@@ -65,6 +66,10 @@ const PW = "패스워드";
 const BROWN_NYAN = "브라운냥";
 const PHONE = "화냥폰";
 const MASTER = "화이트냥";
+const ADD = "추가";
+const LIST = "목록";
+const STATEMENT = "명제";
+const STATEMENT_LIST = "명제목록";
 
 const RSP = ["가바보", "가위바위보"];
 const HELLO_LIST = ["안녕", "안녕하세요"];
@@ -84,6 +89,7 @@ const obj = {
     ME_TOKEN: ME_TOKEN,
     YOU_TOKEN: YOU_TOKEN,
 
+    RIGHT_ARROW: RIGHT_ARROW,
     SLASH: SLASH,
 
     L: L,
@@ -143,6 +149,10 @@ const obj = {
     BROWN_NYAN: BROWN_NYAN,
     PHONE: PHONE,
     MASTER: MASTER,
+    ADD: ADD,
+    LIST: LIST,
+    STATEMENT: STATEMENT,
+    STATEMENT_LIST: STATEMENT_LIST,
 
     RSP: RSP,
     HELLO_LIST: HELLO_LIST,

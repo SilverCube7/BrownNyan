@@ -6,6 +6,7 @@
 const scriptName = "브라운냥";
 
 const learn_map = new Map();
+const statement_map = new Map();
 const msg_map = new Map();
 const brown_nyan_msg_map = new Map();
 
@@ -93,6 +94,7 @@ const rank = require("modules/NyanModules/rank.js");
 const user = require("modules/NyanModules/user.js");
 const password = require("modules/NyanModules/password.js");
 const profile = require("modules/NyanModules/profile.js");
+const statement_graph = require("modules/NyanModules/graph.js");
 const cmd = require("modules/NyanModules/cmd.js");
 const tmr = require("modules/NyanModules/timer.js");
 
@@ -215,6 +217,8 @@ const cmd_map = new Map([
     [kw.EAT, cmd.eat],
     [kw.EATING_POCKET, cmd.show_eating_pocket],
     [kw.DIGESTION, cmd.digest],
+    [kw.STATEMENT, cmd.process_statement],
+    [kw.STATEMENT_LIST, cmd.show_statement_list],
     [kw.DEV, cmd.dev_command]
 ]);
 for(let k of kw.RSP) {
@@ -242,6 +246,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
     if(room == kw.MASTER || is_room_prefix(room, "[BN]")) {
         if(!learn_map.has(room)) {
             learn_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.LEARNING)));
+        }
+
+        if(!statement_map.has(room)) {
+            statement_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.STATEMENT)));
         }
 
         if(!msg_map.has(room)) {
@@ -285,6 +293,7 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         }
 
         let query = msg.split('/');
+        const statement = cmd.convert_statement(msg);
 
         if(query[0].toUpperCase() == kw.PI) {
             send_msg(replier, room, cmd.PI(room, sender, query.slice(1)));
@@ -292,6 +301,8 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             send_emoji(replier, room, sender, query.slice(1));
         } else if(cmd_map.get(query[0])) {
             send_msg(replier, room, cmd_map.get(query[0])(room, sender, query.slice(1)));
+        } else if(statement) {
+            send_msg(replier, room, cmd.is_true_statement(statement_map.get(room), statement));
         } else {
             let learn_list = learn_map.get(room);
 

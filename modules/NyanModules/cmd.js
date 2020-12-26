@@ -547,13 +547,7 @@ function convert_statement_split(msg, a, b) {
 }
 
 function convert_statement(msg) {
-    let list = convert_statement_split(msg, "는 ", "이다!");
-    if(list) return list;
-
-    list = convert_statement_split(msg, "은 ", "이다!");
-    if(list) return list;
-
-    list = convert_statement_split(msg, "는 ", "다!");
+    let list = convert_statement_split(msg, "는 ", "다!");
     if(list) return list;
 
     list = convert_statement_split(msg, "은 ", "다!");

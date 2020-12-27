@@ -81,6 +81,16 @@ function is_space(c) {
     return false;
 }
 
+function in_space(s) {
+    for(let i of spaces) {
+        if(s.indexOf(i) != -1) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 const kw = require("modules/NyanModules/keyword.js");
 const lib = require("modules/NyanModules/lib.js");
 const ans = require("modules/NyanModules/ans.js");

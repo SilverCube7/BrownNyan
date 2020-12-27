@@ -465,14 +465,14 @@ function set_statement(room, sender, query) {
         return ans.TOO_SHORT;
     }
 
-    if(is_forbidden_word(A) ||
+    const re = /^!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+$/;
+
+    if(!re.test(A) ||
+       !re.test(B) ||
+       is_forbidden_word(A) ||
        is_forbidden_word(B) ||
-       in_forbidden_sign(A) ||
-       in_forbidden_sign(B) ||
-       is_space(A[0]) ||
-       is_space(A[A.length-1]) ||
-       is_space(B[0]) ||
-       is_space(B[B.length-1])) {
+       (A[0] == "!" && is_forbidden_word(A.substring(1))) ||
+       (B[0] == "!" && is_forbidden_word(B.substring(1)))) {
         return ans.CAN_NOT_SET_STATEMENT;
     }
 
@@ -536,33 +536,23 @@ function show_statement_list(room, sender, query) {
 
 function convert_statement(msg) {
     // A은[는] B(이)다!
-    if(/[!?_\d가-힣]+[은는] +[!?_\d가-힣]+이?다!$/.test(msg)) {
-        const re1 = /[은는] +/, re2 = /이?다!$/, re3 = /[!?_]/;
+    if(/^!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+[은는] +!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+이?다!$/.test(msg)) {
+        const re1 = /[은는] +/, re2 = /이?다!$/;
         const k1 = re1.exec(msg).index, k2 = re2.exec(msg).index;
-
-        let sub = msg.substring(0, k1);
-        while(re3.test(sub)) {
-            sub = sub.replace(re3, "");
-        }
 
         /*
             (자음)+은
             (모음)+는
         */
-        if(!lib.is_end_of_vowel(sub) != (msg[k1] == "은")) {
+        if(!lib.is_end_of_vowel(msg.substring(0, k1)) != (msg[k1] == "은")) {
             return undefined;
-        }
-
-        sub = msg.substring(k1+2, k2);
-        while(re3.test(sub)) {
-            sub = sub.replace(re3, "");
         }
 
         /*
             (자음)+이다!
             (모음)+이다!/다!
         */
-        if(!lib.is_end_of_vowel(sub) && (msg[k2] != "이")) {
+        if(!lib.is_end_of_vowel(msg.substring(k1+2, k2)) && (msg[k2] != "이")) {
             return undefined;
         }
 
@@ -570,12 +560,12 @@ function convert_statement(msg) {
     }
 
     // A -> B
-    if(/[!?\w가-힣]+ *-> *[!?\w가-힣]+$/.test(msg)) {
+    if(/^!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+ *-> *!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+$/.test(msg)) {
         return msg.split(/ *-> */);
     }
 
     // A → B
-    if(/[!?\w가-힣]+ *→ *[!?\w가-힣]+$/.test(msg)) {
+    if(/^!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+ *→ *!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+$/.test(msg)) {
         return msg.split(/ *→ */);
     }
 
@@ -589,6 +579,7 @@ function is_true_statement(statement_list, query) {
 
     for(let i of statement_list) {
         statement_graph.connect(i[0], i[1]);
+        statement_graph.connect(("!"+i[1]).replace("!!", ""), ("!"+i[0]).replace("!!", ""));
     }
 
     if(statement_graph.dfs(A, B)) {

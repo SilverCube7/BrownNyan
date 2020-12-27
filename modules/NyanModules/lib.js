@@ -36,12 +36,28 @@ function strip(s) {
 }
 
 function is_end_of_vowel(s) {
-    if(s == "") {
+    if(s[s.length-1] == "_") {
         return true;
     }
 
     if(/\d/.test(s[s.length-1])) {
         return /[2459]/.test(s[s.length-1]);
+    }
+
+    if(/[A-Z]/.test(s[s.length-1])) {
+        return /[^LMNR]/.test(s[s.length-1]);
+    }
+
+    if(/[a-z]/.test(s[s.length-1])) {
+        return /[^lmnr]/.test(s[s.length-1]);
+    }
+
+    if(/[ㄱ-ㅎ]/.test(s[s.length-1])) {
+        return false;
+    }
+
+    if(/[ㅏ-ㅣ]/.test(s[s.length-1])) {
+        return true;
     }
 
     return (s.charCodeAt(s.length-1)-0xAC00+1)%(21*28)%28 == 1;

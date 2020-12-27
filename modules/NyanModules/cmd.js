@@ -1,6 +1,3 @@
-const { rsp_lose } = require("./ans");
-const { satisfy_regex } = require("./lib");
-
 const day = ['일', '월', '화', '수', '목', '금', '토'];
 const rsp_stoi = new Map([
     [kw.ROCK, 0],

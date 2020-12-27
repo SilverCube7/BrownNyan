@@ -35,11 +35,24 @@ function strip(s) {
     return new_s;
 }
 
+function is_end_of_vowel(s) {
+    if(s == "") {
+        return true;
+    }
+
+    if(/\d/.test(s[s.length-1])) {
+        return /[2459]/.test(s[s.length-1]);
+    }
+
+    return (s.charCodeAt(s.length-1)-0xAC00+1)%(21*28)%28 == 1;
+}
+
 const obj = {
     in_list: in_list,
     randint: randint,
     choose: choose,
-    strip: strip
+    strip: strip,
+    is_end_of_vowel: is_end_of_vowel
 };
 
 module.exports = obj;

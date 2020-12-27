@@ -1,4 +1,5 @@
 const { rsp_lose } = require("./ans");
+const { satisfy_regex } = require("./lib");
 
 const day = ['일', '월', '화', '수', '목', '금', '토'];
 const rsp_stoi = new Map([
@@ -536,28 +537,50 @@ function show_statement_list(room, sender, query) {
     return ans.BLANK;
 }
 
-function convert_statement_split(msg, a, b) {
-    if(msg.indexOf(a) != -1 && msg.substring(msg.length-b.length) == b) {
-        let query = msg.split(a);
-        query[1] = query[1].substring(0, query[1].length-b.length);
-        return query;
+function convert_statement(msg) {
+    // A은[는] B(이)다!
+    if(/[!?_\d가-힣]+[은는] +[!?_\d가-힣]+이?다!$/.test(msg)) {
+        const re1 = /[은는] +/, re2 = /이?다!$/, re3 = /[!?_]/;
+        const k1 = re1.exec(msg).index, k2 = re2.exec(msg).index;
+
+        let sub = msg.substring(0, k1);
+        while(re3.test(sub)) {
+            sub = sub.replace(re3, "");
+        }
+
+        /*
+            (자음)+은
+            (모음)+는
+        */
+        if(!lib.is_end_of_vowel(sub) != (msg[k1] == "은")) {
+            return undefined;
+        }
+
+        sub = msg.substring(k1+2, k2);
+        while(re3.test(sub)) {
+            sub = sub.replace(re3, "");
+        }
+
+        /*
+            (자음)+이다!
+            (모음)+이다!/다!
+        */
+        if(!lib.is_end_of_vowel(sub) && (msg[k2] != "이")) {
+            return undefined;
+        }
+
+        return msg.replace(re2, "").split(re1);
     }
 
-    return undefined;
-}
+    // A -> B
+    if(/[!?\w가-힣]+ *-> *[!?\w가-힣]+$/.test(msg)) {
+        return msg.split(/ *-> */);
+    }
 
-function convert_statement(msg) {
-    let list = convert_statement_split(msg, "는 ", "다!");
-    if(list) return list;
-
-    list = convert_statement_split(msg, "은 ", "다!");
-    if(list) return list;
-
-    list = convert_statement_split(msg, "->", "");
-    if(list) return list;
-
-    list = convert_statement_split(msg, "→", "");
-    if(list) return list;
+    // A → B
+    if(/[!?\w가-힣]+ *→ *[!?\w가-힣]+$/.test(msg)) {
+        return msg.split(/ *→ */);
+    }
 
     return undefined;
 }

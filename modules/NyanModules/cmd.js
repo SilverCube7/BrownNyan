@@ -541,10 +541,34 @@ function show_statement_list(room, sender, query) {
 }
 
 function convert_statement(msg) {
+    // A은[는] B이[가] 아니다!
+    if(/^!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+[은는] +!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+[이가] +아니다!$/.test(msg)) {
+        let re1 = /[은는] +/, re2 = /[이가] +아니다!$/;
+        let k1 = re1.exec(msg).index, k2 = re2.exec(msg).index;
+
+        /*
+            (자음)+은
+            (모음)+는
+        */
+        if(!lib.is_end_of_vowel(msg.substring(0, k1)) != (msg[k1] == "은")) {
+            return undefined;
+        }
+
+        /*
+            (자음)+이 아니다!
+            (모음)+가 아니다!
+        */
+        if(!lib.is_end_of_vowel(msg.substring(k1+2, k2)) != (msg[k2] == "이")) {
+            return undefined;
+        }
+
+        return msg.replace(re2, "").split(re1);
+    }
+
     // A은[는] B(이)다!
     if(/^!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+[은는] +!?[\wㄱ-ㅎㅏ-ㅣ가-힣]+이?다!$/.test(msg)) {
-        const re1 = /[은는] +/, re2 = /이?다!$/;
-        const k1 = re1.exec(msg).index, k2 = re2.exec(msg).index;
+        let re1 = /[은는] +/, re2 = /이?다!$/;
+        let k1 = re1.exec(msg).index, k2 = re2.exec(msg).index;
 
         /*
             (자음)+은
@@ -589,10 +613,27 @@ function is_true_statement(statement_list, query) {
     }
 
     if(statement_graph.dfs(A, B)) {
-        return ans.IS_TRUE_STATEMENT;
+        return ans.TRUE;
     }
 
-    return ans.IS_FALSE_STATEMENT;
+    return ans.FALSE;
+}
+
+function is_false_statement(statement_list, query) {
+    let A = query[0], B = query[1];
+
+    statement_graph.clear();
+
+    for(let i of statement_list) {
+        statement_graph.connect(i[0], i[1]);
+        statement_graph.connect(("!"+i[1]).replace("!!", ""), ("!"+i[0]).replace("!!", ""));
+    }
+
+    if(statement_graph.dfs(A, B)) {
+        return ans.FALSE;
+    }
+
+    return ans.TRUE;
 }
 
 function PI(room, sender, query) {
@@ -661,6 +702,7 @@ const obj = {
     show_statement_list: show_statement_list,
     convert_statement: convert_statement,
     is_true_statement: is_true_statement,
+    is_false_statement: is_false_statement,
     PI: PI,
     dev_command: dev_command,
     admin_command: admin_command

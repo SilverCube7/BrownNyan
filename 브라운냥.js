@@ -314,7 +314,11 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
         } else if(cmd_map.get(query[0])) {
             send_msg(replier, room, cmd_map.get(query[0])(room, sender, query.slice(1)));
         } else if(statement) {
-            send_msg(replier, room, cmd.is_true_statement(statement_map.get(room), statement));
+            if(/[이가] +아니다!$/.test(msg)) {
+                send_msg(replier, room, cmd.is_false_statement(statement_map.get(room), statement));
+            } else {
+                send_msg(replier, room, cmd.is_true_statement(statement_map.get(room), statement));
+            }
         } else {
             let learn_list = learn_map.get(room);
 

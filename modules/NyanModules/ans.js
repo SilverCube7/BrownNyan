@@ -10,11 +10,11 @@ const HAVE_NOT_LEARNING = "냥습한게 없다냥!";
 const HAVE_NOT_STATEMENT = "명제가 없다냥!";
 const HAVE_NOT_TARGET = "대상이 없다냥!";
 const IS_CHARGING = "충전 중이다냥!";
-const IS_FALSE_STATEMENT = "거짓이다냥!";
+const FALSE = "거짓이다냥!";
 const IS_NOT_CHARGING = "충전 중이 아니다냥!";
 const IS_NOT_INT = "정수가 아니다냥!";
 const IS_NOT_RANK = "그런 순위는 없다냥!";
-const IS_TRUE_STATEMENT = "참이다냥!";
+const TRUE = "참이다냥!";
 const NOT_IN_RANGE = "수가 범위를 초과했다냥!";
 const OK = "냥!";
 const SECRET = "이 정보는 1급기밀이다냥!";
@@ -126,11 +126,11 @@ const obj = {
     HAVE_NOT_STATEMENT: HAVE_NOT_STATEMENT,
     HAVE_NOT_TARGET: HAVE_NOT_TARGET,
     IS_CHARGING: IS_CHARGING,
-    IS_FALSE_STATEMENT: IS_FALSE_STATEMENT,
+    FALSE: FALSE,
     IS_NOT_CHARGING: IS_NOT_CHARGING,
     IS_NOT_INT: IS_NOT_INT,
     IS_NOT_RANK: IS_NOT_RANK,
-    IS_TRUE_STATEMENT: IS_TRUE_STATEMENT,
+    TRUE: TRUE,
     NOT_IN_RANGE: NOT_IN_RANGE,
     OK: OK,
     SECRET: SECRET,

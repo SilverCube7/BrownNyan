@@ -221,7 +221,6 @@ const cmd_map = new Map([
     [kw.TWO_DAYS_AGO, cmd.show_two_days_ago],
     [kw.THREE_DAYS_AGO, cmd.show_three_days_ago],
     [kw.TODAY_DAY, cmd.show_today_day],
-    [kw.BROWN_NYAN, cmd.response_brown_nyan],
     [kw.YOUR_NAME, cmd.show_your_name],
     [kw.MY_NAME, cmd.show_my_name],
     [kw.EAT, cmd.eat],
@@ -242,6 +241,9 @@ for(let k of kw.VOMIT_LIST) {
 }
 for(let k of kw.LICK_LIST) {
     cmd_map.set(k, cmd.lick);
+}
+for(let k of kw.BROWN_NYAN_LIST) {
+    cmd_map.set(k, cmd.response_brown_nyan);
 }
 for(let k of kw.ADMIN_LIST) {
     cmd_map.set(k, cmd.admin_command);

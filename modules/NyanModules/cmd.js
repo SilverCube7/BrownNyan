@@ -165,7 +165,7 @@ function show_rank(room, sender, query) {
         if(A == kw.TALK) return rank.show_talk_rank(room);
         if(A == kw.PICTURE) return rank.show_picture_rank(room);
         if(A == kw.EMOTICON) return rank.show_emoticon_rank(room);
-        if(A == kw.BROWN_NYAN) return rank.show_brown_nyan_rank(room);
+        if(lib.in_list(A, kw.BROWN_NYAN_LIST)) return rank.show_brown_nyan_rank(room);
         if(A == kw.EAT) return rank.show_eat_rank(room);
         if(lib.in_list(A, kw.VOMIT_LIST)) return rank.show_vomit_rank(room);
         if(A == kw.ESCAPE) return rank.show_escape_rank(room);

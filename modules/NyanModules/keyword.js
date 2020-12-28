@@ -79,6 +79,7 @@ const VOMIT_LIST = [VOMIT, "퉷"];
 const VOMITED_LIST = [VOMITED, "퉷당햇"];
 const LICK_LIST = [LICK, "할짝"];
 const LICKED_LIST = [LICKED, "할짝당햇"];
+const BROWN_NYAN_LIST = [BROWN_NYAN, "브냥"];
 
 const obj = {
     EMOJI_CODE: EMOJI_CODE,
@@ -161,7 +162,8 @@ const obj = {
     VOMIT_LIST: VOMIT_LIST,
     VOMITED_LIST: VOMITED_LIST,
     LICK_LIST: LICK_LIST,
-    LICKED_LIST: LICKED_LIST
+    LICKED_LIST: LICKED_LIST,
+    BROWN_NYAN_LIST: BROWN_NYAN_LIST
 };
 
 module.exports = obj;

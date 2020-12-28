@@ -53,7 +53,7 @@ const spaces = [
 
 function is_forbidden_word(s) {
     for(let i of forbidden_words) {
-        if(s.toUpperCase() == i.toUpperCase()) {
+        if(lib.strip(s).toUpperCase() == lib.strip(i).toUpperCase()) {
             return true;
         }
     }

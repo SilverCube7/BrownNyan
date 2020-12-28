@@ -29,6 +29,12 @@ function find_in_learn_list(learn_list, s) {
 
 function learn(room, sender, query) {
     if(query.length == 1) {
+        let A = query[0];
+
+        if(A == kw.LIST) {
+            return show_learn_list(room, sender, query.slice(1));
+        }
+
         return confirm_learn(room, sender, query);
     }
 

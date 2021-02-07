@@ -70,6 +70,7 @@ const ADD = "추가";
 const LIST = "목록";
 const STATEMENT = "명제";
 const STATEMENT_LIST = "명제목록";
+const BLOCK = "차단";
 
 const RSP = ["가바보", "가위바위보"];
 const HELLO_LIST = ["안녕", "안녕하세요"];

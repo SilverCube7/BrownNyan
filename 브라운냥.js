@@ -296,16 +296,16 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             return;
         }
 
+        if(imageDB == db.load_txt(db.make_full_path(room+kw.SLASH+kw.BLOCK+kw.SLASH+sender))) {
+            return;
+        }
+
         if(msg == kw.SEND_PICTURE) {
             rank.update_rank_map(room, sender, rank.picture_rank_map, kw.PICTURE);
         } else if(msg == kw.SEND_EMOTICON) {
             rank.update_rank_map(room, sender, rank.emoticon_rank_map, kw.EMOTICON);
         } else {
             rank.update_rank_map(room, sender, rank.talk_rank_map, kw.TALK);
-        }
-
-        if(imageDB == profile.get_profile(room, sender)) {
-            return;
         }
 
         let query = msg.split('/');

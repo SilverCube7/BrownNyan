@@ -9,6 +9,7 @@ const learn_map = new Map();
 const statement_map = new Map();
 const msg_map = new Map();
 const brown_nyan_msg_map = new Map();
+const block_map = new Map();
 
 const msg_map_limit = 500;
 const brown_nyan_msg_map_limit = 100;
@@ -268,6 +269,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             msg_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.MSG)));
         }
 
+        if(!block_map.has(room)) {
+            block_map.set(room, db.load_list(db.make_full_path(room+kw.SLASH+kw.BLOCK)));
+        }
+
         msg_map.get(room).push([msg, sender]);
 
         while(msg_map.get(room).length > msg_map_limit+1) {
@@ -296,8 +301,13 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             return;
         }
 
-        if(imageDB == db.load_txt(db.make_full_path(room+kw.SLASH+kw.BLOCK+kw.SLASH+sender))) {
-            return;
+        // 차단되어 있는 유저는 명령어 사용 금지 & 순위에 기록되지 않음
+        let block_list = block_map.get(room);
+
+        for(let i=0; i<block_list.length; i++) {
+            if(imageDB.getProfileImage() == block_list[i][0]) {
+                return;
+            }
         }
 
         if(msg == kw.SEND_PICTURE) {

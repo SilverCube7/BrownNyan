@@ -304,6 +304,10 @@ function response(room, msg, sender, isGroupChat, replier, imageDB, packageName)
             rank.update_rank_map(room, sender, rank.talk_rank_map, kw.TALK);
         }
 
+        if(imageDB == profile.get_profile(room, sender)) {
+            return;
+        }
+
         let query = msg.split('/');
         const statement = cmd.convert_statement(msg);
 
